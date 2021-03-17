@@ -28,7 +28,7 @@ TOL = 0.2;
 LENGTH = 100;         // X axis
 WIDTH = 65;           // Y axis
 UPPER_THICKNESS = 10; // Z axis
-LOWER_THICKNESS = 10; // Z axis
+LOWER_THICKNESS = 20; // Z axis
 
 // bearings
 BEARING_OUT_D = 22;
@@ -89,6 +89,35 @@ module inner_hinge() {
     }
 }
 
+module bearing_slot(outer_d, inner_d, depth, wall) {
+    outer_r = outer_d/2;
+    inner_r = inner_d/2;
+    color("#00F")
+    linear_extrude(wall) donutSlice(inner_r+TOL, outer_r, 0, 360);
+
+    color("#55F")
+    translate([0, 0, wall-0.0001]) linear_extrude(depth)
+        donutSlice(BEARING_OUT_D/2 + TOL, outer_r, 0, 360);
+}
+
+module lower_plate() {
+    Z = LOWER_THICKNESS;
+    HL = OUT_HINGE_L;
+    HOD = OUT_HINGE_OUT_D;
+    HID = OUT_HINGE_IN_D;
+
+    difference() {
+        color("#0F0")
+        translate([-HOD/2, -HL/2, -Z]) cube([LENGTH, HL, Z]);
+        translate([0, HL/2+0.1, 0]) rotate([90, 0, 0]) cylinder(d=BEARING_OUT_D+1, h=HL+0.2);
+    }
+
+    // the M8 nut has a diameter of ~14.5mm. We want the inner hole to be able
+    // to contain it, so we use 16.
+    translate([0,  HL/2, 0]) rotate([90, 0, 0]) bearing_slot(HOD, 16, 7, 3);
+    translate([0, -HL/2, 0]) rotate([-90, 0, 0]) bearing_slot(HOD, 16, 7, 3);
+}
+
 module PH38_bolt_head() {
     linear_extrude(6.15) hexagon(16.20/2);
 }
@@ -96,3 +125,4 @@ module PH38_bolt_head() {
 
 $t=0; // comment out to allow animation
 rotate([0, -90*$t, 0]) upper_plate(ball_head=true);
+lower_plate();
