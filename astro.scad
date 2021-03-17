@@ -59,7 +59,7 @@ module upper_plate(ball_head=false) {
 
     if (ball_head) {
         color("grey")
-            translate([BALL_X, 0, Z+0.0001]) cylinder(d=BALL_D, h=5);
+            translate([BALL_X, 0, Z+0.0001]) cylinder(d=BALL_D, h=90);
 
         color("grey")
             translate([BALL_X, 0, -6.15]) PH38_bolt_head();
