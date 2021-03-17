@@ -76,5 +76,6 @@ module PH38_bolt_head() {
     linear_extrude(6.15) hexagon(16.20/2);
 }
 
-upper_plate(ball_head=true);
+
+rotate([0, -90*$t, 0]) upper_plate(ball_head=true);
 
