@@ -36,6 +36,8 @@ HINGE_BOLT_L = 60;    // Y axis
 HINGE_WALL_THICKNESS = 3;
 HINGE_INNER_L = HINGE_BOLT_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
 HINGE_THICKNESS = 3;
+HINGE_OUT_D = M8 + HINGE_THICKNESS;
+HINGE_IN_D = M8 + TOL;
 
 BALL_D = 55; // ball head diameter
 BALL_X = 25 + 5 + BALL_D/2; // ball head X coordinate
@@ -45,25 +47,11 @@ module upper_plate(ball_head=false) {
     Y = WIDTH;
     Z = UPPER_THICKNESS;
 
-    HL = HINGE_INNER_L;
-    H_out_d = M8 + HINGE_THICKNESS;
-    H_in_d = M8 + TOL;
-
-    // inner hinge
-    difference() {
-        union() {
-            color("#F00")
-                rotate([90, 0, 0]) cylinder(d=H_out_d, h=HL, center=true);
-            color("#F55", 0.9)
-                translate([-H_out_d/2, -HL/2, 0]) cube([25, HL, Z]);
-        }
-         translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, H_in_d);
-    }
-
+    inner_hinge();
     // rest of the plate
     difference() {
         color("#F88")
-            translate([25-H_out_d/2-0.01, -Y/2, 0]) cube([X-25, Y, Z]);
+            translate([25 - HINGE_OUT_D/2 - 0.01, -Y/2, 0]) cube([X-25, Y, Z]);
         // hole for the ball head
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
     }
@@ -74,6 +62,22 @@ module upper_plate(ball_head=false) {
 
         color("grey")
             translate([BALL_X, 0, -6.15]) PH38_bolt_head();
+    }
+}
+
+module inner_hinge() {
+    Z = UPPER_THICKNESS;
+    HL = HINGE_INNER_L;
+    HOD = HINGE_OUT_D;
+    HID = HINGE_IN_D;
+    difference() {
+        union() {
+            color("#F00")
+                rotate([90, 0, 0]) cylinder(d=HOD, h=HL, center=true);
+            color("#F55", 0.9)
+                translate([-HOD/2, -HL/2, 0]) cube([25, HL, Z]);
+        }
+         translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, HID);
     }
 }
 
