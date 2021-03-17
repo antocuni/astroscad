@@ -1,4 +1,5 @@
 use <MCAD/2Dshapes.scad>
+use <MCAD/regular_shapes.scad>
 use <MCAD/boxes.scad>
 use <MCAD/nuts_and_bolts.scad>
 use <MCAD/polyholes.scad>
@@ -64,8 +65,16 @@ module upper_plate(ball_head=false) {
 
     if (ball_head) {
         color("grey")
-        translate([BALL_X, 0, Z+0.0001]) cylinder(d=BALL_D, h=5);
+            translate([BALL_X, 0, Z+0.0001]) cylinder(d=BALL_D, h=5);
+
+        color("grey")
+            translate([BALL_X, 0, -6.15]) PH38_bolt_head();
     }
 }
 
+module PH38_bolt_head() {
+    linear_extrude(6.15) hexagon(16.20/2);
+}
+
 upper_plate(ball_head=true);
+
