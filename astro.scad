@@ -30,7 +30,11 @@ WIDTH = 65;           // Y axis
 UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = 10; // Z axis
 
-HINGE_W = 40;
+BEARING_THICKNESS = 7;
+
+HINGE_BOLT_L = 60;    // Y axis
+HINGE_WALL_THICKNESS = 3;
+HINGE_INNER_L = HINGE_BOLT_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
 HINGE_THICKNESS = 3;
 
 BALL_D = 55; // ball head diameter
@@ -41,6 +45,7 @@ module upper_plate(ball_head=false) {
     Y = WIDTH;
     Z = UPPER_THICKNESS;
 
+    HL = HINGE_INNER_L;
     H_out_d = M8 + HINGE_THICKNESS;
     H_in_d = M8 + TOL;
 
@@ -48,11 +53,11 @@ module upper_plate(ball_head=false) {
     difference() {
         union() {
             color("#F00")
-                rotate([90, 0, 0]) cylinder(d=H_out_d, h=HINGE_W, center=true);
+                rotate([90, 0, 0]) cylinder(d=H_out_d, h=HL, center=true);
             color("#F55", 0.9)
-                translate([-H_out_d/2, -HINGE_W/2, 0]) cube([25, HINGE_W, Z]);
+                translate([-H_out_d/2, -HL/2, 0]) cube([25, HL, Z]);
         }
-         translate([0, HINGE_W/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HINGE_W+0.02, H_in_d);
+         translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, H_in_d);
     }
 
     // rest of the plate
