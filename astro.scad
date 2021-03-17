@@ -32,6 +32,9 @@ LOWER_THICKNESS = 10; // Z axis
 HINGE_W = 40;
 HINGE_THICKNESS = 3;
 
+BALL_D = 55; // ball head diameter
+BALL_X = 25 + 5 + BALL_D/2; // ball head X coordinate
+
 module upper_plate(ball_head=false) {
     X = LENGTH;
     Y = WIDTH;
@@ -52,14 +55,16 @@ module upper_plate(ball_head=false) {
     }
 
     // rest of the plate
-    color("#F88")
-        translate([25-H_out_d/2-0.01, -Y/2, 0])
-        cube([X-25, Y, Z]);
+    difference() {
+        color("#F88")
+            translate([25-H_out_d/2-0.01, -Y/2, 0]) cube([X-25, Y, Z]);
+        // hole for the ball head
+        translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
+    }
 
     if (ball_head) {
-        ball_head_d = 55;
         color("grey")
-        translate([25+ball_head_d/2, 0, Z+0.0001]) cylinder(d=55, h=5);
+        translate([BALL_X, 0, Z+0.0001]) cylinder(d=BALL_D, h=5);
     }
 }
 
