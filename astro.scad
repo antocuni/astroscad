@@ -7,7 +7,6 @@ use <MCAD/polyholes.scad>
 $fa = 1;
 $fs = 0.4;
 
-
 /* Geometric conventions:
 
    - the rotation axis of the whole tracker is the Y axis
@@ -16,6 +15,8 @@ $fs = 0.4;
 
    - the lower plate stays below the XY plane (Z<0)
 */
+
+VITAMINS = true; // whether to show the ball head, the bearings, etc.
 
 // screw size
 M8 = 8;
@@ -50,7 +51,7 @@ IN_HINGE_IN_D = M8 + TOL;
 BALL_D = 55; // ball head diameter
 BALL_X = 25 + 5 + BALL_D/2; // ball head X coordinate
 
-module upper_plate(ball_head=false) {
+module upper_plate() {
     X = LENGTH;
     Y = WIDTH;
     Z = UPPER_THICKNESS;
@@ -64,7 +65,7 @@ module upper_plate(ball_head=false) {
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
     }
 
-    if (ball_head) {
+    if (VITAMINS) {
         color("grey")
             translate([BALL_X, 0, Z+0.0001]) cylinder(d=BALL_D, h=90);
 
@@ -124,5 +125,5 @@ module PH38_bolt_head() {
 
 
 $t=0; // comment out to allow animation
-rotate([0, -90*$t, 0]) upper_plate(ball_head=true);
+rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
