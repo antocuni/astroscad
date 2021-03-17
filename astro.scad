@@ -32,9 +32,10 @@ LOWER_THICKNESS = 10; // Z axis
 
 BEARING_THICKNESS = 7;
 
-HINGE_BOLT_L = 60;    // Y axis
+HINGE_BOLT_L = 60;
 HINGE_WALL_THICKNESS = 3;
-HINGE_INNER_L = HINGE_BOLT_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
+HINGE_OUTER_L = HINGE_BOLT_L - 6.40; // 6.40 is the tickness of the nut
+HINGE_INNER_L = HINGE_OUTER_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
 HINGE_THICKNESS = 3;
 HINGE_OUT_D = M8 + HINGE_THICKNESS;
 HINGE_IN_D = M8 + TOL;
@@ -86,5 +87,6 @@ module PH38_bolt_head() {
 }
 
 
+$t=0; // comment out to allow animation
 rotate([0, -90*$t, 0]) upper_plate(ball_head=true);
 
