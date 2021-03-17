@@ -3,6 +3,7 @@ use <MCAD/regular_shapes.scad>
 use <MCAD/boxes.scad>
 use <MCAD/nuts_and_bolts.scad>
 use <MCAD/polyholes.scad>
+use <MCAD/bearing.scad>
 
 $fa = 1;
 $fs = 0.4;
@@ -31,9 +32,11 @@ WIDTH = 65;           // Y axis
 UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = 20; // Z axis
 
-// bearings
+// bearing model: 608RS (608zz should work as well)
 BEARING_OUT_D = 22;
+BEARING_IN_D = 12;
 BEARING_THICKNESS = 7;
+BEARING_WALL = 3; // the thickness of the wall to hold the bearing in place
 
 // inner and outer hinge
 HINGE_BOLT_L = 60;
@@ -90,14 +93,18 @@ module inner_hinge() {
     }
 }
 
-module bearing_slot(outer_d, inner_d, depth, wall) {
+module bearing_slot(outer_d) {
+    // the M8 nut has a diameter of ~14.5mm. We want the inner hole to be able
+    // to contain it, so we use 16.
+    inner_r = 16 / 2;
     outer_r = outer_d/2;
-    inner_r = inner_d/2;
+
+    T = BEARING_THICKNESS;
     color("#00F")
-    linear_extrude(wall) donutSlice(inner_r+TOL, outer_r, 0, 360);
+    linear_extrude(BEARING_WALL) donutSlice(inner_r+TOL, outer_r, 0, 360);
 
     color("#55F")
-    translate([0, 0, wall-0.0001]) linear_extrude(depth)
+    translate([0, 0, BEARING_WALL-0.0001]) linear_extrude(BEARING_THICKNESS + TOL)
         donutSlice(BEARING_OUT_D/2 + TOL, outer_r, 0, 360);
 }
 
@@ -110,13 +117,18 @@ module lower_plate() {
     difference() {
         color("#0F0")
         translate([-HOD/2, -HL/2, -Z]) cube([LENGTH, HL, Z]);
-        translate([0, HL/2+0.1, 0]) rotate([90, 0, 0]) cylinder(d=BEARING_OUT_D+1, h=HL+0.2);
+        translate([0, HL/2+0.1, 0]) rotate([90, 0, 0]) cylinder(d=BEARING_OUT_D+2, h=HL+0.2);
     }
 
-    // the M8 nut has a diameter of ~14.5mm. We want the inner hole to be able
-    // to contain it, so we use 16.
+    // add the bearing slots
     translate([0,  HL/2, 0]) rotate([90, 0, 0]) bearing_slot(HOD, 16, 7, 3);
     translate([0, -HL/2, 0]) rotate([-90, 0, 0]) bearing_slot(HOD, 16, 7, 3);
+
+    if (VITAMINS) {
+        dist = HL/2 - BEARING_WALL;
+        translate([0, dist, 0]) bearing(model=608, angle=[90, 0, 0]);
+        translate([0, -dist, 0]) bearing(model=608, angle=[-90, 0, 0]);
+    }
 }
 
 module PH38_bolt_head() {
@@ -127,3 +139,5 @@ module PH38_bolt_head() {
 $t=0; // comment out to allow animation
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
+
+
