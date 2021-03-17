@@ -30,15 +30,22 @@ WIDTH = 65;           // Y axis
 UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = 10; // Z axis
 
+// bearings
+BEARING_OUT_D = 22;
 BEARING_THICKNESS = 7;
 
+// inner and outer hinge
 HINGE_BOLT_L = 60;
 HINGE_WALL_THICKNESS = 3;
-HINGE_OUTER_L = HINGE_BOLT_L - 6.40; // 6.40 is the tickness of the nut
-HINGE_INNER_L = HINGE_OUTER_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
-HINGE_THICKNESS = 3;
-HINGE_OUT_D = M8 + HINGE_THICKNESS;
-HINGE_IN_D = M8 + TOL;
+
+OUT_HINGE_L = HINGE_BOLT_L - 6.40; // 6.40 is the tickness of the nut
+OUT_HINGE_OUT_D = BEARING_OUT_D + 10;
+
+
+IN_HINGE_L = OUT_HINGE_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
+IN_HINGE_OUT_D = M8 + HINGE_WALL_THICKNESS;
+IN_HINGE_IN_D = M8 + TOL;
+
 
 BALL_D = 55; // ball head diameter
 BALL_X = 25 + 5 + BALL_D/2; // ball head X coordinate
@@ -52,7 +59,7 @@ module upper_plate(ball_head=false) {
     // rest of the plate
     difference() {
         color("#F88")
-            translate([25 - HINGE_OUT_D/2 - 0.01, -Y/2, 0]) cube([X-25, Y, Z]);
+            translate([25 - IN_HINGE_OUT_D/2 - 0.01, -Y/2, 0]) cube([X-25, Y, Z]);
         // hole for the ball head
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
     }
@@ -68,9 +75,9 @@ module upper_plate(ball_head=false) {
 
 module inner_hinge() {
     Z = UPPER_THICKNESS;
-    HL = HINGE_INNER_L;
-    HOD = HINGE_OUT_D;
-    HID = HINGE_IN_D;
+    HL = IN_HINGE_L;
+    HOD = IN_HINGE_OUT_D;
+    HID = IN_HINGE_IN_D;
     difference() {
         union() {
             color("#F00")
@@ -78,7 +85,7 @@ module inner_hinge() {
             color("#F55", 0.9)
                 translate([-HOD/2, -HL/2, 0]) cube([25, HL, Z]);
         }
-         translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, HID);
+        translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, HID);
     }
 }
 
@@ -89,4 +96,3 @@ module PH38_bolt_head() {
 
 $t=0; // comment out to allow animation
 rotate([0, -90*$t, 0]) upper_plate(ball_head=true);
-
