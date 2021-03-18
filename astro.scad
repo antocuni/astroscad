@@ -33,7 +33,7 @@ BEARING_THICKNESS = 7;
 BEARING_WALL = 3; // the thickness of the wall to hold the bearing in place
 
 // inner and outer hinge
-HINGE_BOLT_L = 60;
+HINGE_BOLT_L = 70;
 HINGE_WALL_THICKNESS = 3;
 
 OUT_HINGE_L = HINGE_BOLT_L - 6.40; // 6.40 is the tickness of the nut
@@ -50,30 +50,35 @@ WIDTH = OUT_HINGE_L;  // Y axis
 UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = OUT_HINGE_OUT_D/2 + 1; // Z axis
 
-
 BALL_D = 55; // ball head diameter
-BALL_X = 25 + 5 + BALL_D/2; // ball head X coordinate
+BALL_X = IN_HINGE_PLATE_LENGTH + 2 + BALL_D/2; // ball head X coordinate
+
+// VITAMINS
+
+module PH38_bolt_head() {
+    linear_extrude(6.15) hexagon(16.20/2);
+}
+
+module ball_head() {
+    cylinder(d=BALL_D, h=90);
+}
+
+// ACTUAL MODEL
 
 module upper_plate() {
     X = LENGTH;
     Y = WIDTH;
     Z = UPPER_THICKNESS;
-
     inner_hinge();
-    // rest of the plate
     difference() {
-        color("#F88")
+        color("#F88") // big upper plate
             translate([IN_HINGE_PLATE_LENGTH - 0.01, -Y/2, 0]) cube([X-25, Y, Z]);
         // hole for the ball head
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
     }
-
     if (VITAMINS) {
-        color("grey")
-            translate([BALL_X, 0, Z+0.0001]) cylinder(d=BALL_D, h=90);
-
-        color("grey")
-            translate([BALL_X, 0, -6.15]) PH38_bolt_head();
+        color("grey") translate([BALL_X, 0, Z+0.0001]) ball_head();
+        color("grey") translate([BALL_X, 0, -6.15]) PH38_bolt_head();
     }
 }
 
@@ -84,9 +89,9 @@ module inner_hinge() {
     HID = IN_HINGE_IN_D;
     difference() {
         union() {
-            color("#F00")
+            color("#F00") // inner hinge
                 rotate([90, 0, 0]) cylinder(d=HOD, h=HL, center=true);
-            color("#F55", 0.9)
+            color("#F55", 0.9) // small upper plate
                 translate([0, -HL/2+0.5, 0]) cube([IN_HINGE_PLATE_LENGTH, HL-1, Z]);
         }
         translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, HID);
@@ -129,12 +134,7 @@ module lower_plate() {
     }
 }
 
-module PH38_bolt_head() {
-    linear_extrude(6.15) hexagon(16.20/2);
-}
-
-
-$t=0; // comment out to allow animation
+$t=0.2; // comment out to allow animation
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
 
