@@ -47,8 +47,9 @@ OUT_HINGE_OUT_D = BEARING_OUT_D + 10;
 
 
 IN_HINGE_L = OUT_HINGE_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
-IN_HINGE_OUT_D = M8 + HINGE_WALL_THICKNESS;
+IN_HINGE_OUT_D = 18;
 IN_HINGE_IN_D = M8 + TOL;
+IN_HINGE_PLATE_LENGTH = OUT_HINGE_OUT_D/2 + 2;
 
 
 BALL_D = 55; // ball head diameter
@@ -87,7 +88,7 @@ module inner_hinge() {
             color("#F00")
                 rotate([90, 0, 0]) cylinder(d=HOD, h=HL, center=true);
             color("#F55", 0.9)
-                translate([-HOD/2, -HL/2, 0]) cube([25, HL, Z]);
+                translate([0, -HL/2+0.5, 0]) cube([IN_HINGE_PLATE_LENGTH, HL-1, Z]);
         }
         translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, HID);
     }
@@ -112,8 +113,6 @@ module lower_plate() {
     Z = LOWER_THICKNESS;
     HL = OUT_HINGE_L;
     HOD = OUT_HINGE_OUT_D;
-    HID = OUT_HINGE_IN_D;
-
     difference() {
         color("#0F0")
         translate([-HOD/2, -HL/2, -Z]) cube([LENGTH, HL, Z]);
