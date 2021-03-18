@@ -100,8 +100,8 @@ module inner_hinge() {
 
 module bearing_slot(outer_d) {
     // the M8 nut has a diameter of ~14.5mm. We want the inner hole to be able
-    // to contain it, so we use 16.
-    inner_r = 16 / 2;
+    // to contain it
+    inner_r = 17 / 2;
     outer_r = outer_d/2;
 
     T = BEARING_THICKNESS;
