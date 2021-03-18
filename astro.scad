@@ -26,12 +26,6 @@ PH38 = 9.525; // photographic 3/8" screw ==> 9.525 mm
 
 TOL = 0.2;
 
-// geometry of the tracker
-LENGTH = 100;         // X axis
-WIDTH = 65;           // Y axis
-UPPER_THICKNESS = 10; // Z axis
-LOWER_THICKNESS = 20; // Z axis
-
 // bearing model: 608RS (608zz should work as well)
 BEARING_OUT_D = 22;
 BEARING_IN_D = 12;
@@ -45,11 +39,16 @@ HINGE_WALL_THICKNESS = 3;
 OUT_HINGE_L = HINGE_BOLT_L - 6.40; // 6.40 is the tickness of the nut
 OUT_HINGE_OUT_D = BEARING_OUT_D + 10;
 
-
 IN_HINGE_L = OUT_HINGE_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
 IN_HINGE_OUT_D = 18;
 IN_HINGE_IN_D = M8 + TOL;
-IN_HINGE_PLATE_LENGTH = OUT_HINGE_OUT_D/2 + 2;
+IN_HINGE_PLATE_LENGTH = OUT_HINGE_OUT_D/2 + 1;
+
+// geometry of the tracker
+LENGTH = 100;         // X axis
+WIDTH = OUT_HINGE_L;  // Y axis
+UPPER_THICKNESS = 10; // Z axis
+LOWER_THICKNESS = OUT_HINGE_OUT_D/2 + 1; // Z axis
 
 
 BALL_D = 55; // ball head diameter
@@ -64,7 +63,7 @@ module upper_plate() {
     // rest of the plate
     difference() {
         color("#F88")
-            translate([25 - IN_HINGE_OUT_D/2 - 0.01, -Y/2, 0]) cube([X-25, Y, Z]);
+            translate([IN_HINGE_PLATE_LENGTH - 0.01, -Y/2, 0]) cube([X-25, Y, Z]);
         // hole for the ball head
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
     }
