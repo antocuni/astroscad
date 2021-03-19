@@ -149,6 +149,9 @@ module lower_plate() {
 
         // add a hole for the PH38_bolt_head
         translate([BALL_X, 0, -NUT_HOLE_H+0.001]) cylinder(d=PH38+10, h=NUT_HOLE_H);
+
+        // add a hole for the threaded_rod
+        threaded_rod();
     }
 
     // add the bearing slots
