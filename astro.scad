@@ -49,7 +49,7 @@ IN_HINGE_PLATE_LENGTH = OUT_HINGE_OUT_D/2 + 1;
 LENGTH = 100;         // X axis
 WIDTH = OUT_HINGE_L;  // Y axis
 UPPER_THICKNESS = 10; // Z axis
-LOWER_THICKNESS = OUT_HINGE_OUT_D/2 + 1; // Z axis
+LOWER_THICKNESS = 10;
 
 R = 82;
 THREADED_ROD_D = M5 + TOL*2;
@@ -133,7 +133,11 @@ module lower_plate() {
     HOD = OUT_HINGE_OUT_D;
     difference() {
         color("#0F0")
-        translate([-HOD/2, -HL/2, -Z]) cube([LENGTH, HL, Z]);
+            union() {
+            translate([0, -HL/2, -Z]) cube([LENGTH, HL, Z]);
+            translate([0, HL/2, 0]) rotate([90, 0, 0]) cylinder(d=HOD, h=HL);
+        }
+        translate([0, 0, HOD/4]) cube([HOD+0.001, HL+0.001, HOD/2+0.001], center=true);
         translate([0, HL/2+0.1, 0]) rotate([90, 0, 0]) cylinder(d=BEARING_OUT_D+2, h=HL+0.2);
     }
 
