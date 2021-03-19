@@ -51,7 +51,7 @@ UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = OUT_HINGE_OUT_D/2;
 
 R = 80.5;
-THREADED_ROD_D = M5 + TOL*2;
+THREADED_ROD_D = M5 + 1;
 
 BALL_D = 55; // ball head diameter
 BALL_X = 40;
@@ -65,6 +65,10 @@ module PH38_bolt_head() {
 module PH14_nut_hole(height) {
     d = 12.35+1.5;
     linear_extrude(height) circle(d=d, $fn=6);
+}
+
+module PH14_bolt_hole(height) {
+    polyhole(h, PH14+0.3);
 }
 
 module ball_head() {
