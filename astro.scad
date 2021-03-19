@@ -17,7 +17,7 @@ $fs = 0.4;
    - the lower plate stays below the XY plane (Z<0)
 */
 
-VITAMINS = true; // whether to show the ball head, the bearings, etc.
+VITAMINS = true && $preview; // whether to show the ball head, the bearings, etc.
 
 TOL = 0.2;
 
@@ -43,7 +43,6 @@ OUT_HINGE_OUT_D = BEARING_OUT_D + 10;
 IN_HINGE_L = OUT_HINGE_L - (HINGE_WALL_THICKNESS + BEARING_THICKNESS + TOL)*2;
 IN_HINGE_OUT_D = 18;
 IN_HINGE_IN_D = M8 + TOL;
-IN_HINGE_PLATE_LENGTH = OUT_HINGE_OUT_D/2 + 1;
 
 // geometry of the tracker
 LENGTH = 100;         // X axis
@@ -55,7 +54,7 @@ R = 82;
 THREADED_ROD_D = M5 + TOL*2;
 
 BALL_D = 55; // ball head diameter
-BALL_X = IN_HINGE_PLATE_LENGTH + 2 + BALL_D/2; // ball head X coordinate
+BALL_X = 40;
 
 // VITAMINS
 
@@ -81,8 +80,14 @@ module upper_plate() {
     Z = UPPER_THICKNESS;
     inner_hinge();
     difference() {
-        color("#F88", 0.8) // big upper plate
-            translate([IN_HINGE_PLATE_LENGTH - 0.01, -Y/2, 0]) cube([X-25, Y, Z]);
+        color("#0DD", 0.8) // big upper plate
+        translate([0, -Y/2, 0]) cube([LENGTH, Y, Z]);
+
+        // remove a cylinder which is a bit bigger than the bearing slots, to
+        // make sure that the upper plate does not touch them
+        translate([0, OUT_HINGE_L/2, 0]) rotate([90, 0, 0])
+        cylinder(d=OUT_HINGE_OUT_D+1, h=OUT_HINGE_L);
+
         // hole for the ball head
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
 
@@ -103,10 +108,10 @@ module inner_hinge() {
     HID = IN_HINGE_IN_D;
     difference() {
         union() {
-            color("#F00") // inner hinge
+            color("#055") // inner hinge
                 rotate([90, 0, 0]) cylinder(d=HOD, h=HL, center=true);
-            color("#F55", 0.9) // small upper plate
-                translate([0, -HL/2+0.5, 0]) cube([IN_HINGE_PLATE_LENGTH, HL-1, Z]);
+            color("#088", 0.9) // small upper plate
+                translate([0, -HL/2+0.5, 0.001]) cube([LENGTH-0.001, HL-1, Z-0.001]);
         }
         translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, HID);
     }
