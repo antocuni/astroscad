@@ -48,7 +48,7 @@ IN_HINGE_IN_D = M8 + TOL;
 LENGTH = 100;         // X axis
 WIDTH = OUT_HINGE_L;  // Y axis
 UPPER_THICKNESS = 10; // Z axis
-LOWER_THICKNESS = 10;
+LOWER_THICKNESS = OUT_HINGE_OUT_D/2;
 
 R = 82;
 THREADED_ROD_D = M5 + TOL*2;
@@ -136,6 +136,8 @@ module lower_plate() {
     Z = LOWER_THICKNESS;
     HL = OUT_HINGE_L;
     HOD = OUT_HINGE_OUT_D;
+    NUT_HOLE_H = 7.5;
+
     difference() {
         color("#0F0")
             union() {
@@ -145,8 +147,7 @@ module lower_plate() {
         translate([0, 0, HOD/4]) cube([HOD+0.001, HL+0.001, HOD/2+0.001], center=true);
         translate([0, HL/2+0.1, 0]) rotate([90, 0, 0]) cylinder(d=BEARING_OUT_D+2, h=HL+0.2);
 
-        // add a hole for the PH38_nut
-        NUT_HOLE_H = 7.5;
+        // add a hole for the PH38_bolt_head
         translate([BALL_X, 0, -NUT_HOLE_H+0.001]) cylinder(d=PH38+10, h=NUT_HOLE_H);
     }
 
