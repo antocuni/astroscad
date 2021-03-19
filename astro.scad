@@ -19,12 +19,13 @@ $fs = 0.4;
 
 VITAMINS = true; // whether to show the ball head, the bearings, etc.
 
+TOL = 0.2;
+
 // screw size
+M5 = 5;
 M8 = 8;
 PH14 = 6.35;  // photographic 1/4" screw ==> 6.35 mm
 PH38 = 9.525; // photographic 3/8" screw ==> 9.525 mm
-
-TOL = 0.2;
 
 // bearing model: 608RS (608zz should work as well)
 BEARING_OUT_D = 22;
@@ -50,6 +51,9 @@ WIDTH = OUT_HINGE_L;  // Y axis
 UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = OUT_HINGE_OUT_D/2 + 1; // Z axis
 
+R = 82;
+THREADED_ROD_D = M5 + TOL*2;
+
 BALL_D = 55; // ball head diameter
 BALL_X = IN_HINGE_PLATE_LENGTH + 2 + BALL_D/2; // ball head X coordinate
 
@@ -63,6 +67,12 @@ module ball_head() {
     cylinder(d=BALL_D, h=90);
 }
 
+module threaded_rod() {
+    color("grey")
+        rotate([90, 80, 0])
+        rotate_extrude(angle=90) translate([R, 0, 0]) circle(d=THREADED_ROD_D);
+}
+
 // ACTUAL MODEL
 
 module upper_plate() {
@@ -71,14 +81,18 @@ module upper_plate() {
     Z = UPPER_THICKNESS;
     inner_hinge();
     difference() {
-        color("#F88") // big upper plate
+        color("#F88", 0.8) // big upper plate
             translate([IN_HINGE_PLATE_LENGTH - 0.01, -Y/2, 0]) cube([X-25, Y, Z]);
         // hole for the ball head
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
+
+        // hole for the threaded rod
+        threaded_rod();
     }
     if (VITAMINS) {
         color("grey") translate([BALL_X, 0, Z+0.0001]) ball_head();
         color("grey") translate([BALL_X, 0, -6.15]) PH38_bolt_head();
+        threaded_rod();
     }
 }
 
@@ -134,8 +148,6 @@ module lower_plate() {
     }
 }
 
-$t=0.2; // comment out to allow animation
+$t = 0.2;
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
-
-
