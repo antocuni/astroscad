@@ -58,7 +58,7 @@ R = 80.5;
 THREADED_ROD_D = M5 + 1;
 
 BALL_D = 55; // ball head diameter
-BALL_X = 40;
+BALL_X = 33;
 
 // VITAMINS
 
