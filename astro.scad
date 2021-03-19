@@ -111,7 +111,7 @@ module inner_hinge() {
             color("#055") // inner hinge
                 rotate([90, 0, 0]) cylinder(d=HOD, h=HL, center=true);
             color("#088", 0.9) // small upper plate
-                translate([0, -HL/2+0.5, 0.001]) cube([LENGTH-0.001, HL-1, Z-0.001]);
+                translate([0, -HL/2+0.5, -0.001]) cube([20, HL-1, Z-0.002]);
         }
         translate([0, HL/2+0.01, 0]) rotate([90, 0, 0]) polyhole(HL+0.02, HID);
     }
