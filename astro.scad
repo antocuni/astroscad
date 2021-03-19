@@ -24,8 +24,8 @@ TOL = 0.2;
 // screw size
 M5 = 5;
 M8 = 8;
-PH14 = 6.35;  // photographic 1/4" screw ==> 6.35 mm
-PH38 = 9.525; // photographic 3/8" screw ==> 9.525 mm
+PH14 = 6.35;  // photographic 1/4" bolt ==> 6.35 mm
+PH38 = 9.525; // photographic 3/8" bolt ==> 9.525 mm
 
 // bearing model: 608RS (608zz should work as well)
 BEARING_OUT_D = 22;
@@ -60,6 +60,11 @@ BALL_X = 40;
 
 module PH38_bolt_head() {
     linear_extrude(6.15) hexagon(16.20/2);
+}
+
+module PH14_nut_hole(height) {
+    d = 12.35+1.5;
+    linear_extrude(height) circle(d=d, $fn=6);
 }
 
 module ball_head() {
