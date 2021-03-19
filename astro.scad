@@ -50,7 +50,7 @@ WIDTH = OUT_HINGE_L;  // Y axis
 UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = OUT_HINGE_OUT_D/2;
 
-R = 82;
+R = 80.5;
 THREADED_ROD_D = M5 + TOL*2;
 
 BALL_D = 55; // ball head diameter
