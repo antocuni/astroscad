@@ -15,7 +15,7 @@ use <MCAD/2Dshapes.scad>
 OUTER_D = 16;
 BORE_D = 8.2;
 TOTAL_H = 5;
-WASHER_H = 1.3;
+WASHER_H = 1.35;
 BALL_CAGE_H = TOTAL_H - (WASHER_H*2);
 
 module thrust_bearing_washer(tolerance=0.4) {
