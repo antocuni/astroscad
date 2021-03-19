@@ -13,19 +13,19 @@ WASHER_H = thrust_bearing_washer_h();
 // https://github.com/miklasiu/lego_gears/
 module gear_with_nut(NUT_D=M5, TEETH=24, H=8, NUT_H=3.85) {
     difference() {
-        spur_gear(1, TEETH, H, 0, pressure_angle=20, helix_angle=0, optimized=false);
+        translate([0, 0, -H/2]) spur_gear(1, TEETH, H, 0, pressure_angle=20, helix_angle=0, optimized=false);
 
-        translate([0, 0, -0.0001])
+        translate([0, 0, -H/2 - 0.0001])
             thrust_bearing_washer();
 
-        translate([0, 0, H-WASHER_H+0.0001])
+        translate([0, 0, H/2 - WASHER_H + 0.0001])
             thrust_bearing_washer();
 
-        translate([0, 0, (H-NUT_H)/2])
+        translate([0, 0, -NUT_H/2])
             nutHole(NUT_D, tolerance=0.1);
 
-        translate([0, 0, -0.5])
-            cylinder(H+1, d=7);
+        translate([0, 0, -H/2 - 0.001])
+            cylinder(H+0.002, d=7);
     }
 }
 
