@@ -27,6 +27,10 @@ M8 = 8;
 PH14 = 6.35;  // photographic 1/4" bolt ==> 6.35 mm
 PH38 = 9.525; // photographic 3/8" bolt ==> 9.525 mm
 
+// the PH14 bolt fastens the quick-release plate to the lower plate. How long
+// is the part which penetrates?
+PH14_BOLT_LENGTH = 5;
+
 // bearing model: 608RS (608zz should work as well)
 BEARING_OUT_D = 22;
 BEARING_IN_D = 12;
@@ -75,10 +79,10 @@ module ball_head() {
     cylinder(d=BALL_D, h=90);
 }
 
-module threaded_rod() {
+module threaded_rod(d=THREADED_ROD_D) {
     color("grey")
         rotate([90, 80, 0])
-        rotate_extrude(angle=90) translate([R, 0, 0]) circle(d=THREADED_ROD_D);
+        rotate_extrude(angle=90) translate([R, 0, 0]) circle(d=d);
 }
 
 // ACTUAL MODEL
@@ -159,8 +163,13 @@ module lower_plate() {
         // add a hole for the PH38_bolt_head
         translate([BALL_X, 0, -NUT_HOLE_H+0.001]) cylinder(d=PH38+10, h=NUT_HOLE_H);
 
-        // add a hole for the threaded_rod
-        threaded_rod();
+        // add a hole for the threaded_rod, but bigger to make sure it can
+        // pass without friction
+        threaded_rod(d=THREADED_ROD_D + 3);
+
+        // add a slot for the PH14 nut, and a hole for the PH14 bolt
+        translate([16, 0, -Z+PH14_BOLT_LENGTH]) PH14_nut_hole(Z);
+        translate([16, 0, -Z-1]) polyhole(Z+2, PH14+0.3);
     }
 
     // add the bearing slots
@@ -174,6 +183,6 @@ module lower_plate() {
     }
 }
 
-$t = 0.2;
+$t = 0.4;
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
