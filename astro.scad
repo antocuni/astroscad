@@ -250,7 +250,7 @@ module gear_cap() {
     }
 
     module pillar() {
-        id = GEAR_CAP_PILLAR_D + 0.5;
+        id = GEAR_CAP_PILLAR_D + TOL;
         od = id + 2;
         linear_extrude(PILLAR_H) donutSlice(id/2, od/2, 0, 360);
     }
