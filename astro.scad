@@ -132,7 +132,7 @@ module upper_plate() {
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
 
         // hole for the threaded rod
-        threaded_rod(d=THREADED_ROD_D+1);
+        threaded_rod(d=THREADED_ROD_D+TOL*2);
 
         gear_cavity();
     }
@@ -140,6 +140,7 @@ module upper_plate() {
         color("grey") translate([BALL_X, 0, Z+0.0001]) ball_head();
         color("grey") translate([BALL_X, 0, -6.15]) PH38_bolt_head();
         threaded_rod();
+        color("grey") rotate([0, -3.9, 0]) translate([R, 0]) nutHole(M5);
     }
 }
 
@@ -262,7 +263,7 @@ module gear_cavity() {
     {
         X = GEAR_CAP_LENGTH + 4;
         Z = GEAR_CAP_PLATE_THICKNESS + 0.001;
-        translate([R, 0, Z/2+GEAR_H/2+tbbh-0.001]) cube([X, Y, Z], center=true);
+        translate([R-X/2, -Y/2, GEAR_H/2+tbbh-0.001]) cube([X+50, Y, Z]);
     }
 }
 
@@ -311,7 +312,7 @@ module gear_cap() {
     echo("PILLAR: total length of the screw (including head) = ", PILLAR_H + Z + LOWER_THICKNESS);
 }
 
-$t = 0.01;
+$t = 0.1;
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
 gear_cap();
