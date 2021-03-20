@@ -4,6 +4,7 @@ include <contrib/StepMotor_28BYJ-48.scad>
 TEETH = 24;
 
 function stepper_gear_teeth() = TEETH;
+function stepper_shaft_boss_d() = SBD;
 
 module stepper() {
     // like StepMotor28BYJ(), but positioned such that:
@@ -25,5 +26,5 @@ module stepper_gear() {
     translate([0, 0, -H/2]) spur_gear(1, TEETH, H, 0, pressure_angle=20, helix_angle=0, optimized=false);
 }
 
-//stepper();
-stepper_gear();
+stepper();
+//stepper_gear();

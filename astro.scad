@@ -228,6 +228,11 @@ module lower_plate() {
         translate([R,  PILLAR_Y, -Z+2.39]) nutHole(M3, tolerance=TOL);
         translate([R, -PILLAR_Y, -Z-0.001]) nutHole(M3, tolerance=TOL);
         translate([R, -PILLAR_Y, -Z+2.39]) nutHole(M3, tolerance=TOL);
+
+        // add slots for the stepper hole and flanges
+        sbd = stepper_shaft_boss_d();
+        translate([STEPPER_X, 0, -Z-0.001]) stepper();
+        translate([STEPPER_X, 0, -Z-0.001]) cylinder(d=sbd+TOL, h=Z+0.002);
     }
 
     // add the bearing slots
