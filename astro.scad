@@ -156,10 +156,6 @@ module lower_plate() {
     HOD = OUT_HINGE_OUT_D;
     NUT_HOLE_H = 7.5;
 
-    // the rightmost part of the lower plate is thinner, to accommodate the
-    // gear and the thrust bearing
-    HOLLOW_H = GEAR_H/2 + thrust_bearing_ball_cage_h();
-
     difference() {
         color("#0F0")
             union() {
@@ -180,12 +176,7 @@ module lower_plate() {
         translate([16, 0, -Z+PH14_BOLT_LENGTH]) PH14_nut_hole(Z);
         translate([16, 0, -Z-1]) polyhole(Z+2, PH14+0.3);
 
-        // make the rightmost part of the plate thinner
-        translate([BALL_X + 15 , -(HL+1)/2, -HOLLOW_H+0.001]) cube([LENGTH, HL+1, HOLLOW_H]);
-
-        // add a slot for the thrust_bearing washer
-        wh = thrust_bearing_washer_h();
-        translate([R, 0, -HOLLOW_H - wh + 0.001]) thrust_bearing_washer();
+        gear_cavity();
     }
 
     // add the bearing slots
@@ -193,14 +184,28 @@ module lower_plate() {
     translate([0, -HL/2, 0]) rotate([-90, 0, 0]) bearing_slot(HOD, 16, 7, 3);
 
     if (VITAMINS) {
-        wh = thrust_bearing_washer_h();
+        tbwh = thrust_bearing_washer_h();
+        tbbh = thrust_bearing_ball_cage_h();
         dist = HL/2 - BEARING_WALL;
         translate([0, dist, 0]) bearing(model=608, angle=[90, 0, 0]);
         translate([0, -dist, 0]) bearing(model=608, angle=[-90, 0, 0]);
         color("white") translate([R, 0, 0]) gear_with_nut();
-        translate([R, 0, -HOLLOW_H - wh]) thrust_bearing();
-        translate([R, 0, GEAR_H/2 - wh]) thrust_bearing();
+        translate([R, 0, -GEAR_H/2 - tbwh - tbbh]) thrust_bearing();
+        translate([R, 0, GEAR_H/2 - tbwh]) thrust_bearing();
     }
+}
+
+module gear_cavity() {
+    // this is meant to be used inside a difference() block: make enough room
+    // for the gear and the thrust bearings, in both the lower and upper
+    // plates.
+    tbbh = thrust_bearing_ball_cage_h();
+    tbwh = thrust_bearing_washer_h();
+    H = GEAR_H + tbbh*2;
+    Y = OUT_HINGE_L;
+    translate([BALL_X + 15 , -(Y+1)/2, -H/2]) cube([LENGTH, Y+1, H]);
+    // add slots for the thrust bearing washers
+    translate([R, 0, -GEAR_H/2 - tbbh - tbwh + 0.001]) thrust_bearing_washer();
 }
 
 $t = 0.4;
