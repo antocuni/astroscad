@@ -202,8 +202,8 @@ module lower_plate() {
         gear_cavity();
 
         // add holes for the pillar screws
-        translate([R,  PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL*3, h=Z+0.002);
-        translate([R, -PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL*3, h=Z+0.002);
+        translate([R,  PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL, h=Z+0.002);
+        translate([R, -PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL, h=Z+0.002);
 
         // and slots for the nuts. We put two of them one above the other
         // because nutHole does not let us to specify the height :(
@@ -262,8 +262,7 @@ module gear_cap() {
     }
 
     module pillar() {
-        // use a higher tolerance to make sure the screw fits comfortably
-        id = GEAR_CAP_PILLAR_D + TOL*3;
+        id = GEAR_CAP_PILLAR_D + TOL;
         od = id + 2;
         linear_extrude(PILLAR_H) donutSlice(id/2, od/2, 0, 360);
     }
