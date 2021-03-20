@@ -16,22 +16,25 @@ function gear_with_nut_h() = H;
 
 // params for lego-compatible wheels are taken from here:
 // https://github.com/miklasiu/lego_gears/
-module gear_with_nut(NUT_D=M5, NUT_H=3.85) {
+module gear_with_nut(NUT_D=M5, NUT_H=3.85, force_holes=false) {
     difference() {
         translate([0, 0, -H/2]) spur_gear(1, TEETH, H, 0, pressure_angle=20, helix_angle=0, optimized=false);
 
-        translate([0, 0, -H/2 - 0.0001])
-            thrust_bearing_washer();
+        // in preview mode, the gear becomes a mess if I put these.
+        if (!$preview || force_holes) {
+            translate([0, 0, -H/2 - 0.0001])
+                thrust_bearing_washer();
 
-        translate([0, 0, H/2 - WASHER_H + 0.0001])
-            thrust_bearing_washer();
+            translate([0, 0, H/2 - WASHER_H + 0.0001])
+                thrust_bearing_washer();
 
-        translate([0, 0, -NUT_H/2])
-            nutHole(NUT_D, tolerance=0.1);
+            translate([0, 0, -NUT_H/2])
+                nutHole(NUT_D, tolerance=0.1);
 
-        translate([0, 0, -H/2 - 0.001])
-            cylinder(H+0.002, d=7);
+            translate([0, 0, -H/2 - 0.001])
+                cylinder(H+0.002, d=7);
+        }
     }
 }
 
-gear_with_nut();
+gear_with_nut(force_holes=true);

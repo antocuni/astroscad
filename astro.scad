@@ -283,7 +283,7 @@ module gear_cap() {
     PILLAR_H = GEAR_CAP_PILLAR_H;
 
     module screw(y) {
-        h = PILLAR_H + Z;
+        h = $preview ? 0 : PILLAR_H + Z;
         z = GEAR_H/2 + tbbh + Z;
         translate([R, y, z+0.001])
         rotate([0, 180, 0]) {
@@ -296,7 +296,7 @@ module gear_cap() {
         od = id + 2;
         linear_extrude(PILLAR_H) donutSlice(id/2, od/2, 0, 360);
     }
-    color("#55D", 0.6)
+    color("#55D", 0.7)
     difference() {
         union() {
             translate([R, 0, Z/2+GEAR_H/2+tbbh]) cube([X, Y, Z], center=true);
