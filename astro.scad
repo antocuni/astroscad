@@ -4,6 +4,8 @@ use <MCAD/boxes.scad>
 use <MCAD/nuts_and_bolts.scad>
 use <MCAD/polyholes.scad>
 use <MCAD/bearing.scad>
+use <gear_with_nut.scad>
+use <thrust_bearing.scad>
 
 $fa = 1;
 $fs = 0.4;
@@ -55,10 +57,13 @@ UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = OUT_HINGE_OUT_D/2;
 
 R = 80.5;
-THREADED_ROD_D = M5 + 1;
+THREADED_ROD_D = M5;
 
 BALL_D = 55; // ball head diameter
 BALL_X = 33;
+
+GEAR_H = gear_with_nut_h();
+
 
 // VITAMINS
 
@@ -105,7 +110,7 @@ module upper_plate() {
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
 
         // hole for the threaded rod
-        threaded_rod();
+        threaded_rod(d=THREADED_ROD_D+1);
     }
     if (VITAMINS) {
         color("grey") translate([BALL_X, 0, Z+0.0001]) ball_head();
@@ -170,6 +175,11 @@ module lower_plate() {
         // add a slot for the PH14 nut, and a hole for the PH14 bolt
         translate([16, 0, -Z+PH14_BOLT_LENGTH]) PH14_nut_hole(Z);
         translate([16, 0, -Z-1]) polyhole(Z+2, PH14+0.3);
+
+        // the rightmost part of the lower plate is thinner, to accommodate
+        // the wheel and the thrust_bearing
+        cube_h = GEAR_H/2 + thrust_bearing_ball_cage_h();
+        translate([BALL_X + 15 , -(HL+1)/2, -cube_h+0.001]) cube([LENGTH, HL+1, cube_h]);
     }
 
     // add the bearing slots
@@ -180,6 +190,7 @@ module lower_plate() {
         dist = HL/2 - BEARING_WALL;
         translate([0, dist, 0]) bearing(model=608, angle=[90, 0, 0]);
         translate([0, -dist, 0]) bearing(model=608, angle=[-90, 0, 0]);
+        color("white") translate([R, 0, 0]) gear_with_nut();
     }
 }
 

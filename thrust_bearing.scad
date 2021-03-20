@@ -19,6 +19,7 @@ WASHER_H = 1.35;
 BALL_CAGE_H = TOTAL_H - (WASHER_H*2);
 
 function thrust_bearing_washer_h() = WASHER_H;
+function thrust_bearing_ball_cage_h() = BALL_CAGE_H;
 
 module thrust_bearing_washer(tolerance=0.4) {
     inner_r = BORE_D / 2;
