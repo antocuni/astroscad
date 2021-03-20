@@ -177,6 +177,7 @@ module lower_plate() {
     HL = OUT_HINGE_L;
     HOD = OUT_HINGE_OUT_D;
     NUT_HOLE_H = 7.5;
+    PILLAR_Y = GEAR_CAP_PILLAR_DISTANCE;
 
     difference() {
         color("#0F0")
@@ -199,6 +200,10 @@ module lower_plate() {
         translate([16, 0, -Z-1]) polyhole(Z+2, PH14+0.3);
 
         gear_cavity();
+
+        // add holes for the pillar screws
+        translate([R,  PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL, h=Z+0.002);
+        translate([R, -PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL, h=Z+0.002);
     }
 
     // add the bearing slots
