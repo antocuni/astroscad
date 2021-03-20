@@ -287,23 +287,24 @@ module gear_cap() {
 
     PILLAR_Y = GEAR_CAP_PILLAR_DISTANCE;
     PILLAR_H = GEAR_CAP_PILLAR_H;
+    PILLAR_ID = GEAR_CAP_PILLAR_D + TOL;
 
     module screw(y) {
-        h = $preview ? 0 : PILLAR_H + Z;
-        //h = PILLAR_H + Z;
+        //h = $preview ? 0 : PILLAR_H + Z;
+        h = PILLAR_H + Z;
         z = GEAR_H/2 + tbbh + Z;
         translate([R, y, z+0.001])
         rotate([0, 180, 0]) {
-            screw_hole(SCREW_DIN965, SCREW_M3, h, h);
+        screw_hole(SCREW_DIN965, SCREW_M3, h, h);
+        // screw_hole make a very tight hole. Enlarge it a bit
+        translate([0, 0, -0.001]) cylinder(d=PILLAR_ID, h=PILLAR_H+Z+0.003);
         }
     }
     module pillar() {
-        id = GEAR_CAP_PILLAR_D + TOL;
-        od = id + 2;
+        W = PILLAR_ID+2;
         difference() {
-            translate([-GEAR_CAP_LENGTH/2, -od/2, 0])
-                cube([GEAR_CAP_LENGTH, od, PILLAR_H+0.001]);
-            translate([0, 0, -0.001]) cylinder(d=id, h=PILLAR_H+0.003);
+            translate([-GEAR_CAP_LENGTH/2, -W/2, 0])
+                cube([GEAR_CAP_LENGTH, W, PILLAR_H+0.001]);
         }
     }
     color("#55D", 0.7)
