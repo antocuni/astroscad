@@ -26,5 +26,13 @@ module stepper_gear() {
     translate([0, 0, -H/2]) spur_gear(1, TEETH, H, 0, pressure_angle=20, helix_angle=0, optimized=false);
 }
 
+// this is intended to be used inside a difference() block
+module stepper_mounting_holes(h=10, tolerance=0) {
+    d = 4+tolerance;
+    translate([SBO, -MHCC/2, -0.001]) cylinder(d=d, h=h+0.002);
+    translate([SBO,  MHCC/2, -0.001]) cylinder(d=d, h=h+0.002);
+}
+
 stepper();
 //stepper_gear();
+stepper_mounting_holes();

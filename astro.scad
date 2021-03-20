@@ -233,6 +233,7 @@ module lower_plate() {
         sbd = stepper_shaft_boss_d();
         translate([STEPPER_X, 0, -Z-0.001]) stepper();
         translate([STEPPER_X, 0, -Z-0.001]) cylinder(d=sbd+TOL, h=Z+0.002);
+        translate([STEPPER_X, 0, -Z]) stepper_mounting_holes(h=Z);
     }
 
     // add the bearing slots
