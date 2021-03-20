@@ -131,8 +131,7 @@ module upper_plate() {
         // hole for the threaded rod
         threaded_rod(d=THREADED_ROD_D+1);
 
-        // cavity for the gear cap
-        gear_cap(bounding_box=true);
+        gear_cavity();
     }
     if (VITAMINS) {
         color("grey") translate([BALL_X, 0, Z+0.0001]) ball_head();
@@ -249,13 +248,20 @@ module gear_cavity() {
     tbbh = thrust_bearing_ball_cage_h();
     tbwh = thrust_bearing_washer_h();
     H = GEAR_H + tbbh*2;
-    Y = OUT_HINGE_L;
-    translate([BALL_X + 15 , -(Y+1)/2, -H/2]) cube([LENGTH, Y+1, H]);
+    Y = OUT_HINGE_L + 1;
+    translate([BALL_X + 15 , -Y/2, -H/2]) cube([LENGTH, Y, H]);
     // slot for the thrust bearing washer
     translate([R, 0, -GEAR_H/2 - tbbh - tbwh + 0.001]) thrust_bearing_washer();
+
+    // space for the gear cap
+    {
+        X = GEAR_CAP_LENGTH + 4;
+        Z = GEAR_CAP_PLATE_THICKNESS + 0.001;
+        translate([R, 0, Z/2+GEAR_H/2+tbbh-0.001]) cube([X, Y, Z], center=true);
+    }
 }
 
-module gear_cap(bounding_box=false) {
+module gear_cap() {
     tbbh = thrust_bearing_ball_cage_h();
     tbwh = thrust_bearing_washer_h();
     X = GEAR_CAP_LENGTH;
@@ -298,19 +304,9 @@ module gear_cap(bounding_box=false) {
         threaded_rod(d=THREADED_ROD_D + 3);
     }
     echo("PILLAR: total length of the screw (including head) = ", PILLAR_H + Z + LOWER_THICKNESS);
-
-    // if we ask for the bounding box, we also draw a cube around the whole
-    // module. This is useful if you want to put it into a difference()
-    // block. We also make it a big bigger, to make sure it fits comfortably
-    if (bounding_box) {
-        x = X + 2;
-        y = Y + 2;
-        h = GEAR_CAP_TOTAL_H;
-        translate([R, 0, Z/2]) cube([x, y, h], center=true);
-    }
 }
 
-$t = 0.0;
+$t = 0.01;
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
 gear_cap();
