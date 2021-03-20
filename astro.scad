@@ -267,6 +267,10 @@ module gear_cap() {
         // add holes for the two screws
         screw(PILLAR_Y);
         screw(-PILLAR_Y);
+
+        // add a hole for the threaded_rod, but bigger to make sure it can
+        // pass without friction
+        threaded_rod(d=THREADED_ROD_D + 3);
     }
 }
 
