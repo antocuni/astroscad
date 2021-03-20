@@ -240,6 +240,15 @@ module gear_cap() {
     PILLAR_Y = GEAR_CAP_PILLAR_DISTANCE;
     PILLAR_H = GEAR_H + tbbh*2;
 
+    module screw(y) {
+        h = PILLAR_H + Z;
+        z = GEAR_H/2 + tbbh + Z;
+        translate([R, y, z+0.001])
+        rotate([0, 180, 0]) {
+            screw_hole(SCREW_DIN965, SCREW_M3, h, h);
+        }
+    }
+
     module pillar() {
         id = GEAR_CAP_PILLAR_D + 0.5;
         od = id + 2;
@@ -254,6 +263,10 @@ module gear_cap() {
         }
         // slot for the thrust bearing washer
         translate([R, 0, GEAR_H/2 + tbbh - 0.001]) thrust_bearing_washer();
+
+        // add holes for the two screws
+        screw(PILLAR_Y);
+        screw(-PILLAR_Y);
     }
 }
 
