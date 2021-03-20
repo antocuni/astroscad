@@ -260,11 +260,8 @@ module gear_cavity() {
     translate([R, 0, -GEAR_H/2 - tbbh - tbwh + 0.001]) thrust_bearing_washer();
 
     // space for the gear cap
-    {
-        X = GEAR_CAP_LENGTH + 4;
-        Z = GEAR_CAP_PLATE_THICKNESS + 0.001;
-        translate([R-X/2, -Y/2, GEAR_H/2+tbbh-0.001]) cube([X+50, Y, Z]);
-    }
+    translate([GEAR_CAVITY_X, -Y/2, GEAR_H/2+tbbh-0.001])
+        cube([UPPER_LENGTH, Y, GEAR_CAP_PLATE_THICKNESS + 0.001]);
 }
 
 module gear_cap() {
