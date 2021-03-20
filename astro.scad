@@ -189,6 +189,8 @@ module bearing_slot(outer_d) {
 }
 
 module lower_plate() {
+    tbwh = thrust_bearing_washer_h();
+    tbbh = thrust_bearing_ball_cage_h();
     X = LOWER_LENGTH;
     Z = LOWER_THICKNESS;
     HL = OUT_HINGE_L;
@@ -234,6 +236,9 @@ module lower_plate() {
         translate([STEPPER_X, 0, -Z-0.001]) stepper();
         translate([STEPPER_X, 0, -Z-0.001]) cylinder(d=sbd+TOL, h=Z+0.002);
         translate([STEPPER_X, 0, -Z]) stepper_mounting_holes(h=Z);
+        // slot for the thrust bearing washer (for the stepper gear)
+        translate([STEPPER_X, 0, -GEAR_H/2 - tbbh - tbwh + 0.001])
+            thrust_bearing_washer();
     }
 
     // add the bearing slots
@@ -241,8 +246,6 @@ module lower_plate() {
     translate([0, -HL/2, 0]) rotate([-90, 0, 0]) bearing_slot(HOD, 16, 7, 3);
 
     if (VITAMINS) {
-        tbwh = thrust_bearing_washer_h();
-        tbbh = thrust_bearing_ball_cage_h();
         dist = HL/2 - BEARING_WALL;
         translate([0, dist, 0]) bearing(model=608, angle=[90, 0, 0]);
         translate([0, -dist, 0]) bearing(model=608, angle=[-90, 0, 0]);
