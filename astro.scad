@@ -77,7 +77,7 @@ GEAR_CAP_LENGTH = thrust_bearing_outer_d() + 4;
 GEAR_CAP_PLATE_THICKNESS = thrust_bearing_washer_h() + 2;
 GEAR_CAP_PILLAR_H = GEAR_H + thrust_bearing_ball_cage_h()*2;
 GEAR_CAP_PILLAR_DISTANCE = (OUT_HINGE_L/2) - 7;
-GEAR_CAP_PILLAR_D = M3; // inner diameter
+GEAR_CAP_PILLAR_D = M3; // inner diameter of the screw
 GEAR_CAP_TOTAL_H = GEAR_CAP_PLATE_THICKNESS + GEAR_CAP_PILLAR_H;
 
 // bah, the screw_holes library uses a different convention for the global
@@ -290,17 +290,21 @@ module gear_cap() {
 
     module screw(y) {
         h = $preview ? 0 : PILLAR_H + Z;
+        //h = PILLAR_H + Z;
         z = GEAR_H/2 + tbbh + Z;
         translate([R, y, z+0.001])
         rotate([0, 180, 0]) {
             screw_hole(SCREW_DIN965, SCREW_M3, h, h);
         }
     }
-
     module pillar() {
         id = GEAR_CAP_PILLAR_D + TOL;
         od = id + 2;
-        linear_extrude(PILLAR_H) donutSlice(id/2, od/2, 0, 360);
+        difference() {
+            translate([-GEAR_CAP_LENGTH/2, -od/2, 0])
+                cube([GEAR_CAP_LENGTH, od, PILLAR_H+0.001]);
+            translate([0, 0, -0.001]) cylinder(d=id, h=PILLAR_H+0.003);
+        }
     }
     color("#55D", 0.7)
     difference() {
@@ -323,7 +327,7 @@ module gear_cap() {
     echo("PILLAR: total length of the screw (including head) = ", PILLAR_H + Z + LOWER_THICKNESS);
 }
 
-$t = 0.1;
+$t = 0.2;
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
 gear_cap();
