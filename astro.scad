@@ -253,7 +253,9 @@ module lower_plate() {
         translate([R, 0, -GEAR_H/2 - tbwh - tbbh]) thrust_bearing();
         translate([R, 0, GEAR_H/2 - tbwh]) thrust_bearing();
 
-        color("white") translate([STEPPER_X, 0, 0]) stepper_gear();
+        gh = 4;
+        ghs = Z - stepper_to_shaft_distance() - gh/2;
+        color("white") translate([STEPPER_X, 0, 0]) stepper_gear(H=gh, H_SHAFT=ghs);
         translate([STEPPER_X, 0, -Z]) stepper();
     }
 }
