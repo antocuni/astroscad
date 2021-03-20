@@ -54,9 +54,10 @@ IN_HINGE_OUT_D = 18;
 IN_HINGE_IN_D = M8 + TOL;
 
 // geometry of the tracker
-LENGTH = 130;         // X axis
+UPPER_LENGTH = 130;   // X axis
+LOWER_LENGTH = 130;
 WIDTH = OUT_HINGE_L;  // Y axis
-UPPER_THICKNESS = 10; // Z axis
+UPPER_THICKNESS = 15; // Z axis
 LOWER_THICKNESS = OUT_HINGE_OUT_D/2;
 
 R = 80.5;
@@ -64,6 +65,8 @@ THREADED_ROD_D = M5;
 
 BALL_D = 55; // ball head diameter
 BALL_X = 33;
+
+GEAR_CAVITY_X = BALL_X + 25;
 
 GEAR_H = gear_with_nut_h();
 DISTANCE_BETWEEN_GEARS = (gear_with_nut_teeth() + stepper_gear_teeth()) / 2;
@@ -105,20 +108,20 @@ module ball_head() {
 
 module threaded_rod(d=THREADED_ROD_D) {
     color("grey")
-        rotate([90, 80, 0])
+        rotate([90, 75, 0])
         rotate_extrude(angle=90) translate([R, 0, 0]) circle(d=d);
 }
 
 // ACTUAL MODEL
 
 module upper_plate() {
-    X = LENGTH;
+    X = UPPER_LENGTH;
     Y = WIDTH;
     Z = UPPER_THICKNESS;
     inner_hinge();
     difference() {
         color("#0DD", 0.8) // big upper plate
-        translate([0, -Y/2, 0]) cube([LENGTH, Y, Z]);
+        translate([0, -Y/2, 0]) cube([X, Y, Z]);
 
         // remove a cylinder which is a bit bigger than the bearing slots, to
         // make sure that the upper plate does not touch them
@@ -182,6 +185,7 @@ module bearing_slot(outer_d) {
 }
 
 module lower_plate() {
+    X = LOWER_LENGTH;
     Z = LOWER_THICKNESS;
     HL = OUT_HINGE_L;
     HOD = OUT_HINGE_OUT_D;
@@ -191,7 +195,7 @@ module lower_plate() {
     difference() {
         color("#0F0")
             union() {
-            translate([0, -HL/2, -Z]) cube([LENGTH, HL, Z]);
+            translate([0, -HL/2, -Z]) cube([X, HL, Z]);
             translate([0, HL/2, 0]) rotate([90, 0, 0]) cylinder(d=HOD, h=HL);
         }
         translate([0, 0, HOD/4]) cube([HOD+0.001, HL+0.001, HOD/2+0.001], center=true);
@@ -249,7 +253,8 @@ module gear_cavity() {
     tbwh = thrust_bearing_washer_h();
     H = GEAR_H + tbbh*2;
     Y = OUT_HINGE_L + 1;
-    translate([BALL_X + 15 , -Y/2, -H/2]) cube([LENGTH, Y, H]);
+    LENGTH = max(UPPER_LENGTH, LOWER_LENGTH);
+    translate([GEAR_CAVITY_X , -Y/2, -H/2]) cube([LENGTH, Y, H]);
     // slot for the thrust bearing washer
     translate([R, 0, -GEAR_H/2 - tbbh - tbwh + 0.001]) thrust_bearing_washer();
 
