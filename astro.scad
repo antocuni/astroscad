@@ -140,10 +140,20 @@ module bearing_slot(outer_d) {
     // to contain it
     inner_r = 17 / 2;
     outer_r = outer_d/2;
+    module notch() {
+        l = (outer_r - inner_r);
+        thick = 0.2;
+        translate([inner_r, 0, 0]) cube([l, thick, thick]);
+    }
 
     T = BEARING_THICKNESS;
     color("#00F")
-    linear_extrude(BEARING_WALL) donutSlice(inner_r+TOL, outer_r, 0, 360);
+    difference() {
+        linear_extrude(BEARING_WALL) donutSlice(inner_r+TOL, outer_r, 0, 360);
+        rotate([0, 0, 0]) notch();
+        rotate([0, 0, -10]) notch();
+        rotate([0, 0, -20]) notch();
+    }
 
     color("#55F")
     translate([0, 0, BEARING_WALL-0.0001]) linear_extrude(BEARING_THICKNESS + TOL)
