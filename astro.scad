@@ -193,11 +193,13 @@ module lower_plate() {
     translate([0, -HL/2, 0]) rotate([-90, 0, 0]) bearing_slot(HOD, 16, 7, 3);
 
     if (VITAMINS) {
+        wh = thrust_bearing_washer_h();
         dist = HL/2 - BEARING_WALL;
         translate([0, dist, 0]) bearing(model=608, angle=[90, 0, 0]);
         translate([0, -dist, 0]) bearing(model=608, angle=[-90, 0, 0]);
         color("white") translate([R, 0, 0]) gear_with_nut();
-        translate([R, 0, -HOLLOW_H - thrust_bearing_washer_h()]) thrust_bearing();
+        translate([R, 0, -HOLLOW_H - wh]) thrust_bearing();
+        translate([R, 0, GEAR_H/2 - wh]) thrust_bearing();
     }
 }
 
