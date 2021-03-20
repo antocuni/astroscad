@@ -201,9 +201,11 @@ module lower_plate() {
 
         gear_cavity();
 
-        // add holes for the pillar screws
+        // add holes for the pillar screws and slots for the nuts
         translate([R,  PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL, h=Z+0.002);
         translate([R, -PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL, h=Z+0.002);
+        translate([R,  PILLAR_Y, -Z-0.001]) nutHole(M3, tolerance=0.1);
+        translate([R, -PILLAR_Y, -Z-0.001]) nutHole(M3, tolerance=0.1);
     }
 
     // add the bearing slots
