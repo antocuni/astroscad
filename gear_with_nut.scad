@@ -8,13 +8,15 @@ $fa = 1;
 $fs = 0.4;
 
 WASHER_H = thrust_bearing_washer_h();
-GEAR_H = 8;
+H = 8;
+TEETH = 24;
 
-function gear_with_nut_h() = GEAR_H;
+function gear_with_nut_teeth() = TEETH;
+function gear_with_nut_h() = H;
 
 // params for lego-compatible wheels are taken from here:
 // https://github.com/miklasiu/lego_gears/
-module gear_with_nut(NUT_D=M5, TEETH=24, H=GEAR_H, NUT_H=3.85) {
+module gear_with_nut(NUT_D=M5, NUT_H=3.85) {
     difference() {
         translate([0, 0, -H/2]) spur_gear(1, TEETH, H, 0, pressure_angle=20, helix_angle=0, optimized=false);
 

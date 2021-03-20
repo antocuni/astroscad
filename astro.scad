@@ -7,6 +7,7 @@ use <MCAD/bearing.scad>
 use <gear_with_nut.scad>
 use <thrust_bearing.scad>
 use <contrib/screw_holes.scad>
+use <stepper.scad>
 
 $fa = 1;
 $fs = 0.4;
@@ -53,7 +54,7 @@ IN_HINGE_OUT_D = 18;
 IN_HINGE_IN_D = M8 + TOL;
 
 // geometry of the tracker
-LENGTH = 100;         // X axis
+LENGTH = 130;         // X axis
 WIDTH = OUT_HINGE_L;  // Y axis
 UPPER_THICKNESS = 10; // Z axis
 LOWER_THICKNESS = OUT_HINGE_OUT_D/2;
@@ -65,6 +66,8 @@ BALL_D = 55; // ball head diameter
 BALL_X = 33;
 
 GEAR_H = gear_with_nut_h();
+DISTANCE_BETWEEN_GEARS = (gear_with_nut_teeth() + stepper_gear_teeth()) / 2;
+STEPPER_X = R + DISTANCE_BETWEEN_GEARS;
 
 GEAR_CAP_PILLAR_DISTANCE = (OUT_HINGE_L/2) - 7;
 GEAR_CAP_PILLAR_D = M3; // inner diameter
@@ -226,6 +229,9 @@ module lower_plate() {
         color("white") translate([R, 0, 0]) gear_with_nut();
         translate([R, 0, -GEAR_H/2 - tbwh - tbbh]) thrust_bearing();
         translate([R, 0, GEAR_H/2 - tbwh]) thrust_bearing();
+
+        color("white") translate([STEPPER_X, 0, 0]) stepper_gear();
+        translate([STEPPER_X, 0, -Z]) stepper();
     }
 }
 
@@ -288,6 +294,6 @@ module gear_cap() {
 }
 
 $t = 0.4;
-rotate([0, -90*$t, 0]) upper_plate();
+//rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
-gear_cap();
+//gear_cap();
