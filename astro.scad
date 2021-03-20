@@ -69,9 +69,13 @@ GEAR_H = gear_with_nut_h();
 DISTANCE_BETWEEN_GEARS = (gear_with_nut_teeth() + stepper_gear_teeth()) / 2;
 STEPPER_X = R + DISTANCE_BETWEEN_GEARS;
 
+GEAR_CAP_WIDTH = OUT_HINGE_L;
+GEAR_CAP_LENGTH = thrust_bearing_outer_d() + 4;
+GEAR_CAP_PLATE_THICKNESS = thrust_bearing_washer_h() + 2;
+GEAR_CAP_PILLAR_H = GEAR_H + thrust_bearing_ball_cage_h()*2;
 GEAR_CAP_PILLAR_DISTANCE = (OUT_HINGE_L/2) - 7;
 GEAR_CAP_PILLAR_D = M3; // inner diameter
-
+GEAR_CAP_TOTAL_H = GEAR_CAP_PLATE_THICKNESS + GEAR_CAP_PILLAR_H;
 
 // bah, the screw_holes library uses a different convention for the global
 // M3/M4/M5 etc variables, so we cannot use them directly :(. Thats' why we
@@ -126,6 +130,9 @@ module upper_plate() {
 
         // hole for the threaded rod
         threaded_rod(d=THREADED_ROD_D+1);
+
+        // cavity for the gear cap
+        gear_cap(bounding_box=true);
     }
     if (VITAMINS) {
         color("grey") translate([BALL_X, 0, Z+0.0001]) ball_head();
@@ -248,15 +255,15 @@ module gear_cavity() {
     translate([R, 0, -GEAR_H/2 - tbbh - tbwh + 0.001]) thrust_bearing_washer();
 }
 
-module gear_cap() {
+module gear_cap(bounding_box=false) {
     tbbh = thrust_bearing_ball_cage_h();
     tbwh = thrust_bearing_washer_h();
-    X = thrust_bearing_outer_d() + 4;
-    Y = OUT_HINGE_L;
-    Z = tbwh + 2;
+    X = GEAR_CAP_LENGTH;
+    Y = GEAR_CAP_WIDTH;
+    Z = GEAR_CAP_PLATE_THICKNESS;
 
     PILLAR_Y = GEAR_CAP_PILLAR_DISTANCE;
-    PILLAR_H = GEAR_H + tbbh*2;
+    PILLAR_H = GEAR_CAP_PILLAR_H;
 
     module screw(y) {
         h = PILLAR_H + Z;
@@ -291,9 +298,19 @@ module gear_cap() {
         threaded_rod(d=THREADED_ROD_D + 3);
     }
     echo("PILLAR: total length of the screw (including head) = ", PILLAR_H + Z + LOWER_THICKNESS);
+
+    // if we ask for the bounding box, we also draw a cube around the whole
+    // module. This is useful if you want to put it into a difference()
+    // block. We also make it a big bigger, to make sure it fits comfortably
+    if (bounding_box) {
+        x = X + 2;
+        y = Y + 2;
+        h = GEAR_CAP_TOTAL_H;
+        translate([R, 0, Z/2]) cube([x, y, h], center=true);
+    }
 }
 
-$t = 0.4;
-//rotate([0, -90*$t, 0]) upper_plate();
+$t = 0.0;
+rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
-//gear_cap();
+gear_cap();
