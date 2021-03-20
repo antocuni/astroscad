@@ -57,7 +57,7 @@ IN_HINGE_IN_D = M8 + TOL;
 UPPER_LENGTH = 130;   // X axis
 LOWER_LENGTH = 130;
 WIDTH = OUT_HINGE_L;  // Y axis
-UPPER_THICKNESS = 15; // Z axis
+UPPER_THICKNESS = OUT_HINGE_OUT_D/2;; // Z axis
 LOWER_THICKNESS = OUT_HINGE_OUT_D/2;
 
 R = 80.5;
@@ -140,7 +140,7 @@ module upper_plate() {
         color("grey") translate([BALL_X, 0, Z+0.0001]) ball_head();
         color("grey") translate([BALL_X, 0, -6.15]) PH38_bolt_head();
         threaded_rod();
-        color("grey") rotate([0, -3.9, 0]) translate([R, 0]) nutHole(M5);
+        color("grey") rotate([0, -7, 0]) translate([R, 0]) nutHole(M5);
     }
 }
 
@@ -260,8 +260,13 @@ module gear_cavity() {
     translate([R, 0, -GEAR_H/2 - tbbh - tbwh + 0.001]) thrust_bearing_washer();
 
     // space for the gear cap
-    translate([GEAR_CAVITY_X, -Y/2, GEAR_H/2+tbbh-0.001])
+    UZ = GEAR_H/2+tbbh;
+    translate([GEAR_CAVITY_X, -Y/2, UZ-0.001])
         cube([UPPER_LENGTH, Y, GEAR_CAP_PLATE_THICKNESS + 0.001]);
+
+    // space for the nut which keep the rod in place
+    h=4.1;
+    translate([R, 0, UZ+h-1]) cylinder(d=13, h=h);
 }
 
 module gear_cap() {
