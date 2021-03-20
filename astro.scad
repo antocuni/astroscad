@@ -202,8 +202,8 @@ module lower_plate() {
         gear_cavity();
 
         // add holes for the pillar screws and slots for the nuts
-        translate([R,  PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL, h=Z+0.002);
-        translate([R, -PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL, h=Z+0.002);
+        translate([R,  PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL*3, h=Z+0.002);
+        translate([R, -PILLAR_Y, -Z-0.001]) cylinder(d=M3+TOL*3, h=Z+0.002);
         translate([R,  PILLAR_Y, -Z-0.001]) nutHole(M3, tolerance=0.1);
         translate([R, -PILLAR_Y, -Z-0.001]) nutHole(M3, tolerance=0.1);
     }
@@ -257,7 +257,8 @@ module gear_cap() {
     }
 
     module pillar() {
-        id = GEAR_CAP_PILLAR_D + TOL;
+        // use a higher tolerance to make sure the screw fits comfortably
+        id = GEAR_CAP_PILLAR_D + TOL*3;
         od = id + 2;
         linear_extrude(PILLAR_H) donutSlice(id/2, od/2, 0, 360);
     }
@@ -279,6 +280,7 @@ module gear_cap() {
         // pass without friction
         threaded_rod(d=THREADED_ROD_D + 3);
     }
+    echo("PILLAR: total length of the screw (including head) = ", PILLAR_H + Z + LOWER_THICKNESS);
 }
 
 $t = 0.4;
