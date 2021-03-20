@@ -214,10 +214,26 @@ module gear_cavity() {
     H = GEAR_H + tbbh*2;
     Y = OUT_HINGE_L;
     translate([BALL_X + 15 , -(Y+1)/2, -H/2]) cube([LENGTH, Y+1, H]);
-    // add slots for the thrust bearing washers
+    // slot for the thrust bearing washer
     translate([R, 0, -GEAR_H/2 - tbbh - tbwh + 0.001]) thrust_bearing_washer();
+}
+
+module gear_cap() {
+    tbbh = thrust_bearing_ball_cage_h();
+    tbwh = thrust_bearing_washer_h();
+    X = thrust_bearing_outer_d() + 4;
+    Y = OUT_HINGE_L;
+    Z = tbwh + 2;
+
+    color("#55D", 0.6)
+    difference() {
+        translate([R, 0, Z/2+GEAR_H/2+tbbh]) cube([X, Y, Z], center=true);
+        // slot for the thrust bearing washer
+        translate([R, 0, GEAR_H/2 + tbbh - 0.001]) thrust_bearing_washer();
+    }
 }
 
 $t = 0.4;
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
+gear_cap();
