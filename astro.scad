@@ -156,6 +156,10 @@ module lower_plate() {
     HOD = OUT_HINGE_OUT_D;
     NUT_HOLE_H = 7.5;
 
+    // the rightmost part of the lower plate is thinner, to accommodate the
+    // gear and the thrust bearing
+    HOLLOW_H = GEAR_H/2 + thrust_bearing_ball_cage_h();
+
     difference() {
         color("#0F0")
             union() {
@@ -176,10 +180,12 @@ module lower_plate() {
         translate([16, 0, -Z+PH14_BOLT_LENGTH]) PH14_nut_hole(Z);
         translate([16, 0, -Z-1]) polyhole(Z+2, PH14+0.3);
 
-        // the rightmost part of the lower plate is thinner, to accommodate
-        // the wheel and the thrust_bearing
-        cube_h = GEAR_H/2 + thrust_bearing_ball_cage_h();
-        translate([BALL_X + 15 , -(HL+1)/2, -cube_h+0.001]) cube([LENGTH, HL+1, cube_h]);
+        // make the rightmost part of the plate thinner
+        translate([BALL_X + 15 , -(HL+1)/2, -HOLLOW_H+0.001]) cube([LENGTH, HL+1, HOLLOW_H]);
+
+        // add a slot for the thrust_bearing washer
+        wh = thrust_bearing_washer_h();
+        translate([R, 0, -HOLLOW_H - wh + 0.001]) thrust_bearing_washer();
     }
 
     // add the bearing slots
@@ -191,6 +197,7 @@ module lower_plate() {
         translate([0, dist, 0]) bearing(model=608, angle=[90, 0, 0]);
         translate([0, -dist, 0]) bearing(model=608, angle=[-90, 0, 0]);
         color("white") translate([R, 0, 0]) gear_with_nut();
+        translate([R, 0, -HOLLOW_H - thrust_bearing_washer_h()]) thrust_bearing();
     }
 }
 
