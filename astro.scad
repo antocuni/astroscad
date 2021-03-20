@@ -131,6 +131,9 @@ module upper_plate() {
         // hole for the ball head
         translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
 
+        // my PH38 bolt is too short, make some more space for it
+        translate([BALL_X, 0, -0.001]) cylinder(d=PH38+10, h=5);
+
         // hole for the threaded rod
         threaded_rod(d=THREADED_ROD_D+TOL*2);
 
