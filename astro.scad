@@ -6,6 +6,7 @@ use <MCAD/polyholes.scad>
 use <MCAD/bearing.scad>
 use <gear_with_nut.scad>
 use <thrust_bearing.scad>
+use <contrib/screw_holes.scad>
 
 $fa = 1;
 $fs = 0.4;
@@ -24,6 +25,7 @@ VITAMINS = true && $preview; // whether to show the ball head, the bearings, etc
 TOL = 0.2;
 
 // screw size
+M3 = 3;
 M5 = 5;
 M8 = 8;
 PH14 = 6.35;  // photographic 1/4" bolt ==> 6.35 mm
@@ -63,6 +65,16 @@ BALL_D = 55; // ball head diameter
 BALL_X = 33;
 
 GEAR_H = gear_with_nut_h();
+
+GEAR_CAP_PILLAR_DISTANCE = (OUT_HINGE_L/2) - 7;
+GEAR_CAP_PILLAR_D = M3; // inner diameter
+
+
+// bah, the screw_holes library uses a different convention for the global
+// M3/M4/M5 etc variables, so we cannot use them directly :(. Thats' why we
+// use<> instead of include<> it. Manually copy&paste the few things we need
+SCREW_DIN965 = 1; // for screw_holes.scad
+SCREW_M3 = 3;
 
 
 // VITAMINS
@@ -225,9 +237,21 @@ module gear_cap() {
     Y = OUT_HINGE_L;
     Z = tbwh + 2;
 
+    PILLAR_Y = GEAR_CAP_PILLAR_DISTANCE;
+    PILLAR_H = GEAR_H + tbbh*2;
+
+    module pillar() {
+        id = GEAR_CAP_PILLAR_D + 0.5;
+        od = id + 2;
+        linear_extrude(PILLAR_H) donutSlice(id/2, od/2, 0, 360);
+    }
     color("#55D", 0.6)
     difference() {
-        translate([R, 0, Z/2+GEAR_H/2+tbbh]) cube([X, Y, Z], center=true);
+        union() {
+            translate([R, 0, Z/2+GEAR_H/2+tbbh]) cube([X, Y, Z], center=true);
+            translate([R,  PILLAR_Y, -PILLAR_H/2]) pillar();
+            translate([R, -PILLAR_Y, -PILLAR_H/2]) pillar();
+        }
         // slot for the thrust bearing washer
         translate([R, 0, GEAR_H/2 + tbbh - 0.001]) thrust_bearing_washer();
     }
