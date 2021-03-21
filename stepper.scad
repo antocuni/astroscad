@@ -25,7 +25,7 @@ module stepper() {
     }
 }
 
-module stepper_gear(H, H_SHAFT) {
+module stepper_gear_with_shaft(H, H_SHAFT) {
     tbwh = thrust_bearing_washer_h();
     shaft_d = SBD - 2;
     difference() {

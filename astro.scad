@@ -252,10 +252,6 @@ module lower_plate() {
         color("white") translate([R, 0, 0]) gear_with_nut();
         translate([R, 0, -GEAR_H/2 - tbwh - tbbh]) thrust_bearing();
         translate([R, 0, GEAR_H/2 - tbwh]) thrust_bearing();
-
-        gh = 4;
-        ghs = Z - stepper_to_shaft_distance() - gh/2;
-        color("white") translate([STEPPER_X, 0, 0]) stepper_gear(H=gh, H_SHAFT=ghs);
         translate([STEPPER_X, 0, -Z]) stepper();
     }
 }
@@ -333,7 +329,15 @@ module gear_cap() {
     echo("PILLAR: total length of the screw (including head) = ", PILLAR_H + Z + LOWER_THICKNESS);
 }
 
+module stepper_gear() {
+    Z = LOWER_THICKNESS;
+    gh = 4;
+    ghs = Z - stepper_to_shaft_distance() - gh/2;
+    color("white") translate([STEPPER_X, 0, 0]) stepper_gear_with_shaft(H=gh, H_SHAFT=ghs);
+}
+
 $t = 0.2;
 rotate([0, -90*$t, 0]) upper_plate();
 lower_plate();
 gear_cap();
+stepper_gear();
