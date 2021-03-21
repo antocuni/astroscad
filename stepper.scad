@@ -1,5 +1,6 @@
 use <gears/gears.scad> // https://github.com/chrisspen/gears
 include <contrib/StepMotor_28BYJ-48.scad>
+use <thrust_bearing.scad>
 
 $fn=60;
 
@@ -25,8 +26,14 @@ module stepper() {
 }
 
 module stepper_gear(H, H_SHAFT) {
+    tbwh = thrust_bearing_washer_h();
     shaft_d = SBD - 2;
-    translate([0, 0, -H/2]) spur_gear(1, TEETH, H, 0, pressure_angle=20, helix_angle=0, optimized=false);
+    difference() {
+        translate([0, 0, -H/2])
+            spur_gear(1, TEETH, H, 0, pressure_angle=20, helix_angle=0, optimized=false);
+        if (!$preview)
+            translate([0, 0, -H/2-0.001]) thrust_bearing_washer();
+    }
     difference() {
         translate([0, 0, -H_SHAFT-H/2 + 0.001]) cylinder(d=shaft_d, h=H_SHAFT);
         translate([0, 0, -H_SHAFT-H/2]) BYJ48_Hole(H_SHAFT+1);
@@ -44,7 +51,7 @@ module stepper_mounting_holes(h=10, tolerance=0) {
 // Pruimboom
 module BYJ48_Hole(h=10)
 {
-    margin1=0.4;
+    margin1=0.2;
     margin2=0.2;
     difference()
     {
@@ -57,5 +64,5 @@ module BYJ48_Hole(h=10)
 
 
 //stepper();
-//stepper_gear(H=4, H_SHAFT=5); // XXX: compute the correct H_SHAFT before printing!
+stepper_gear(H=4, H_SHAFT=5); // DON'T PRINT FROM THIS FILE! Print from astro.scad, which has the correct height
 //stepper_mounting_holes();
