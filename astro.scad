@@ -129,7 +129,7 @@ module upper_plate() {
         cylinder(d=OUT_HINGE_OUT_D+1, h=OUT_HINGE_L);
 
         // hole for the ball head
-        translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38+TOL);
+        translate([BALL_X, 0, -0.002]) polyhole(Z+0.004, PH38 + TOL*2);
 
         // my PH38 bolt is too short, make some more space for it
         translate([BALL_X, 0, -0.001]) cylinder(d=PH38+10, h=5);
