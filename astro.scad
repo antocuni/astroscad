@@ -108,7 +108,7 @@ module ball_head() {
 
 module threaded_rod(d=THREADED_ROD_D) {
     color("grey")
-        rotate([90, 75, 0])
+        rotate([90, 65, 0])
         rotate_extrude(angle=90) translate([R, 0, 0]) circle(d=d);
 }
 
@@ -336,8 +336,39 @@ module stepper_gear() {
     color("white") translate([STEPPER_X, 0, 0]) stepper_gear_with_shaft(H=gh, H_SHAFT=ghs);
 }
 
-$t = 0.2;
-rotate([0, -90*$t, 0]) upper_plate();
+module curved_washer(h, extra_angle=10) {
+    alfa = asin(h/R);
+    inner = M5 + TOL*2;
+    outer = inner + 2;
+
+    module pipe() {
+        rotate([90, 0, 0]) rotate_extrude(angle=alfa+extra_angle) translate([R, 0, 0])
+            donutSlice(inner/2, outer/2, 0, 360);
+    }
+
+    difference() {
+        pipe();
+        translate([0, -5, -0.001]) cube([R+10, 10, h]);
+    }
+    difference() {
+        translate([cos(alfa)*R, 0, h+0.001]) linear_extrude(1) donutSlice(inner/2, 8, 0, 360);
+        translate([cos(alfa)*R - outer , 0, h])  cylinder(d=2, h=1.002);
+    }
+}
+
+module curved_washers_to_print() {
+    translate([-20, 0, -UPPER_THICKNESS]) curved_washer(UPPER_THICKNESS, extra_angle=10);
+    tbbh = thrust_bearing_ball_cage_h();
+    tbwh = thrust_bearing_washer_h();
+    H = (GEAR_H/2 + tbbh) + GEAR_CAP_PLATE_THICKNESS + 4.1;
+    translate([0, 0, -H]) curved_washer(H, extra_angle=5);
+}
+
+$t = 0.3;
+rotate([0, -90*$t, 0]) union() {
+    upper_plate();
+    curved_washer(UPPER_THICKNESS, extra_angle=10);
+}
 lower_plate();
 gear_cap();
 stepper_gear();
