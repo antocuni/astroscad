@@ -336,24 +336,53 @@ module stepper_gear() {
     color("white") translate([STEPPER_X, 0, 0]) stepper_gear_with_shaft(H=gh, H_SHAFT=ghs);
 }
 
-module curved_washer(h, extra_angle=10) {
-    alfa = asin(h/R);
-    inner = M5 + TOL*2;
+module curved_washer(z, angle=10, bottom=false, extra_tol=0, with_base=false) {
+    alfa = asin(z/R);
+    inner = M5 + TOL*2 + extra_tol;
     outer = inner + 2;
+    washer_h = 1;
 
-    module pipe() {
-        rotate([90, 0, 0]) rotate_extrude(angle=alfa+extra_angle) translate([R, 0, 0])
-            donutSlice(inner/2, outer/2, 0, 360);
-    }
+    a = angle_from;
+    b = angle_to;
 
-    difference() {
-        pipe();
-        translate([0, -5, -0.001]) cube([R+10, 10, h]);
+    module washer(z) {
+        x = cos(alfa) * R;
+        zz = bottom ? z - washer_h : z;
+        difference() {
+            translate([x, 0, zz]) cylinder(r=8, h=washer_h);
+            translate([x-outer , 0, zz-0.001])  cylinder(d=2, h=1.002);
+        }
     }
-    difference() {
-        translate([cos(alfa)*R, 0, h+0.001]) linear_extrude(1) donutSlice(inner/2, 8, 0, 360);
-        translate([cos(alfa)*R - outer , 0, h])  cylinder(d=2, h=1.002);
+    module torus(d, a, b) {
+        rotate([90, 0, 0])
+        rotate([0, 0, a])
+        rotate_extrude(angle=b-a)
+            translate([R, 0, 0])
+            circle(d=d);
     }
+    module base() {
+        X = GEAR_CAP_LENGTH;
+        Y = GEAR_CAP_WIDTH;
+        Z = 2;
+        translate([R + -X/2, -Y/2, z]) cube([X, Y, Z]);
+    }
+    //plane(z);
+    difference() {
+        union() {
+            washer(z);
+            torus(outer, alfa, alfa+angle);
+            if (with_base)
+                base();
+        }
+        torus(inner, 0, 360);
+        translate([0, -R, z-R*2-0.001]) cube([R*2, R*2, R*2]);
+        translate([R, -GEAR_CAP_PILLAR_DISTANCE, z-3]) cylinder(d=3.2, h=6);
+        translate([R, +GEAR_CAP_PILLAR_DISTANCE, z-3]) cylinder(d=3.2, h=6);
+    }
+}
+
+module plane(z) {
+    color("green", 0.2) translate([0, 0, z]) linear_extrude(0.0001) circle(d=R*3);
 }
 
 module curved_washers_to_print() {
@@ -361,13 +390,14 @@ module curved_washers_to_print() {
     tbbh = thrust_bearing_ball_cage_h();
     tbwh = thrust_bearing_washer_h();
     H = (GEAR_H/2 + tbbh) + GEAR_CAP_PLATE_THICKNESS + 4.1;
-    translate([0, 0, -H]) curved_washer(H, extra_angle=5);
+    translate([0, 0, -H]) curved_washer(H, angle=5);
 }
+
 
 $t = 0.3;
 rotate([0, -90*$t, 0]) union() {
     upper_plate();
-    curved_washer(UPPER_THICKNESS, extra_angle=10);
+    curved_washer(UPPER_THICKNESS, angle=10);
 }
 lower_plate();
 gear_cap();
