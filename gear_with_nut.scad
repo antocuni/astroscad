@@ -32,8 +32,9 @@ module gear_with_nut(NUT_D=M5, NUT_H=NUT_H, force_holes=false) {
             translate([0, 0, -NUT_H/2])
                 my_nutHole(NUT_D, NUT_H);
 
+            // see the comment inside thrust_bearing.scad for why we need d=6.2
             translate([0, 0, -H/2 - 0.001])
-                cylinder(H+0.002, d=7);
+                cylinder(H+0.002, d=6.2);
         }
     }
 }
