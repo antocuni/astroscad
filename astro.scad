@@ -393,6 +393,24 @@ module curved_washers_to_print() {
     translate([0, 0, -H]) curved_washer(H, angle=5);
 }
 
+/* TODO:
+   - adjust the M8 tolerance, it was too tight for my printer
+
+   - the bearing slots are way too tight
+
+   - the upper hinge is too long (along the Y axis)
+
+   - adjust the stepper holes, they were too small
+
+   - the upper plate didn't rotate freely: I had to cut the leftmost part of
+     it else it touched the bearing slots
+
+   - the hole in the upper plate seems to be not perfectly aligned with the
+     threaded_rod, not sure why
+
+   - the gear_cap pillars are too short, probably the washers_h needs to be
+     adjusted
+*/
 
 $t = 0.3;
 rotate([0, -90*$t, 0]) union() {
