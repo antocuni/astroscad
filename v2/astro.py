@@ -1,12 +1,10 @@
 #!./autoscad.py
 
 from solid import *
+import scad
 
+obj = scad.cube(10, 10, 10, center='xz')
 
-d = difference()(
-    cube(10),
-    sphere(15)
-)
 
 if __name__ == '__main__':
-    scad_render_to_file(d, 'astro.scad')
+    scad_render_to_file(obj, 'astro.scad')
