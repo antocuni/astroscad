@@ -3,7 +3,8 @@
 from solid import *
 import scad
 
-obj = scad.cube(10, 10, 10, center='xz')
+obj = scad.cube(10, 10, 30).translate(x=20).color('red', 0.4)
+
 
 
 if __name__ == '__main__':
