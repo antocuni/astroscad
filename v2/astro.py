@@ -3,7 +3,8 @@
 from solid import *
 import scad
 
-obj = scad.cube(10, 10, 30).translate(x=20).color('red', 0.4)
+obj = scad.cylinder(r1=10, r2=3, h=10, segments=60)
+obj+= scad.cylinder(r1=10, r2=3, h=-10, segments=60).color('red')
 
 
 
