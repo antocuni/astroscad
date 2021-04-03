@@ -1,4 +1,8 @@
 import solid
+EPSILON = 0.001
+
+def in2mm(inches):
+    return inches * 25.4
 
 class ExtraMethods:
     def translate(self, x=0, y=0, z=0):
@@ -80,3 +84,16 @@ def cylinder(*, h=None, r=None, d=None, r1=None, r2=None, d1=None, d2=None,
     return solid.cylinder(h=h, r=r, d=d, r1=r1, r2=r2, d1=d1, d2=d2,
                           center=center,
                           segments=segments).translate(z=tz)
+
+def render_to_file(*args, fn=None, fa=None, fs=None, **kwargs):
+    header = []
+    if fn: header.append(f'$fn = {fn};')
+    if fa: header.append(f'$fa = {fa};')
+    if fs: header.append(f'$fs = {fs};')
+    header = '\n'.join(header)
+    return solid.scad_render_to_file(*args, file_header=header, **kwargs)
+
+
+def bolt_hole(*, d, h, clearance=0.2):
+    h = h + EPSILON*2
+    return cylinder(d=d+clearance, h=h).translate(z=-EPSILON)
