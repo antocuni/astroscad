@@ -25,7 +25,7 @@ def bracket():
     obj -= cube(w+t+1, w, h+t+1, center='yz')
     #
     delta=-w/4
-    obj -= bolt_hole(d=3.2, h=h+t+1, center=True).translate(x=delta)
+    obj -= bolt_hole(d=3.2, h=h+t, center=True).translate(x=delta)
     obj -= bolt_hole(d=3.2, h=50, center=True).rotate(x=90).translate(delta+r_gear+r_worm)
     return obj
 

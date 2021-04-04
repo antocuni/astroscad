@@ -106,4 +106,7 @@ def render_to_file(*args, fn=None, fa=None, fs=None, **kwargs):
 
 def bolt_hole(*, d, h, clearance=0.2, center=None):
     h = h + EPSILON*2
-    return cylinder(d=d+clearance, h=h, center=center).translate(z=-EPSILON)
+    cyl = cylinder(d=d+clearance, h=h, center=center)
+    if not center:
+        cyl = cyl.translate(z=-EPSILON)
+    return cyl
