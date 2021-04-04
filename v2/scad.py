@@ -110,3 +110,40 @@ def bolt_hole(*, d, h, clearance=0.2, center=None):
     if not center:
         cyl = cyl.translate(z=-EPSILON)
     return cyl
+
+
+class Preview:
+    """
+    Make it possible to render two different things depending on the value of $preview.
+    Override the preview() and render() methods for your needs.
+    """
+
+    def __init__(self):
+        self._preview_obj = self.preview()
+        self._render_obj = self.render()
+        self.children = []
+        self.params = {}
+        if self._preview_obj:
+            self.children += self._preview_obj.children
+            self.params.update(self._preview_obj.params)
+        if self._render_obj:
+            self.children += self._render_obj.children
+            self.params.update(self._render_obj.params)
+
+    def preview(self):
+        return None
+
+    def render(self):
+        return None
+
+    def _render(self):
+        lines = []
+        w = lines.append
+        w('if ($preview) {')
+        if self._preview_obj:
+            w(self._preview_obj._render())
+        w('} else {')
+        if self._render_obj:
+            w(self._render_obj._render())
+        w('}')
+        return '\n'.join(lines)
