@@ -7,18 +7,28 @@ def in2mm(inches):
 class ExtraMethods:
     def translate(self, x=0, y=0, z=0):
         return solid.translate([x, y, z])(self)
+    tr = translate
 
     def scale(self, x=0, y=0, z=0):
         return solid.scale([x, y, z])(self)
+    sc = scale
 
     def rotate(self, x=0, y=0, z=0, v=None):
         return solid.rotate([x, y, z], v)(self)
+    rot = rotate
 
     def resize(self, x=0, y=0, z=0, auto=None):
         return solid.resize([x, y, z], auto)(self)
+    rsz = resize
 
     def color(self, *args, **kwargs):
         return solid.color(*args, **kwargs)(self)
+
+    def m(self, mod='#'):
+        """
+        Shorthand for set_modifier
+        """
+        return self.set_modifier(mod)
 
     @classmethod
     def attach_to(cls, target):
@@ -94,6 +104,6 @@ def render_to_file(*args, fn=None, fa=None, fs=None, **kwargs):
     return solid.scad_render_to_file(*args, file_header=header, **kwargs)
 
 
-def bolt_hole(*, d, h, clearance=0.2):
+def bolt_hole(*, d, h, clearance=0.2, center=None):
     h = h + EPSILON*2
-    return cylinder(d=d+clearance, h=h).translate(z=-EPSILON)
+    return cylinder(d=d+clearance, h=h, center=center).translate(z=-EPSILON)

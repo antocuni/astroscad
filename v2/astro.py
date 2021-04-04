@@ -6,7 +6,8 @@ import scad
 from scad import cube, cylinder, in2mm, bolt_hole
 
 os.environ['OPENSCADPATH'] = ':'.join([
-    '/usr/share/openscad/libraries/'
+    '/usr/share/openscad/libraries/',
+    '..',
 ])
 MCAD_bearing = import_scad('MCAD/bearing.scad')
 
@@ -38,12 +39,11 @@ class MyBearing:
             cylinder(d=17, h=cls.H+2).translate(z=-1),
             )
 
-
-root = union()
-#root += MyBearing()
-#root += MyBearing.adapter(hole_d = in2mm(1/4))
-
+def main():
+    obj = union()
+    obj += MyBearing()
+    obj += MyBearing.adapter(hole_d = in2mm(1/4))
 
 
 if __name__ == '__main__':
-    scad.render_to_file(root, 'astro.scad', fa=1, fs=0.4)
+    scad.render_to_file(main(), 'astro.scad', fa=1, fs=0.4)
