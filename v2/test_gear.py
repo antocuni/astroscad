@@ -13,9 +13,9 @@ MCAD_bearing = import_scad('MCAD/bearing.scad')
 gears = import_scad('gears/gears.scad')
 
 
-
+R_WORM = 5.75877
 def bracket():
-    r_worm = 5.75877
+    r_worm = R_WORM
     r_gear = 12
     t = 4 # thickness*2
     w = 28
@@ -34,13 +34,35 @@ def bracket():
         .rot(x=90)
         .tr(delta+r_gear+r_worm)
         )
-    return obj
+    return obj.tr(x=-delta)
 
-def gear():
-    return gears.spur_gear(1, 24, 2, pressure_angle=20, helix_angle=0).translate(z=-1)
+def worm_gear(spur, worm):
+    h_gear = 2
+    shaft_w = 3.2
+    return gears.worm_gear(modul = 1,
+                           tooth_number = 24,
+                           thread_starts = 2,
+                           width = h_gear,
+                           length = 15,
+                           worm_bore = 0,
+                           gear_bore = shaft_w,
+                           pressure_angle = 28,
+                           lead_angle = 10,
+                           optimized = 1,
+                           together_built = True,
+                           show_spur = spur,
+                           show_worm = worm);
 
 root = union()
 root += bracket()
+root += worm_gear(spur=True, worm=False).translate(x=24/2)
+root += worm_gear(spur=False, worm=True).translate(x=24/2+R_WORM, y=15/2)
+
+#root -= cylinder(h=16, d=2.74, center=True, segments=6).m().rotate(x=90)
+#root -= cylinder(h=20, d=3.2, center=True).m()
+
+#root += gears.planetary_gear(modul=0.5, sun_teeth=18, planet_teeth=24, number_planets=3, width=5, rim_width=3, bore=4, pressure_angle=20, helix_angle=30, together_built=True, optimized=True);
+
 
 if __name__ == '__main__':
     scad.render_to_file(root, 'test_gear.scad', fa=1, fs=0.4)
