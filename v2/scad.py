@@ -39,31 +39,65 @@ class ExtraMethods:
 
 ExtraMethods.attach_to(solid.OpenSCADObject)
 
+## class BoundingBox:
+##     def __init__(self, x0, y0, z0, x1, y1, z1):
+##         self.x0, self.x1 = sorted((x0, x1))
+##         self.y0, self.y1 = sorted((y0, y1))
+##         self.z0, self.z1 = sorted((z0, z1))
 
-def _get_st(axis, size, center):
-    assert axis in ('x', 'y', 'z')
-    t = 0
-    if size < 0:
-        size = -size
-        t = -size
-    if axis in center:
-        t = -size/2
-    return size, t
 
-def _process_center(center):
-    assert center in ('', 'x', 'y', 'z', 'xy', 'xz', 'yz', 'xyz', True, False)
-    if center is True:
-        return 'xyz'
-    if center is False:
-        return ''
-    return center
+class MySCADObject:
+    """
+    This is a wrapper around solid.OpenSCADObject, so that we can add our own
+    functionalities
+    """
 
-def cube(sx, sy, sz, center=''):
-    center = _process_center(center)
-    sx, tx = _get_st('x', sx, center)
-    sy, ty = _get_st('y', sy, center)
-    sz, tz = _get_st('z', sz, center)
-    return solid.cube([sx, sy, sz]).translate(tx, ty, tz)
+    def __init__(self, *args, **kwargs):
+        # these two attributes are unused but are required to mock a real
+        # OpenSCADObject
+        self.children = []
+        self.params = {}
+        self.obj = self.make_obj(*args, **kwargs)
+
+    def make_obj(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def _render(self, render_holes=False):
+        return self.obj._render(render_holes=render_holes)
+
+
+class Cube(MySCADObject):
+
+    def make_obj(self, sx, sy, sz, center=''):
+        center = self._process_center(center)
+        sx, tx = self._get_st('x', sx, center)
+        sy, ty = self._get_st('y', sy, center)
+        sz, tz = self._get_st('z', sz, center)
+        return solid.cube([sx, sy, sz]).translate(tx, ty, tz)
+
+    def _process_center(self, center):
+        assert center in ('', 'x', 'y', 'z', 'xy', 'xz', 'yz', 'xyz', True, False)
+        if center is True:
+            return 'xyz'
+        if center is False:
+            return ''
+        return center
+
+    def _get_st(self, axis, size, center):
+        """
+        Get the size and translation for a given axis
+        """
+        assert axis in ('x', 'y', 'z')
+        t = 0
+        if size < 0:
+            size = -size
+            t = -size
+        if axis in center:
+            t = -size/2
+        return size, t
+
+
+
 
 def cylinder(*, h=None, r=None, d=None, r1=None, r2=None, d1=None, d2=None,
              center=None, segments=None):
