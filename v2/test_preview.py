@@ -25,4 +25,4 @@ def main():
 
 
 if __name__ == '__main__':
-    scad.render_to_file(main(), 'test_preview.scad', fa=1, fs=0.4)
+    scad.render_to_file(main(), '/tmp/test_preview.scad', fa=1, fs=0.4)

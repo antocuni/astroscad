@@ -58,7 +58,6 @@ def _process_center(center):
         return ''
     return center
 
-
 def cube(sx, sy, sz, center=''):
     center = _process_center(center)
     sx, tx = _get_st('x', sx, center)

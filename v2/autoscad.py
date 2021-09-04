@@ -27,8 +27,8 @@ def main():
         return
     pyfile = pathlib.Path(sys.argv[1])
     execute(pyfile)
-    # XXX: this assumes that FILE.py produces FILE.scad
-    scadfile = pyfile.with_suffix('.scad')
+    # XXX: this assumes that FILE.py produces /tmp/FILE.scad
+    scadfile = pathlib.Path('/tmp/') / pyfile.with_suffix('.scad')
     run_openscad_maybe(scadfile)
 
     # rerun FILE.py as soon as any *.py file is created/modified/deleted

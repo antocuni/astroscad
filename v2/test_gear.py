@@ -65,4 +65,4 @@ root += worm_gear(spur=False, worm=True).translate(x=24/2+R_WORM, y=15/2)
 
 
 if __name__ == '__main__':
-    scad.render_to_file(root, 'test_gear.scad', fa=1, fs=0.4)
+    scad.render_to_file(root, '/tmp/test_gear.scad', fa=1, fs=0.4)

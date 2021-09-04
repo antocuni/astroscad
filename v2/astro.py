@@ -46,4 +46,4 @@ def main():
 
 
 if __name__ == '__main__':
-    scad.render_to_file(main(), 'astro.scad', fa=1, fs=0.4)
+    scad.render_to_file(main(), '/tmp/astro.scad', fa=1, fs=0.4)
