@@ -3,7 +3,7 @@
 import os
 from solid import import_scad, union
 import scad
-from scad import Cube, cylinder, bolt_hole
+from scad import Cube, Cylinder, bolt_hole
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',
@@ -11,8 +11,8 @@ os.environ['OPENSCADPATH'] = ':'.join([
 ])
 
 def main():
-    return Cube(10, 20, 5, center='xy')
-    #return cylinder(d=5, h=10)
+    #return Cube(10, 20, 5, center='xy')
+    return Cylinder(d1=5, d2=10, h=10)
 
 
 if __name__ == '__main__':

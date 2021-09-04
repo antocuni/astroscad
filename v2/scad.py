@@ -97,36 +97,36 @@ class Cube(MySCADObject):
         return size, t
 
 
+class Cylinder(MySCADObject):
 
-
-def cylinder(*, h=None, r=None, d=None, r1=None, r2=None, d1=None, d2=None,
-             center=None, segments=None):
-    if r is not None:
-        assert r1 is None, 'Cannot use r1 together with r'
-        assert r2 is None, 'Cannot use r2 together with r'
-        assert d is None, 'Cannot use d together with r'
-        assert d1 is None, 'Cannot use d1 together with r'
-        assert d2 is None, 'Cannot use d2 together with r'
-    elif r1 is not None or r2 is not None:
-        assert d is None, 'Cannot use d together with r'
-        assert d1 is None, 'Cannot use d1 together with r'
-        assert d2 is None, 'Cannot use d2 together with r'
-    elif d is not None:
-        assert d1 is None, 'Cannot use d1 together with r'
-        assert d2 is None, 'Cannot use d2 together with r'
-    else:
-        assert d1 is not None or d2 is not None, \
-            'You must specify one of r, d, r1, r2, d1, d2'
-    #
-    tz = 0
-    if h < 0:
-        h = -h
-        tz = -h
-        r1, r2 = r2, r1
-        d1, d2 = d2, d1
-    return solid.cylinder(h=h, r=r, d=d, r1=r1, r2=r2, d1=d1, d2=d2,
-                          center=center,
-                          segments=segments).translate(z=tz)
+    def make_obj(self, *, h=None, r=None, d=None, r1=None, r2=None, d1=None, d2=None,
+                 center=None, segments=None):
+        if r is not None:
+            assert r1 is None, 'Cannot use r1 together with r'
+            assert r2 is None, 'Cannot use r2 together with r'
+            assert d is None, 'Cannot use d together with r'
+            assert d1 is None, 'Cannot use d1 together with r'
+            assert d2 is None, 'Cannot use d2 together with r'
+        elif r1 is not None or r2 is not None:
+            assert d is None, 'Cannot use d together with r'
+            assert d1 is None, 'Cannot use d1 together with r'
+            assert d2 is None, 'Cannot use d2 together with r'
+        elif d is not None:
+            assert d1 is None, 'Cannot use d1 together with r'
+            assert d2 is None, 'Cannot use d2 together with r'
+        else:
+            assert d1 is not None or d2 is not None, \
+                'You must specify one of r, d, r1, r2, d1, d2'
+        #
+        tz = 0
+        if h < 0:
+            h = -h
+            tz = -h
+            r1, r2 = r2, r1
+            d1, d2 = d2, d1
+        return solid.cylinder(h=h, r=r, d=d, r1=r1, r2=r2, d1=d1, d2=d2,
+                              center=center,
+                              segments=segments).translate(z=tz)
 
 def render_to_file(*args, fn=None, fa=None, fs=None, **kwargs):
     header = []
