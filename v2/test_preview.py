@@ -21,7 +21,7 @@ class CubeOrCylinder(Preview):
 
 
 def main():
-    return PreviewObject()
+    return CubeOrCylinder()
 
 
 if __name__ == '__main__':
