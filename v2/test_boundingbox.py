@@ -26,4 +26,4 @@ def main():
 
 
 if __name__ == '__main__':
-    scad.render_to_file(main(), '/tmp/test_boundingbox.scad', fa=1, fs=0.4)
+    main().render_to_file(fa=1, fs=0.4)

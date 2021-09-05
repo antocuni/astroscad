@@ -33,6 +33,14 @@ class MySCADObject:
     def make_obj(self, *args, **kwargs):
         raise NotImplementedError
 
+    def render_to_file(self, filename='/tmp/autoscad.scad', fn=None, fa=None, fs=None):
+        header = []
+        if fn: header.append(f'$fn = {fn};')
+        if fa: header.append(f'$fa = {fa};')
+        if fs: header.append(f'$fs = {fs};')
+        header = '\n'.join(header)
+        return solid.scad_render_to_file(self.obj, filename, file_header=header)
+
     def _render(self, render_holes=False):
         return self.obj._render(render_holes=render_holes)
 
@@ -152,13 +160,7 @@ class Cylinder(MySCADObject):
                                   segments=segments)
         self.translate(z=tz)
 
-def render_to_file(*args, fn=None, fa=None, fs=None, **kwargs):
-    header = []
-    if fn: header.append(f'$fn = {fn};')
-    if fa: header.append(f'$fa = {fa};')
-    if fs: header.append(f'$fs = {fs};')
-    header = '\n'.join(header)
-    return solid.scad_render_to_file(*args, file_header=header, **kwargs)
+
 
 
 def bolt_hole(*, d, h, clearance=0.2, center=None):
