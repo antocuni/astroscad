@@ -17,3 +17,10 @@ def test_Vector_add():
     v2 = Vector(1, 2, 3)
     v3 = v1 + v2
     assert v3 == Vector(11, 22, 33)
+
+def test_Point_None():
+    p1 = Point(10, 20, -100)
+    bottom = Point(None, None, 30)
+    v = bottom - p1
+    assert v == Vector(0, 0, 130)
+    assert p1 + v == Point(10, 20, 30)

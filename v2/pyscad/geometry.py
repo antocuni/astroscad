@@ -16,9 +16,14 @@ class Point:
     def __sub__(self, p):
         if not isinstance(p, Point):
             return NotImplemented
-        return Vector(x=self.x-p.x,
-                      y=self.y-p.y,
-                      z=self.z-p.z)
+        dx = dy = dz = 0
+        if self.x is not None and p.x is not None:
+            dx = self.x - p.x
+        if self.y is not None and p.y is not None:
+            dy = self.y - p.y
+        if self.z is not None and p.z is not None:
+            dz = self.z - p.z
+        return Vector(dx, dy, dz)
 
 @dataclass
 class Vector:
