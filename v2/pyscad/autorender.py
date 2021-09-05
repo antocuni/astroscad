@@ -23,12 +23,12 @@ def run_openscad_maybe(scadfile):
 
 def main():
     if len(sys.argv) != 2:
-        print('Usage: autoscad.py FILE.py')
+        print('Usage: autorender.py FILE.py')
         return
     pyfile = pathlib.Path(sys.argv[1])
     execute(pyfile)
     # XXX: this assumes that executing FILE.py produces /tmp/autoscad.scad
-    scadfile = '/tmp/autoscad.scad'
+    scadfile = '/tmp/autorender.scad'
     run_openscad_maybe(scadfile)
 
     # rerun FILE.py as soon as any *.py file is created/modified/deleted

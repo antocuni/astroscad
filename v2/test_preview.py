@@ -1,7 +1,7 @@
-#!./autoscad.py
+#!./pyscad/autorender.py
 
 import os
-from scad import Cube, Cylinder, Preview
+from pyscad import Cube, Cylinder, Preview
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',

@@ -1,9 +1,7 @@
-#!./autoscad.py
+#!./pyscad/autorender.py
 
 import os
-from solid import import_scad, union
-import scad
-from scad import Cube, Cylinder, ImportScad, bolt_hole
+from pyscad import Cube, Cylinder, ImportScad, bolt_hole
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',

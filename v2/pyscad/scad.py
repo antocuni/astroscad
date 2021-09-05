@@ -12,7 +12,7 @@ def in2mm(inches):
 ##         self.z0, self.z1 = sorted((z0, z1))
 
 
-class MySCADObject:
+class PySCADObject:
     """
     This is a wrapper around solid.OpenSCADObject, so that we can add our own
     functionalities
@@ -30,7 +30,7 @@ class MySCADObject:
     def make_obj(self, *args, **kwargs):
         raise NotImplementedError
 
-    def render_to_file(self, filename='/tmp/autoscad.scad', *, fa=1, fs=0.4, fn=None):
+    def render_to_file(self, filename='/tmp/autorender.scad', *, fa=1, fs=0.4, fn=None):
         header = []
         if fn: header.append(f'$fn = {fn};')
         if fa: header.append(f'$fa = {fa};')
@@ -74,20 +74,20 @@ class MySCADObject:
         return self
 
     def __add__(self, other):
-        if not isinstance(other, MySCADObject):
+        if not isinstance(other, PySCADObject):
             return NotImplemented
         obj = self.obj + other.obj
         return SCADWrapper(obj)
 
     def __sub__(self, other):
-        if not isinstance(other, MySCADObject):
+        if not isinstance(other, PySCADObject):
             return NotImplemented
         obj = self.obj - other.obj
         return SCADWrapper(obj)
 
 
 
-class SCADWrapper(MySCADObject):
+class SCADWrapper(PySCADObject):
 
     def make_obj(self, obj):
         self.obj = obj
@@ -107,7 +107,7 @@ class ImportScad:
 
 
 
-class Cube(MySCADObject):
+class Cube(PySCADObject):
 
     def make_obj(self, sx, sy, sz, center=''):
         center = self._process_center(center)
@@ -139,7 +139,7 @@ class Cube(MySCADObject):
         return size, t
 
 
-class Cylinder(MySCADObject):
+class Cylinder(PySCADObject):
 
     def make_obj(self, *, h=None, r=None, d=None, r1=None, r2=None, d1=None, d2=None,
                  center=None, segments=None):
@@ -181,7 +181,7 @@ def bolt_hole(*, d, h, clearance=0.2, center=None):
     return cyl
 
 
-class Preview(MySCADObject):
+class Preview(PySCADObject):
     """
     Make it possible to render two different things depending on the value of $preview.
     Override the preview() and render() methods for your needs.
