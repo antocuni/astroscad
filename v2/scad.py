@@ -1,3 +1,4 @@
+import functools
 import solid
 EPSILON = 0.001
 
@@ -25,10 +26,6 @@ class MySCADObject:
         self.obj = None
         self.make_obj(*args, **kwargs)
         assert self.obj is not None
-
-    @classmethod
-    def wrap(self, obj):
-        return SCADWrapper(obj)
 
     def make_obj(self, *args, **kwargs):
         raise NotImplementedError
@@ -80,13 +77,13 @@ class MySCADObject:
         if not isinstance(other, MySCADObject):
             return NotImplemented
         obj = self.obj + other.obj
-        return self.wrap(obj)
+        return SCADWrapper(obj)
 
     def __sub__(self, other):
         if not isinstance(other, MySCADObject):
             return NotImplemented
         obj = self.obj - other.obj
-        return self.wrap(obj)
+        return SCADWrapper(obj)
 
 
 
@@ -94,6 +91,20 @@ class SCADWrapper(MySCADObject):
 
     def make_obj(self, obj):
         self.obj = obj
+
+class ImportScad:
+
+    def __init__(self, modname):
+        self.mod = solid.import_scad(modname)
+
+    def __getattr__(self, name):
+        fn = getattr(self.mod, name)
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            obj = fn(*args, **kwargs)
+            return SCADWrapper(obj)
+        return wrapper
+
 
 
 class Cube(MySCADObject):
@@ -162,10 +173,9 @@ class Cylinder(MySCADObject):
 
 
 
-
 def bolt_hole(*, d, h, clearance=0.2, center=None):
     h = h + EPSILON*2
-    cyl = cylinder(d=d+clearance, h=h, center=center)
+    cyl = Cylinder(d=d+clearance, h=h, center=center)
     if not center:
         cyl = cyl.translate(z=-EPSILON)
     return cyl
