@@ -26,6 +26,10 @@ class MySCADObject:
         self.make_obj(*args, **kwargs)
         assert self.obj is not None
 
+    @classmethod
+    def wrap(self, obj):
+        return SCADWrapper(obj)
+
     def make_obj(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -61,8 +65,27 @@ class MySCADObject:
         """
         Shorthand for set_modifier
         """
-        return self.obj.set_modifier(mod)
+        self.obj.set_modifier(mod)
+        return self
 
+    def __add__(self, other):
+        if not isinstance(other, MySCADObject):
+            return NotImplemented
+        obj = self.obj + other.obj
+        return self.wrap(obj)
+
+    def __sub__(self, other):
+        if not isinstance(other, MySCADObject):
+            return NotImplemented
+        obj = self.obj - other.obj
+        return self.wrap(obj)
+
+
+
+class SCADWrapper(MySCADObject):
+
+    def make_obj(self, obj):
+        self.obj = obj
 
 
 class Cube(MySCADObject):

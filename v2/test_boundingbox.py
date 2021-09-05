@@ -13,12 +13,15 @@ os.environ['OPENSCADPATH'] = ':'.join([
 def main():
     #return Cube(10, 20, 5, center='xy')
     cyl = Cylinder(d1=5, d2=7, h=10)
-    cyl.translate(z=-5)
+    #cyl.translate(z=-5)
     #cyl.scale(z=2)
     #cyl.rotate(x=90, v=1)
-    cyl.resize(x=20)
+    cyl.resize(x=10)
     #cyl.color('red')
-    cyl.m()
+    cyl
+    cyl += Cube(10, 1, 1)
+    cyl -= Cube(1, 1, 12).translate(z=-1)
+
     return cyl
 
 
