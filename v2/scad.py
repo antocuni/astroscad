@@ -33,7 +33,7 @@ class MySCADObject:
     def make_obj(self, *args, **kwargs):
         raise NotImplementedError
 
-    def render_to_file(self, filename='/tmp/autoscad.scad', fn=None, fa=None, fs=None):
+    def render_to_file(self, filename='/tmp/autoscad.scad', *, fa=1, fs=0.4, fn=None):
         header = []
         if fn: header.append(f'$fn = {fn};')
         if fa: header.append(f'$fa = {fa};')
@@ -171,29 +171,33 @@ def bolt_hole(*, d, h, clearance=0.2, center=None):
     return cyl
 
 
-class Preview:
+class Preview(MySCADObject):
     """
     Make it possible to render two different things depending on the value of $preview.
     Override the preview() and render() methods for your needs.
     """
 
-    def __init__(self):
-        self._preview_obj = self.preview()
-        self._render_obj = self.render()
-        self.children = []
-        self.params = {}
-        if self._preview_obj:
-            self.children += self._preview_obj.children
-            self.params.update(self._preview_obj.params)
-        if self._render_obj:
-            self.children += self._render_obj.children
-            self.params.update(self._render_obj.params)
+    def make_obj(self):
+        preview_obj = self.preview()
+        render_obj = self.render()
+        self.obj = _PreviewObject(preview_obj, render_obj)
 
     def preview(self):
-        return None
+        raise NotImplementedError
 
     def render(self):
-        return None
+        raise NotImplementedError
+
+
+class _PreviewObject:
+
+    def __init__(self, preview_obj, render_obj):
+        self._preview_obj = preview_obj
+        self._render_obj = render_obj
+        self.children = preview_obj.children + render_obj.children
+        self.params = {}
+        self.params.update(preview_obj.params)
+        self.params.update(self._render_obj.params)
 
     def _render(self):
         lines = []

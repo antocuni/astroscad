@@ -26,4 +26,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main().render_to_file(fa=1, fs=0.4)
+    main().render_to_file()
