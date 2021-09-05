@@ -12,7 +12,14 @@ os.environ['OPENSCADPATH'] = ':'.join([
 
 def main():
     #return Cube(10, 20, 5, center='xy')
-    return Cylinder(d1=5, d2=10, h=10)
+    cyl = Cylinder(d1=5, d2=7, h=10)
+    cyl.translate(z=-5)
+    #cyl.scale(z=2)
+    #cyl.rotate(x=90, v=1)
+    cyl.resize(x=20)
+    #cyl.color('red')
+    cyl.m()
+    return cyl
 
 
 if __name__ == '__main__':

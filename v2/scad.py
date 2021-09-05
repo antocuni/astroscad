@@ -4,41 +4,6 @@ EPSILON = 0.001
 def in2mm(inches):
     return inches * 25.4
 
-class ExtraMethods:
-    def translate(self, x=0, y=0, z=0):
-        return solid.translate([x, y, z])(self)
-    tr = translate
-
-    def scale(self, x=0, y=0, z=0):
-        return solid.scale([x, y, z])(self)
-    sc = scale
-
-    def rotate(self, x=0, y=0, z=0, v=None):
-        return solid.rotate([x, y, z], v)(self)
-    rot = rotate
-
-    def resize(self, x=0, y=0, z=0, auto=None):
-        return solid.resize([x, y, z], auto)(self)
-    rsz = resize
-
-    def color(self, *args, **kwargs):
-        return solid.color(*args, **kwargs)(self)
-
-    def m(self, mod='#'):
-        """
-        Shorthand for set_modifier
-        """
-        return self.set_modifier(mod)
-
-    @classmethod
-    def attach_to(cls, target):
-        for name, val in cls.__dict__.items():
-            if name != 'attach_to' and not name.startswith('__'):
-                assert not hasattr(target, name)
-                setattr(target, name, val)
-
-ExtraMethods.attach_to(solid.OpenSCADObject)
-
 ## class BoundingBox:
 ##     def __init__(self, x0, y0, z0, x1, y1, z1):
 ##         self.x0, self.x1 = sorted((x0, x1))
@@ -57,13 +22,47 @@ class MySCADObject:
         # OpenSCADObject
         self.children = []
         self.params = {}
-        self.obj = self.make_obj(*args, **kwargs)
+        self.obj = None
+        self.make_obj(*args, **kwargs)
+        assert self.obj is not None
 
     def make_obj(self, *args, **kwargs):
         raise NotImplementedError
 
     def _render(self, render_holes=False):
         return self.obj._render(render_holes=render_holes)
+
+    # helper methods
+    def translate(self, x=0, y=0, z=0):
+        self.obj = solid.translate([x, y, z])(self.obj)
+        return self
+    tr = translate
+
+    def scale(self, x=1, y=1, z=1):
+        self.obj = solid.scale([x, y, z])(self.obj)
+        return self
+    sc = scale
+
+    def rotate(self, x=0, y=0, z=0, v=None):
+        self.obj = solid.rotate([x, y, z], v)(self.obj)
+        return self
+    rot = rotate
+
+    def resize(self, x=0, y=0, z=0, auto=None):
+        self.obj = solid.resize([x, y, z], auto)(self.obj)
+        return self
+    rsz = resize
+
+    def color(self, *args, **kwargs):
+        self.obj = solid.color(*args, **kwargs)(self.obj)
+        return self
+
+    def m(self, mod='#'):
+        """
+        Shorthand for set_modifier
+        """
+        return self.obj.set_modifier(mod)
+
 
 
 class Cube(MySCADObject):
@@ -73,7 +72,8 @@ class Cube(MySCADObject):
         sx, tx = self._get_st('x', sx, center)
         sy, ty = self._get_st('y', sy, center)
         sz, tz = self._get_st('z', sz, center)
-        return solid.cube([sx, sy, sz]).translate(tx, ty, tz)
+        self.obj = solid.cube([sx, sy, sz])
+        self.translate(tx, ty, tz)
 
     def _process_center(self, center):
         assert center in ('', 'x', 'y', 'z', 'xy', 'xz', 'yz', 'xyz', True, False)
@@ -124,9 +124,10 @@ class Cylinder(MySCADObject):
             tz = -h
             r1, r2 = r2, r1
             d1, d2 = d2, d1
-        return solid.cylinder(h=h, r=r, d=d, r1=r1, r2=r2, d1=d1, d2=d2,
-                              center=center,
-                              segments=segments).translate(z=tz)
+        self.obj = solid.cylinder(h=h, r=r, d=d, r1=r1, r2=r2, d1=d1, d2=d2,
+                                  center=center,
+                                  segments=segments)
+        self.translate(z=tz)
 
 def render_to_file(*args, fn=None, fa=None, fs=None, **kwargs):
     header = []
