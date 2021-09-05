@@ -1,7 +1,7 @@
-#!./pyscad/autorender.py
+#!/usr/bin/python3
 
 import os
-from pyscad import Cube, Cylinder, ImportScad, bolt_hole
+from pyscad import autorender, Cube, Cylinder, ImportScad, bolt_hole
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',
@@ -61,4 +61,4 @@ def main():
     return root
 
 if __name__ == '__main__':
-    main().render_to_file()
+    main().autorender()

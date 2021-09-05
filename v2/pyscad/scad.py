@@ -1,5 +1,7 @@
 import functools
 import solid
+from .autorender import autorender
+
 EPSILON = 0.001
 
 def in2mm(inches):
@@ -30,7 +32,10 @@ class PySCADObject:
     def make_obj(self, *args, **kwargs):
         raise NotImplementedError
 
-    def render_to_file(self, filename='/tmp/autorender.scad', *, fa=1, fs=0.4, fn=None):
+    def autorender(self, *, filename='/tmp/autorender.scad', **kwargs):
+        autorender(self, filename, **kwargs)
+
+    def render_to_file(self, filename, *, fa=1, fs=0.4, fn=None):
         header = []
         if fn: header.append(f'$fn = {fn};')
         if fa: header.append(f'$fa = {fa};')

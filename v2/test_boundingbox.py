@@ -1,7 +1,8 @@
-#!./pyscad/autorender.py
+#!/usr/bin/python3
 
 import os
 from pyscad import Cube, Cylinder, bolt_hole
+from pyscad import autorender
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',
@@ -14,7 +15,7 @@ def main():
     #cyl.translate(z=-5)
     #cyl.scale(z=2)
     #cyl.rotate(x=90, v=1)
-    cyl.resize(x=10)
+    cyl.resize(x=5)
     #cyl.color('red')
     cyl
     cyl += Cube(10, 1, 1)
@@ -24,4 +25,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main().render_to_file()
+    main().autorender()
