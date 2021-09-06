@@ -9,9 +9,13 @@ class Point:
     def __add__(self, v):
         if not isinstance(v, Vector):
             return NotImplemented
-        return Point(x=self.x+v.x,
-                     y=self.y+v.y,
-                     z=self.z+v.z)
+        x = self.x
+        y = self.y
+        z = self.z
+        if x is not None: x += v.x
+        if y is not None: y += v.y
+        if z is not None: z += v.z
+        return Point(x, y, z)
 
     def __sub__(self, p):
         if not isinstance(p, Point):

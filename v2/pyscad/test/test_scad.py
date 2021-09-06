@@ -27,3 +27,12 @@ class TestAnchors:
         # invalidate_anchors()
         assert re.search(r'File ".*", line .* in test_invalidate', lines[-2])
         assert lines[-1] == '        c.invalidate_anchors()'
+
+    def test_translate(self):
+        c = Cube(2, 4, 6, center='xyz')
+        c.translate(10, 20, 30)
+        assert c.O == Point(10, 20, 30)
+        assert c.pmin == Point(9, 18, 27)
+        assert c.pmax == Point(11, 22, 33)
+        assert c.left == Point(9, None, None)
+

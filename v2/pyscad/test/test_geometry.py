@@ -8,6 +8,12 @@ class TestPointVector:
         p2 = p1 + v
         assert p2 == Point(11, 22, 33)
 
+    def test_Point_add_None(self):
+        p1 = Point(10, None, None)
+        v = Vector(1, 2, 3)
+        p2 = p1 + v
+        assert p2 == Point(11, None, None)
+
     def test_Vector_add(self):
         v1 = Vector(10, 20, 30)
         v2 = Vector(1, 2, 3)

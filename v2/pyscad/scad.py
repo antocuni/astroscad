@@ -45,21 +45,25 @@ class PySCADObject:
         self.anchors = InvalidAnchorPoints(self.anchors)
 
     def translate(self, x=0, y=0, z=0):
+        self.anchors.translate(Vector(x, y, z))
         self.obj = solid.translate([x, y, z])(self.obj)
         return self
     tr = translate
 
     def scale(self, x=1, y=1, z=1):
+        self.invalidate_anchors()
         self.obj = solid.scale([x, y, z])(self.obj)
         return self
     sc = scale
 
     def rotate(self, x=0, y=0, z=0, v=None):
+        self.invalidate_anchors()
         self.obj = solid.rotate([x, y, z], v)(self.obj)
         return self
     rot = rotate
 
     def resize(self, x=0, y=0, z=0, auto=None):
+        self.invalidate_anchors()
         self.obj = solid.resize([x, y, z], auto)(self.obj)
         return self
     rsz = resize
@@ -117,10 +121,10 @@ class Cube(PySCADObject):
         sy, ty = self._get_st('y', sy, center)
         sz, tz = self._get_st('z', sz, center)
         self.obj = solid.cube([sx, sy, sz])
+        self.translate(tx, ty, tz)
         self.anchors.set_bounding_box(Point(-sx/2, -sy/2, -sz/2),
                                       Point(sx/2, sy/2, sz/2))
         self.anchors.O = Point.O
-        self.translate(tx, ty, tz)
 
     def _process_center(self, center):
         assert center in ('', 'x', 'y', 'z', 'xy', 'xz', 'yz', 'xyz', True, False)
