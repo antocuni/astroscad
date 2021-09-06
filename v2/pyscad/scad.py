@@ -44,6 +44,12 @@ class PySCADObject:
     def invalidate_anchors(self):
         self.anchors = InvalidAnchorPoints(self.anchors)
 
+    def move_to(self, **kwargs):
+        for anchor, new_p in kwargs.items():
+            current_p = getattr(self.anchors, anchor)
+            v = new_p - current_p
+            self.translate(v.x, v.y, v.z)
+
     def translate(self, x=0, y=0, z=0):
         self.anchors.translate(Vector(x, y, z))
         self.obj = solid.translate([x, y, z])(self.obj)

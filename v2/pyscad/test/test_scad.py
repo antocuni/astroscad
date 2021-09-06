@@ -36,3 +36,14 @@ class TestAnchors:
         assert c.pmax == Point(11, 22, 33)
         assert c.left == Point(9, None, None)
 
+    def test_move_to(self):
+        c = Cube(2, 4, 6, center='xyz')
+        c.move_to(O=Point(10, 20, 30))
+        assert c.O == Point(10, 20, 30)
+        assert c.pmin == Point(9, 18, 27)
+        assert c.pmax == Point(11, 22, 33)
+        #
+        c.move_to(O=Point(100, 200, 300))
+        assert c.O == Point(100, 200, 300)
+        assert c.pmin == Point(99, 198, 297)
+        assert c.pmax == Point(101, 202, 303)
