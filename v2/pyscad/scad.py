@@ -15,10 +15,6 @@ class PySCADObject:
     """
 
     def __init__(self, *args, **kwargs):
-        # these two attributes are unused but are required to mock a real
-        # OpenSCADObject
-        self.children = []
-        self.params = {}
         self.obj = None
         self.make_obj(*args, **kwargs)
         assert self.obj is not None
@@ -36,9 +32,6 @@ class PySCADObject:
         if fs: header.append(f'$fs = {fs};')
         header = '\n'.join(header)
         return solid.scad_render_to_file(self.obj, filename, file_header=header)
-
-    def _render(self, render_holes=False):
-        return self.obj._render(render_holes=render_holes)
 
     # helper methods
     def translate(self, x=0, y=0, z=0):
