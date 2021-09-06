@@ -1,12 +1,12 @@
 import pytest
 import re
-from pyscad.scad import Cube
+from pyscad.scad import Cube, Cylinder
 from pyscad.geometry import Point
 from pyscad.util import InvalidAnchorError
 
 class TestAnchors:
 
-    def test_cube(self):
+    def test_Cube(self):
         c = Cube(2, 4, 6)
         assert c.center == Point.O
         assert c.pmin == Point(-1, -2, -3)
@@ -47,3 +47,14 @@ class TestAnchors:
         assert c.center == Point(100, 200, 300)
         assert c.pmin == Point(99, 198, 297)
         assert c.pmax == Point(101, 202, 303)
+
+    def test_Cylinder(self):
+        c = Cylinder(h=10, d=30)
+        assert c.center == Point.O
+        assert c.pmin == Point(-15, -15, -5)
+        assert c.pmax == Point(15, 15, 5)
+        #
+        c2 = Cylinder(h=10, r=15)
+        assert c2.center == Point.O
+        assert c2.pmin == Point(-15, -15, -5)
+        assert c2.pmax == Point(15, 15, 5)

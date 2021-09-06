@@ -10,12 +10,13 @@ os.environ['OPENSCADPATH'] = ':'.join([
 ])
 
 def main():
-    red = Cube(10, 10, 10).color('red')
-    green = Cube(5, 5, 5).color('green')
-    red.move_to(center=Point(20, None, None))
-    green.move_to(bottom=red.top)
-    #green.show_bounding_box()
-    return red+green
+    O = Point(7, 7, 7)
+    a = Cube(10, 10, 10).color('red').move_to(center=O)
+    b = Cube(5, 5, 5).color('green').move_to(center=O, left=a.right)
+    c = Cube(5, 5, 5).color('cyan').move_to(center=O, right=a.left)
+    cyl = Cylinder(h=10, r=3).move_to(center=O, bottom=a.top)
+    return a + b + c + cyl
+
 
 
 

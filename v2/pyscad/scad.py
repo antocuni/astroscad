@@ -49,6 +49,7 @@ class PySCADObject:
             current_p = getattr(self.anchors, anchor)
             v = new_p - current_p
             self.translate(v.x, v.y, v.z)
+        return self
 
     def show_bounding_box(self):
         if not self.anchors.has_point('pmin') or not self.anchors.has_point('pmax'):
@@ -150,37 +151,43 @@ class Cube(PySCADObject):
         self.anchors.center = Point.O
 
 class Cylinder(PySCADObject):
+    """
+    Like the builtin opensca cylinder(), but with saner default.
 
-    def make_obj(self, *, h=None, r=None, d=None, r1=None, r2=None, d1=None, d2=None,
-                 center=None, segments=None):
-        if r is not None:
-            assert r1 is None, 'Cannot use r1 together with r'
-            assert r2 is None, 'Cannot use r2 together with r'
-            assert d is None, 'Cannot use d together with r'
-            assert d1 is None, 'Cannot use d1 together with r'
-            assert d2 is None, 'Cannot use d2 together with r'
-        elif r1 is not None or r2 is not None:
-            assert d is None, 'Cannot use d together with r'
-            assert d1 is None, 'Cannot use d1 together with r'
-            assert d2 is None, 'Cannot use d2 together with r'
-        elif d is not None:
-            assert d1 is None, 'Cannot use d1 together with r'
-            assert d2 is None, 'Cannot use d2 together with r'
+    By default the cylinder is center in the origin, and defines the following
+    anchor points:
+
+    - center
+    - pmin, pmax
+    - left, right
+    - back, front
+    - bottom, top
+
+    You can specify only r or d. If you want a truncated cone, you
+    TruncatedCone().
+    """
+
+    def make_obj(self, *, h=None, r=None, d=None, segments=None):
+        assert h is not None
+        if d is None:
+            assert r is not None
+            d = r*2
+        elif r is None:
+            assert d is not None
+            r = d/2
         else:
-            assert d1 is not None or d2 is not None, \
-                'You must specify one of r, d, r1, r2, d1, d2'
-        #
-        tz = 0
-        if h < 0:
-            h = -h
-            tz = -h
-            r1, r2 = r2, r1
-            d1, d2 = d2, d1
-        self.obj = solid.cylinder(h=h, r=r, d=d, r1=r1, r2=r2, d1=d1, d2=d2,
-                                  center=center,
-                                  segments=segments)
-        self.translate(z=tz)
+            raise ValueError('You must specify r or d')
 
+        pmin = Point(-r, -r, -h/2)
+        pmax = Point(r, r, h/2)
+        self.anchors.set_bounding_box(pmin, pmax)
+        self.anchors.center = Point.O
+        self.obj = solid.cylinder(h=h, d=d, center=True, segments=segments)
+
+## class TruncatedCone(PySCADObject):
+
+##     def make_obj(self, *, h=None, r1=None, r2=None, d1=None, d2=None, segments=None):
+##         ...
 
 
 def bolt_hole(*, d, h, clearance=0.2, center=None):
