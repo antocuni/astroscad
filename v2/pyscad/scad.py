@@ -1,5 +1,6 @@
 import functools
 import solid
+from .geometry import Point, Vector, AnchorPoints
 from .autorender import autorender
 
 EPSILON = 0.001
@@ -15,6 +16,7 @@ class PySCADObject:
     """
 
     def __init__(self, *args, **kwargs):
+        self.anchors = AnchorPoints()
         self.obj = None
         self.make_obj(*args, **kwargs)
         assert self.obj is not None
@@ -32,6 +34,12 @@ class PySCADObject:
         if fs: header.append(f'$fs = {fs};')
         header = '\n'.join(header)
         return solid.scad_render_to_file(self.obj, filename, file_header=header)
+
+    def __getattr__(self, name):
+        try:
+            return self.anchors.points[name]
+        except KeyError:
+            raise AttributeError(name)
 
     # helper methods
     def translate(self, x=0, y=0, z=0):
@@ -58,7 +66,7 @@ class PySCADObject:
         self.obj = solid.color(*args, **kwargs)(self.obj)
         return self
 
-    def m(self, mod='#'):
+    def mod(self, mod='#'):
         """
         Shorthand for set_modifier
         """
@@ -107,6 +115,9 @@ class Cube(PySCADObject):
         sy, ty = self._get_st('y', sy, center)
         sz, tz = self._get_st('z', sz, center)
         self.obj = solid.cube([sx, sy, sz])
+        self.anchors.set_bounding_box(Point(-sx/2, -sy/2, -sz/2),
+                                      Point(sx/2, sy/2, sz/2))
+        self.anchors.points['O'] = Point.O
         self.translate(tx, ty, tz)
 
     def _process_center(self, center):
