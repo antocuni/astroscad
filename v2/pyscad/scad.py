@@ -7,12 +7,6 @@ EPSILON = 0.001
 def in2mm(inches):
     return inches * 25.4
 
-## class BoundingBox:
-##     def __init__(self, x0, y0, z0, x1, y1, z1):
-##         self.x0, self.x1 = sorted((x0, x1))
-##         self.y0, self.y1 = sorted((y0, y1))
-##         self.z0, self.z1 = sorted((z0, z1))
-
 
 class PySCADObject:
     """

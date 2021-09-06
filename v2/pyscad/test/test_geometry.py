@@ -1,26 +1,51 @@
-from pyscad.geometry import Point, Vector
+from pyscad.geometry import Point, Vector, AnchorPoints
 
-def test_Point_add():
-    p1 = Point(10, 20, 30)
-    v = Vector(1, 2, 3)
-    p2 = p1 + v
-    assert p2 == Point(11, 22, 33)
+class TestPointVector:
 
-def test_Point_sub():
-    p1 = Point(10, 20, 30)
-    p2 = Point(1, 2, 3)
-    diff = p1 - p2
-    assert diff == Vector(9, 18, 27)
+    def test_Point_add(self):
+        p1 = Point(10, 20, 30)
+        v = Vector(1, 2, 3)
+        p2 = p1 + v
+        assert p2 == Point(11, 22, 33)
 
-def test_Vector_add():
-    v1 = Vector(10, 20, 30)
-    v2 = Vector(1, 2, 3)
-    v3 = v1 + v2
-    assert v3 == Vector(11, 22, 33)
+    def test_Vector_add(self):
+        v1 = Vector(10, 20, 30)
+        v2 = Vector(1, 2, 3)
+        v3 = v1 + v2
+        assert v3 == Vector(11, 22, 33)
 
-def test_Point_None():
-    p1 = Point(10, 20, -100)
-    bottom = Point(None, None, 30)
-    v = bottom - p1
-    assert v == Vector(0, 0, 130)
-    assert p1 + v == Point(10, 20, 30)
+    def test_sub(self):
+        p1 = Point(10, 20, 30)
+        p2 = Point(1, 2, 3)
+        diff = p1 - p2
+        assert diff == Vector(9, 18, 27)
+
+    def test_sub_with_None(self):
+        p1 = Point(10, 20, -100)
+        bottom = Point(None, None, 30)
+        v = bottom - p1
+        assert v == Vector(0, 0, 130)
+        assert p1 + v == Point(10, 20, 30)
+
+
+class TestAnchorPoints:
+
+    def test_init(self):
+        a = AnchorPoints(p1=Point(1, 2, 3),
+                         p2=Point(4, 5, 6))
+        assert a.p1 == Point(1, 2, 3)
+        assert a.p2 == Point(4, 5, 6)
+
+    def test_set_bounding_box(self):
+        p1 = Point(1, 2, -3)
+        p2 = Point(-1, -2, 3)
+        a = AnchorPoints()
+        a.set_bounding_box(p1, p2)
+        assert a.pmin == Point(-1, -2, -3)
+        assert a.pmax == Point(1, 2, 3)
+        assert a.left == Point(-1, None, None)
+        assert a.right == Point(1, None, None)
+        assert a.front == Point(None, -2, None)
+        assert a.back == Point(None, 2, None)
+        assert a.bottom == Point(None, None, -3)
+        assert a.top == Point(None, None, 3)

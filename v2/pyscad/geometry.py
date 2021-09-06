@@ -37,3 +37,33 @@ class Vector:
         return Vector(x=self.x+v.x,
                       y=self.y+v.y,
                       z=self.z+v.z)
+
+
+class AnchorPoints:
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            if not isinstance(value, Point):
+                raise TypeError(f'{key}: a Point is required')
+            setattr(self, key, value)
+
+    def set_bounding_box(self, p1, p2):
+        """
+        Set standard anchors for a bounding box delimited by p1, p2.
+
+          - pmin, pmax: lower-left and upper-right points
+          - left, right: min and max planes on the X axis
+          - front, back: min and max planes on the Y axis
+          - bottom, top: min and max planes on the Z axis
+        """
+        xmin, xmax = sorted((p1.x, p2.x))
+        ymin, ymax = sorted((p1.y, p2.y))
+        zmin, zmax = sorted((p1.z, p2.z))
+        self.pmin   = Point(xmin, ymin, zmin)
+        self.pmax   = Point(xmax, ymax, zmax)
+        self.left   = Point(xmin, None, None)
+        self.right  = Point(xmax, None, None)
+        self.front  = Point(None, ymin, None)
+        self.back   = Point(None, ymax, None)
+        self.bottom = Point(None, None, zmin)
+        self.top    = Point(None, None, zmax)
