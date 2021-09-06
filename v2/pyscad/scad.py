@@ -150,6 +150,27 @@ class Cube(PySCADObject):
         self.anchors.set_bounding_box(pmin, pmax)
         self.anchors.center = Point.O
 
+def _get_r_d(r, d):
+    if d is None:
+        assert r is not None
+        d = r*2
+    elif r is None:
+        assert d is not None
+        r = d/2
+    else:
+        raise ValueError('You must specify r or d')
+    return r, d
+
+class Sphere(PySCADObject):
+
+    def make_obj(self, r=None, d=None):
+        r, d = _get_r_d(r, d)
+        pmin = Point(-r, -r, -r)
+        pmax = Point(r, r, r)
+        self.anchors.set_bounding_box(pmin, pmax)
+        self.anchors.center = Point.O
+        self.obj = solid.sphere(d=d)
+
 class Cylinder(PySCADObject):
     """
     Like the builtin opensca cylinder(), but with saner default.
@@ -169,15 +190,7 @@ class Cylinder(PySCADObject):
 
     def make_obj(self, *, h=None, r=None, d=None, segments=None):
         assert h is not None
-        if d is None:
-            assert r is not None
-            d = r*2
-        elif r is None:
-            assert d is not None
-            r = d/2
-        else:
-            raise ValueError('You must specify r or d')
-
+        r, d = _get_r_d(r, d)
         pmin = Point(-r, -r, -h/2)
         pmax = Point(r, r, h/2)
         self.anchors.set_bounding_box(pmin, pmax)

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import os
-from pyscad import Cube, Cylinder, bolt_hole, Point
+from pyscad import Cube, Cylinder, Sphere, bolt_hole, Point
 from pyscad import autorender
 
 os.environ['OPENSCADPATH'] = ':'.join([
@@ -10,12 +10,14 @@ os.environ['OPENSCADPATH'] = ':'.join([
 ])
 
 def main():
-    O = Point(7, 7, 7)
-    a = Cube(10, 10, 10).color('red').move_to(center=O)
-    b = Cube(5, 5, 5).color('green').move_to(center=O, left=a.right)
-    c = Cube(5, 5, 5).color('cyan').move_to(center=O, right=a.left)
-    cyl = Cylinder(h=10, r=3).move_to(center=O, bottom=a.top)
-    return a + b + c + cyl
+    a = Cube(10, 10, 10).color('red')
+    b = Cube(5, 5, 5).color('green').move_to(left=a.right)
+    c = Cube(5, 5, 5).color('cyan').move_to(right=a.left)
+    cyl = Cylinder(h=10, r=3).move_to(bottom=a.top)
+    sph = Sphere(r=3).color('orange').move_to(bottom=cyl.top)
+    p1 = Sphere(d=1).move_to(center=a.pmin)
+    p2 = Sphere(d=1).move_to(center=a.pmax)
+    return a + b + c + cyl + sph + p1 + p2
 
 
 
