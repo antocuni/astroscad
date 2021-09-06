@@ -49,3 +49,19 @@ class TestAnchorPoints:
         assert a.back == Point(None, 2, None)
         assert a.bottom == Point(None, None, -3)
         assert a.top == Point(None, None, 3)
+
+    def test_iter(self):
+        p1 = Point(1, 2, 3)
+        p2 = Point(4, 5, 6)
+        p3 = Point(7, 8, 9)
+        a = AnchorPoints(p1=p1, p2=p2, p3=p3)
+        a.name = 'Hello'
+        assert list(a) == [p1, p2, p3]
+
+    def test_translate(self):
+        a = AnchorPoints(p1=Point(1, 2, 3),
+                         p2=Point(4, 5, 6))
+        v = Vector(10, 20, 30)
+        a.translate(v)
+        assert a.p1 == Point(11, 22, 33)
+        assert a.p2 == Point(14, 25, 36)

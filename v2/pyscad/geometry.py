@@ -67,3 +67,15 @@ class AnchorPoints:
         self.back   = Point(None, ymax, None)
         self.bottom = Point(None, None, zmin)
         self.top    = Point(None, None, zmax)
+
+    def __iter__(self):
+        for value in self.__dict__.values():
+            if isinstance(value, Point):
+                yield value
+
+    def translate(self, v):
+        for key, p in self.__dict__.items():
+            if not isinstance(p, Point):
+                continue
+            newp = p + v
+            setattr(self, key, newp)
