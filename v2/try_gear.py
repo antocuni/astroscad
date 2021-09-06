@@ -20,7 +20,7 @@ def bracket():
     h = 2.5
     obj = Cube(w+t, w+t,  h+t, center='xyz')
     obj -= Cube(w+t+1, w, 2.5, center='xyz')
-    obj -= Cube(w+t+1, w, h+t+1, center='yz')
+    obj -= Cube(w+t+1, w, h+t+1, center='xyz').translate((w+t+1)/2).mod()
     #
     delta = -w/4
     obj -= (

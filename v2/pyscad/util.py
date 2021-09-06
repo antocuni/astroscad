@@ -24,3 +24,6 @@ class InvalidAnchorPoints:
         msg = 'AnchorPoints have been invalidated here:\n'
         msg += textwrap.indent(self._traceback, '    ')
         raise InvalidAnchorError(msg)
+
+    def translate(self, v):
+        pass
