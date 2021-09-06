@@ -7,19 +7,19 @@ from pyscad.util import InvalidAnchorError
 class TestAnchors:
 
     def test_cube(self):
-        c = Cube(2, 4, 6, center='xyz')
-        assert c.O == Point.O
+        c = Cube(2, 4, 6)
+        assert c.center == Point.O
         assert c.pmin == Point(-1, -2, -3)
         assert c.pmax == Point(1, 2, 3)
 
     def test_invalidate(self):
-        c = Cube(2, 4, 6, center='xyz')
+        c = Cube(2, 4, 6)
         c.invalidate_anchors()
         with pytest.raises(AttributeError):
             c.I_dont_exist
         #
         with pytest.raises(InvalidAnchorError) as exc:
-            c.O
+            c.center
         msg = str(exc.value)
         lines = msg.splitlines()
         assert lines[0] == 'AnchorPoints have been invalidated here:'
@@ -29,21 +29,21 @@ class TestAnchors:
         assert lines[-1] == '        c.invalidate_anchors()'
 
     def test_translate(self):
-        c = Cube(2, 4, 6, center='xyz')
+        c = Cube(2, 4, 6)
         c.translate(10, 20, 30)
-        assert c.O == Point(10, 20, 30)
+        assert c.center == Point(10, 20, 30)
         assert c.pmin == Point(9, 18, 27)
         assert c.pmax == Point(11, 22, 33)
         assert c.left == Point(9, None, None)
 
     def test_move_to(self):
-        c = Cube(2, 4, 6, center='xyz')
-        c.move_to(O=Point(10, 20, 30))
-        assert c.O == Point(10, 20, 30)
+        c = Cube(2, 4, 6)
+        c.move_to(center=Point(10, 20, 30))
+        assert c.center == Point(10, 20, 30)
         assert c.pmin == Point(9, 18, 27)
         assert c.pmax == Point(11, 22, 33)
         #
-        c.move_to(O=Point(100, 200, 300))
-        assert c.O == Point(100, 200, 300)
+        c.move_to(center=Point(100, 200, 300))
+        assert c.center == Point(100, 200, 300)
         assert c.pmin == Point(99, 198, 297)
         assert c.pmax == Point(101, 202, 303)

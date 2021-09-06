@@ -54,8 +54,8 @@ class PySCADObject:
         if not self.anchors.has_point('pmin') or not self.anchors.has_point('pmax'):
             raise ValueError('Cannot find a bounding box')
         size = self.pmax - self.pmin
-        bbox = Cube(size.x, size.y, size.z, center='xyz').mod('%')
-        bbox.move_to(O=self.O)
+        bbox = Cube(size.x, size.y, size.z).mod('%')
+        bbox.move_to(center=self.center)
         self.obj += bbox.obj
 
     def translate(self, x=0, y=0, z=0):
@@ -128,39 +128,26 @@ class ImportScad:
 
 
 class Cube(PySCADObject):
+    """
+    Like the builtin openscad cube(), but with saner default.
 
-    def make_obj(self, sx, sy, sz, center=''):
-        center = self._process_center(center)
-        sx, tx = self._get_st('x', sx, center)
-        sy, ty = self._get_st('y', sy, center)
-        sz, tz = self._get_st('z', sz, center)
+    By default the cube is centered in the origin, and defines the following
+    anchor points:
+
+    - center
+    - pmin, pmax
+    - left, right
+    - back, front
+    - bottom, top
+    """
+
+    def make_obj(self, sx, sy, sz):
+        pmin = Point(-sx/2, -sy/2, -sz/2)
+        pmax = Point(sx/2, sy/2, sz/2)
         self.obj = solid.cube([sx, sy, sz])
-        self.translate(tx, ty, tz)
-        self.anchors.set_bounding_box(Point(-sx/2, -sy/2, -sz/2),
-                                      Point(sx/2, sy/2, sz/2))
-        self.anchors.O = Point.O
-
-    def _process_center(self, center):
-        assert center in ('', 'x', 'y', 'z', 'xy', 'xz', 'yz', 'xyz', True, False)
-        if center is True:
-            return 'xyz'
-        if center is False:
-            return ''
-        return center
-
-    def _get_st(self, axis, size, center):
-        """
-        Get the size and translation for a given axis
-        """
-        assert axis in ('x', 'y', 'z')
-        t = 0
-        if size < 0:
-            size = -size
-            t = -size
-        if axis in center:
-            t = -size/2
-        return size, t
-
+        self.translate(-sx/2, -sy/2, -sz/2)
+        self.anchors.set_bounding_box(pmin, pmax)
+        self.anchors.center = Point.O
 
 class Cylinder(PySCADObject):
 
@@ -224,12 +211,12 @@ class Preview(PySCADObject):
 
 class _PreviewObject:
 
-    def __init__(self, preview_obj, render_obj):
-        self._preview_obj = preview_obj
-        self._render_obj = render_obj
-        self.children = preview_obj.children + render_obj.children
+    def __init__(self, preview, render):
+        self._preview_obj = preview.obj
+        self._render_obj = render.obj
+        self.children = self._preview_obj.children + self._render_obj.children
         self.params = {}
-        self.params.update(preview_obj.params)
+        self.params.update(self._preview_obj.params)
         self.params.update(self._render_obj.params)
 
     def _render(self):
