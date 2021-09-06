@@ -44,11 +44,13 @@ class Vector:
 class AnchorPoints:
 
     def __init__(self, **kwargs):
-        self.points = {}
         for key, value in kwargs.items():
             if not isinstance(value, Point):
                 raise TypeError(f'{key}: a Point is required')
-            self.points[key] = value
+            setattr(self, key, value)
+
+    def has_point(self, name):
+        return name in self.__dict__
 
     def set_bounding_box(self, p1, p2):
         """
@@ -62,29 +64,23 @@ class AnchorPoints:
         xmin, xmax = sorted((p1.x, p2.x))
         ymin, ymax = sorted((p1.y, p2.y))
         zmin, zmax = sorted((p1.z, p2.z))
-        self.points['pmin']   = Point(xmin, ymin, zmin)
-        self.points['pmax']   = Point(xmax, ymax, zmax)
-        self.points['left']   = Point(xmin, None, None)
-        self.points['right']  = Point(xmax, None, None)
-        self.points['front']  = Point(None, ymin, None)
-        self.points['back']   = Point(None, ymax, None)
-        self.points['bottom'] = Point(None, None, zmin)
-        self.points['top']    = Point(None, None, zmax)
+        self.pmin   = Point(xmin, ymin, zmin)
+        self.pmax   = Point(xmax, ymax, zmax)
+        self.left   = Point(xmin, None, None)
+        self.right  = Point(xmax, None, None)
+        self.front  = Point(None, ymin, None)
+        self.back   = Point(None, ymax, None)
+        self.bottom = Point(None, None, zmin)
+        self.top    = Point(None, None, zmax)
 
     def __iter__(self):
-        for value in self.points.values():
+        for value in self.__dict__.values():
             if isinstance(value, Point):
                 yield value
 
     def translate(self, v):
-        for key, p in self.points.items():
+        for key, p in self.__dict__.items():
             if not isinstance(p, Point):
                 continue
             newp = p + v
             setattr(self, key, newp)
-
-    def __getattr__(self, name):
-        try:
-            return self.points[name]
-        except KeyError:
-            raise AttributeError(name)

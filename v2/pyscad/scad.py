@@ -1,6 +1,7 @@
 import functools
 import solid
 from .geometry import Point, Vector, AnchorPoints
+from .util import InvalidAnchorPoints
 from .autorender import autorender
 
 EPSILON = 0.001
@@ -36,12 +37,13 @@ class PySCADObject:
         return solid.scad_render_to_file(self.obj, filename, file_header=header)
 
     def __getattr__(self, name):
-        try:
-            return self.anchors.points[name]
-        except KeyError:
-            raise AttributeError(name)
+        if self.anchors.has_point(name):
+            return getattr(self.anchors, name)
+        raise AttributeError(name)
 
-    # helper methods
+    def invalidate_anchors(self):
+        self.anchors = InvalidAnchorPoints(self.anchors)
+
     def translate(self, x=0, y=0, z=0):
         self.obj = solid.translate([x, y, z])(self.obj)
         return self
@@ -117,7 +119,7 @@ class Cube(PySCADObject):
         self.obj = solid.cube([sx, sy, sz])
         self.anchors.set_bounding_box(Point(-sx/2, -sy/2, -sz/2),
                                       Point(sx/2, sy/2, sz/2))
-        self.anchors.points['O'] = Point.O
+        self.anchors.O = Point.O
         self.translate(tx, ty, tz)
 
     def _process_center(self, center):
