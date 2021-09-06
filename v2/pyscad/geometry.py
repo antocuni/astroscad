@@ -25,6 +25,8 @@ class Point:
             dz = self.z - p.z
         return Vector(dx, dy, dz)
 
+Point.O = Point(0, 0, 0) # origin
+
 @dataclass
 class Vector:
     x: float
@@ -42,10 +44,11 @@ class Vector:
 class AnchorPoints:
 
     def __init__(self, **kwargs):
+        self.points = {}
         for key, value in kwargs.items():
             if not isinstance(value, Point):
                 raise TypeError(f'{key}: a Point is required')
-            setattr(self, key, value)
+            self.points[key] = value
 
     def set_bounding_box(self, p1, p2):
         """
@@ -59,23 +62,29 @@ class AnchorPoints:
         xmin, xmax = sorted((p1.x, p2.x))
         ymin, ymax = sorted((p1.y, p2.y))
         zmin, zmax = sorted((p1.z, p2.z))
-        self.pmin   = Point(xmin, ymin, zmin)
-        self.pmax   = Point(xmax, ymax, zmax)
-        self.left   = Point(xmin, None, None)
-        self.right  = Point(xmax, None, None)
-        self.front  = Point(None, ymin, None)
-        self.back   = Point(None, ymax, None)
-        self.bottom = Point(None, None, zmin)
-        self.top    = Point(None, None, zmax)
+        self.points['pmin']   = Point(xmin, ymin, zmin)
+        self.points['pmax']   = Point(xmax, ymax, zmax)
+        self.points['left']   = Point(xmin, None, None)
+        self.points['right']  = Point(xmax, None, None)
+        self.points['front']  = Point(None, ymin, None)
+        self.points['back']   = Point(None, ymax, None)
+        self.points['bottom'] = Point(None, None, zmin)
+        self.points['top']    = Point(None, None, zmax)
 
     def __iter__(self):
-        for value in self.__dict__.values():
+        for value in self.points.values():
             if isinstance(value, Point):
                 yield value
 
     def translate(self, v):
-        for key, p in self.__dict__.items():
+        for key, p in self.points.items():
             if not isinstance(p, Point):
                 continue
             newp = p + v
             setattr(self, key, newp)
+
+    def __getattr__(self, name):
+        try:
+            return self.points[name]
+        except KeyError:
+            raise AttributeError(name)
