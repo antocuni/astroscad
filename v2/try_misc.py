@@ -14,6 +14,7 @@ def main():
     green = Cube(5, 5, 5, center='xyz').color('green')
     red.move_to(O=Point(20, None, None))
     green.move_to(bottom=red.top)
+    #green.show_bounding_box()
     return red+green
 
 

@@ -50,6 +50,14 @@ class PySCADObject:
             v = new_p - current_p
             self.translate(v.x, v.y, v.z)
 
+    def show_bounding_box(self):
+        if not self.anchors.has_point('pmin') or not self.anchors.has_point('pmax'):
+            raise ValueError('Cannot find a bounding box')
+        size = self.pmax - self.pmin
+        bbox = Cube(size.x, size.y, size.z, center='xyz').mod('%')
+        bbox.move_to(O=self.O)
+        self.obj += bbox.obj
+
     def translate(self, x=0, y=0, z=0):
         self.anchors.translate(Vector(x, y, z))
         self.obj = solid.translate([x, y, z])(self.obj)
