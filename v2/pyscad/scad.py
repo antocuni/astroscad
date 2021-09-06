@@ -145,8 +145,7 @@ class Cube(PySCADObject):
     def make_obj(self, sx, sy, sz):
         pmin = Point(-sx/2, -sy/2, -sz/2)
         pmax = Point(sx/2, sy/2, sz/2)
-        self.obj = solid.cube([sx, sy, sz])
-        self.translate(-sx/2, -sy/2, -sz/2)
+        self.obj = solid.cube([sx, sy, sz], center=True)
         self.anchors.set_bounding_box(pmin, pmax)
         self.anchors.center = Point.O
 
