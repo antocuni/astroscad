@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import os
-from pyscad import autorender, Cube, Cylinder, ImportScad, bolt_hole
+from pyscad import autorender, Cube, Cylinder, ImportScad, bolt_hole, Union, Point
 from pyscad.gears import solid_gears as gears
 
 os.environ['OPENSCADPATH'] = ':'.join([
@@ -33,11 +33,11 @@ def bracket():
         )
     return obj.tr(x=-delta)
 
-def worm_gear(spur, worm):
+def worm_gear(spur, worm, tooth_number=24):
     h_gear = 2
     shaft_w = 3.2
     return gears.worm_gear(modul = 1,
-                           tooth_number = 24,
+                           tooth_number = tooth_number,
                            thread_starts = 2,
                            width = h_gear,
                            length = 15,
@@ -50,6 +50,16 @@ def worm_gear(spur, worm):
                            show_spur = spur,
                            show_worm = worm);
 
+def lego_gear():
+    return gears.spur_gear(modul=1,
+                           tooth_number=24,
+                           width=3,
+                           bore=0,
+                           pressure_angle=20,
+                           helix_angle=0,
+                           optimized=False).mod()
+
+
 def main():
     root = bracket()
     root += worm_gear(spur=True, worm=False).translate(x=24/2)
@@ -59,5 +69,18 @@ def main():
     #root -= cylinder(h=20, d=3.2, center=True).m()
     return root
 
+def main2():
+    tooth_number = 64
+    r_gear = tooth_number/2
+
+    root = Union()
+    #root += lego_gear().translate(z=10)
+    root += worm_gear(spur=True, worm=False, tooth_number=tooth_number).translate(x=r_gear)
+    head = Cylinder(d=55, h=30).mod() # ball head
+    head.move_to(bottom=Point.O).translate(z=2.1/2)
+    root += head
+    return root
+
+
 if __name__ == '__main__':
-    main().autorender()
+    main2().autorender()
