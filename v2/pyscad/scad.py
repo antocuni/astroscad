@@ -15,10 +15,6 @@ from .autorender import autorender
 
 EPSILON = 0.001
 
-def in2mm(inches):
-    return inches * 25.4
-
-
 class PySCADObject:
     """
     This is a wrapper around solid.OpenSCADObject, so that we can add our own
@@ -152,21 +148,6 @@ class Difference(PySCADObject):
         self.solid = solid.union()
         for obj in objs:
             self -= obj
-
-
-class ImportScad:
-
-    def __init__(self, modname):
-        self.mod = solid.import_scad(modname)
-
-    def __getattr__(self, name):
-        fn = getattr(self.mod, name)
-        @functools.wraps(fn)
-        def wrapper(*args, **kwargs):
-            obj = fn(*args, **kwargs)
-            return SCADWrapper(obj)
-        return wrapper
-
 
 
 class Cube(PySCADObject):
@@ -317,3 +298,23 @@ class _PreviewSolid:
             w(self._render_solid._render())
         w('}')
         return '\n'.join(lines)
+
+
+
+class ImportScad:
+
+    def __init__(self, modname):
+        self.mod = solid.import_scad(modname)
+
+    def __getattr__(self, name):
+        fn = getattr(self.mod, name)
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            obj = fn(*args, **kwargs)
+            return GenericSCADWrapper(obj)
+        return wrapper
+
+class GenericSCADWrapper(PySCADObject):
+
+    def init_solid(self, obj):
+        self.solid = obj

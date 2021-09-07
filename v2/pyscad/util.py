@@ -2,6 +2,9 @@ import sys
 import textwrap
 import traceback
 
+def in2mm(inches):
+    return inches * 25.4
+
 class InvalidAnchorError(Exception):
     pass
 
