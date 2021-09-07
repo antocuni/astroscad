@@ -1,13 +1,14 @@
 import pytest
 import re
 from pyscad.scad import Cube, Cylinder, Sphere, Composite
-from pyscad.geometry import Point
+from pyscad.geometry import Point, Vector
 from pyscad.util import InvalidAnchorError
 
 class TestAnchors:
 
     def test_Cube(self):
         c = Cube(2, 4, 6)
+        assert c.size == Vector(2, 4, 6)
         assert c.center == Point.O
         assert c.pmin == Point(-1, -2, -3)
         assert c.pmax == Point(1, 2, 3)
@@ -49,6 +50,7 @@ class TestAnchors:
     def test_translate(self):
         c = Cube(2, 4, 6)
         c.translate(10, 20, 30)
+        assert c.size == Vector(2, 4, 6)  # didn't change
         assert c.center == Point(10, 20, 30)
         assert c.pmin == Point(9, 18, 27)
         assert c.pmax == Point(11, 22, 33)
@@ -68,7 +70,7 @@ class TestAnchors:
 
     def test_move_to_recursive(self):
         class Puppet(Composite):
-            def make(self):
+            def build(self):
                 body = Cube(10, 10, 10)
                 head = Sphere(d=5).move_to(bottom=body.top)
                 self.add(body=body, head=head)
@@ -84,14 +86,28 @@ class TestAnchors:
         assert puppet.body.center == Point(20, 20, 20)
         assert puppet.head.center == Point(20, 20, 27.5)
 
-
     def test_Cylinder(self):
         c = Cylinder(h=10, d=30)
+        assert c.h == 10
+        assert c.d == 30
+        assert c.r == 15
         assert c.center == Point.O
         assert c.pmin == Point(-15, -15, -5)
         assert c.pmax == Point(15, 15, 5)
         #
         c2 = Cylinder(h=10, r=15)
+        assert c.r == 15
+        assert c.d == 30
         assert c2.center == Point.O
         assert c2.pmin == Point(-15, -15, -5)
         assert c2.pmax == Point(15, 15, 5)
+
+    def test_Sphere(self):
+        s1 = Sphere(r=5)
+        assert s1.center == Point.O
+        assert s1.r == 5
+        assert s1.d == 10
+        #
+        s2 = Sphere(d=30)
+        assert s2.r == 15
+        assert s2.d == 30

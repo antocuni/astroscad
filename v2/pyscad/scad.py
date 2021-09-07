@@ -31,13 +31,9 @@ class PySCADObject:
         self.solid = None
         self.init_solid(*args, **kwargs)
         assert self.solid is not None
-        self.make()
 
     def init_solid(self, *args, **kwargs):
         raise NotImplementedError
-
-    def make(self, *args, **kwargs):
-        pass
 
     def autorender(self, *, filename='/tmp/autorender.scad', **kwargs):
         autorender(self, filename, **kwargs)
@@ -193,6 +189,7 @@ class Cube(PySCADObject):
         self.solid = solid.cube([sx, sy, sz], center=True)
         self.anchors.set_bounding_box(pmin, pmax)
         self.anchors.center = Point.O
+        self.size = Vector(sx, sy, sz)
 
 def _get_r_d(r, d):
     if d is None:
@@ -209,6 +206,8 @@ class Sphere(PySCADObject):
 
     def init_solid(self, r=None, d=None):
         r, d = _get_r_d(r, d)
+        self.r = r
+        self.d = d
         pmin = Point(-r, -r, -r)
         pmax = Point(r, r, r)
         self.anchors.set_bounding_box(pmin, pmax)
@@ -235,6 +234,9 @@ class Cylinder(PySCADObject):
     def init_solid(self, *, h=None, r=None, d=None, segments=None):
         assert h is not None
         r, d = _get_r_d(r, d)
+        self.h = h
+        self.r = r
+        self.d = d
         pmin = Point(-r, -r, -h/2)
         pmax = Point(r, r, h/2)
         self.anchors.set_bounding_box(pmin, pmax)
@@ -251,6 +253,10 @@ class Composite(PySCADObject):
 
     def init_solid(self):
         self.solid = solid.union()
+        self.build()
+
+    def build(self):
+        pass
 
     def add(self, **kwargs):
         for name, obj in kwargs.items():
