@@ -7,13 +7,21 @@ Naming convention:
     solid.union)
 """
 
+import os
+from pathlib import Path
 import functools
+
 import solid
 from .geometry import Point, Vector, AnchorPoints
 from .util import InvalidAnchorPoints
 from .autorender import autorender
 
 EPSILON = 0.001
+
+os.environ['OPENSCADPATH'] = ':'.join([
+    '/usr/share/openscad/libraries/',
+    str(Path(__file__).parent),
+])
 
 class PySCADObject:
     """

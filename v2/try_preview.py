@@ -3,11 +3,6 @@
 import os
 from pyscad import autorender, Cube, Cylinder, Preview
 
-os.environ['OPENSCADPATH'] = ':'.join([
-    '/usr/share/openscad/libraries/',
-    '..',
-])
-
 class CubeOrCylinder(Preview):
 
     def preview(self):

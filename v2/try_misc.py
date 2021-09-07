@@ -4,11 +4,6 @@ import os
 from pyscad import Cube, Cylinder, Sphere, bolt_hole, Point, Union
 from pyscad import autorender
 
-os.environ['OPENSCADPATH'] = ':'.join([
-    '/usr/share/openscad/libraries/',
-    '..',
-])
-
 def main():
     a = Cube(10, 10, 10).color('red')
     b = Cube(5, 5, 5).color('green').move_to(left=a.right)

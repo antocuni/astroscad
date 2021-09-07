@@ -2,13 +2,12 @@
 
 import os
 from pyscad import autorender, Cube, Cylinder, ImportScad, bolt_hole
+from pyscad.gears import solid_gears as gears
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',
-    '..',
 ])
 MCAD_bearing = ImportScad('MCAD/bearing.scad')
-gears = ImportScad('gears/gears.scad')
 
 
 R_WORM = 5.75877
