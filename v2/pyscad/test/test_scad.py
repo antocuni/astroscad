@@ -12,6 +12,24 @@ class TestAnchors:
         assert c.pmin == Point(-1, -2, -3)
         assert c.pmax == Point(1, 2, 3)
 
+    def test_children_add(self):
+        a = Cube(1, 1, 1)
+        b = Cube(2, 2, 2)
+        c = a + b
+        assert c.children == [a, b]
+        assert a.children == []
+        a += b
+        assert a.children == [b]
+
+    def test_children_sub(self):
+        a = Cube(1, 1, 1)
+        b = Cube(2, 2, 2)
+        c = a - b
+        assert c.children == [a, b]
+        assert a.children == []
+        a -= b
+        assert a.children == [b]
+
     def test_invalidate(self):
         c = Cube(2, 4, 6)
         c.invalidate_anchors()
@@ -51,7 +69,6 @@ class TestAnchors:
     def test_move_to_recursive(self):
         class Puppet(Composite):
             def make(self):
-                super().make()
                 body = Cube(10, 10, 10)
                 head = Sphere(d=5).move_to(bottom=body.top)
                 self.add(body=body, head=head)

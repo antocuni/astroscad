@@ -27,6 +27,7 @@ class PySCADObject:
 
     def __init__(self, *args, **kwargs):
         self.anchors = AnchorPoints()
+        self.children = []
         self.solid = None
         self.init_solid(*args, **kwargs)
         assert self.solid is not None
@@ -59,9 +60,9 @@ class PySCADObject:
 
     def _all_anchors(self):
         yield self.anchors
-        for item in self.__dict__.values():
-            if isinstance(item, PySCADObject):
-                yield from item._all_anchors()
+        for child in self.children:
+            assert isinstance(child, PySCADObject)
+            yield from child._all_anchors()
 
     def move_to(self, **kwargs):
         for anchor, new_p in kwargs.items():
@@ -117,32 +118,45 @@ class PySCADObject:
     def __add__(self, other):
         if not isinstance(other, PySCADObject):
             return NotImplemented
-        obj = self.solid + other.solid
-        return SCADWrapper(obj)
+        return Union(self, other)
 
     def __iadd__(self, other):
         if not isinstance(other, PySCADObject):
             return NotImplemented
+        self.children.append(other)
         self.solid += other.solid
         return self
 
     def __sub__(self, other):
         if not isinstance(other, PySCADObject):
             return NotImplemented
-        obj = self.solid - other.solid
-        return SCADWrapper(obj)
+        return Difference(self, other)
 
     def __isub__(self, other):
         if not isinstance(other, PySCADObject):
             return NotImplemented
+        self.children.append(other)
         self.solid -= other.solid
         return self
 
 
-class SCADWrapper(PySCADObject):
+class Union(PySCADObject):
 
-    def init_solid(self, obj):
-        self.solid = obj
+    def init_solid(self, *objs):
+        self.solid = solid.union()
+        for obj in objs:
+            self += obj
+
+class Difference(PySCADObject):
+
+    def init_solid(self, *objs):
+        # note: the solid.union() below is not a mistake, it's just used to
+        # make an empty object. The actual solid.difference() is created by
+        # the -= operator
+        self.solid = solid.union()
+        for obj in objs:
+            self -= obj
+
 
 class ImportScad:
 
@@ -231,13 +245,6 @@ class Cylinder(PySCADObject):
 
 ##     def init_solid(self, *, h=None, r1=None, r2=None, d1=None, d2=None, segments=None):
 ##         ...
-
-class Union(PySCADObject):
-
-    def init_solid(self, *objs):
-        self.solid = solid.union()
-        for obj in objs:
-            self.solid += obj.solid
 
 
 class Composite(PySCADObject):
