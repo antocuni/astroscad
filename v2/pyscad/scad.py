@@ -109,12 +109,23 @@ class PySCADObject:
         obj = self.solid + other.solid
         return SCADWrapper(obj)
 
+    def __iadd__(self, other):
+        if not isinstance(other, PySCADObject):
+            return NotImplemented
+        self.solid += other.solid
+        return self
+
     def __sub__(self, other):
         if not isinstance(other, PySCADObject):
             return NotImplemented
         obj = self.solid - other.solid
         return SCADWrapper(obj)
 
+    def __isub__(self, other):
+        if not isinstance(other, PySCADObject):
+            return NotImplemented
+        self.solid -= other.solid
+        return self
 
 
 class SCADWrapper(PySCADObject):
