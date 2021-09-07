@@ -1,3 +1,12 @@
+"""
+Naming convention:
+
+  - 'objects' are the high-level instances of PySCADObject subclasses
+
+  - 'solids' are the low-level solidpython primitives (e.g. solid.cube or
+    solid.union)
+"""
+
 import functools
 import solid
 from .geometry import Point, Vector, AnchorPoints
@@ -18,11 +27,11 @@ class PySCADObject:
 
     def __init__(self, *args, **kwargs):
         self.anchors = AnchorPoints()
-        self.obj = None
-        self.make_obj(*args, **kwargs)
-        assert self.obj is not None
+        self.solid = None
+        self.make(*args, **kwargs)
+        assert self.solid is not None
 
-    def make_obj(self, *args, **kwargs):
+    def make(self, *args, **kwargs):
         raise NotImplementedError
 
     def autorender(self, *, filename='/tmp/autorender.scad', **kwargs):
@@ -34,7 +43,7 @@ class PySCADObject:
         if fa: header.append(f'$fa = {fa};')
         if fs: header.append(f'$fs = {fs};')
         header = '\n'.join(header)
-        return solid.scad_render_to_file(self.obj, filename, file_header=header)
+        return solid.scad_render_to_file(self.solid, filename, file_header=header)
 
     def __getattr__(self, name):
         if self.anchors.has_point(name):
@@ -57,61 +66,61 @@ class PySCADObject:
         size = self.pmax - self.pmin
         bbox = Cube(size.x, size.y, size.z).mod('%')
         bbox.move_to(center=self.center)
-        self.obj += bbox.obj
+        self.solid += bbox.solid
 
     def translate(self, x=0, y=0, z=0):
         self.anchors.translate(Vector(x, y, z))
-        self.obj = solid.translate([x, y, z])(self.obj)
+        self.solid = solid.translate([x, y, z])(self.solid)
         return self
     tr = translate
 
     def scale(self, x=1, y=1, z=1):
         self.invalidate_anchors()
-        self.obj = solid.scale([x, y, z])(self.obj)
+        self.solid = solid.scale([x, y, z])(self.solid)
         return self
     sc = scale
 
     def rotate(self, x=0, y=0, z=0, v=None):
         self.invalidate_anchors()
-        self.obj = solid.rotate([x, y, z], v)(self.obj)
+        self.solid = solid.rotate([x, y, z], v)(self.solid)
         return self
     rot = rotate
 
     def resize(self, x=0, y=0, z=0, auto=None):
         self.invalidate_anchors()
-        self.obj = solid.resize([x, y, z], auto)(self.obj)
+        self.solid = solid.resize([x, y, z], auto)(self.solid)
         return self
     rsz = resize
 
     def color(self, *args, **kwargs):
-        self.obj = solid.color(*args, **kwargs)(self.obj)
+        self.solid = solid.color(*args, **kwargs)(self.solid)
         return self
 
     def mod(self, mod='#'):
         """
         Shorthand for set_modifier
         """
-        self.obj.set_modifier(mod)
+        self.solid.set_modifier(mod)
         return self
 
     def __add__(self, other):
         if not isinstance(other, PySCADObject):
             return NotImplemented
-        obj = self.obj + other.obj
+        obj = self.solid + other.solid
         return SCADWrapper(obj)
 
     def __sub__(self, other):
         if not isinstance(other, PySCADObject):
             return NotImplemented
-        obj = self.obj - other.obj
+        obj = self.solid - other.solid
         return SCADWrapper(obj)
 
 
 
 class SCADWrapper(PySCADObject):
 
-    def make_obj(self, obj):
-        self.obj = obj
+    def make(self, obj):
+        self.solid = obj
 
 class ImportScad:
 
@@ -142,10 +151,10 @@ class Cube(PySCADObject):
     - bottom, top
     """
 
-    def make_obj(self, sx, sy, sz):
+    def make(self, sx, sy, sz):
         pmin = Point(-sx/2, -sy/2, -sz/2)
         pmax = Point(sx/2, sy/2, sz/2)
-        self.obj = solid.cube([sx, sy, sz], center=True)
+        self.solid = solid.cube([sx, sy, sz], center=True)
         self.anchors.set_bounding_box(pmin, pmax)
         self.anchors.center = Point.O
 
@@ -162,13 +171,13 @@ def _get_r_d(r, d):
 
 class Sphere(PySCADObject):
 
-    def make_obj(self, r=None, d=None):
+    def make(self, r=None, d=None):
         r, d = _get_r_d(r, d)
         pmin = Point(-r, -r, -r)
         pmax = Point(r, r, r)
         self.anchors.set_bounding_box(pmin, pmax)
         self.anchors.center = Point.O
-        self.obj = solid.sphere(d=d)
+        self.solid = solid.sphere(d=d)
 
 class Cylinder(PySCADObject):
     """
@@ -187,18 +196,18 @@ class Cylinder(PySCADObject):
     TruncatedCone().
     """
 
-    def make_obj(self, *, h=None, r=None, d=None, segments=None):
+    def make(self, *, h=None, r=None, d=None, segments=None):
         assert h is not None
         r, d = _get_r_d(r, d)
         pmin = Point(-r, -r, -h/2)
         pmax = Point(r, r, h/2)
         self.anchors.set_bounding_box(pmin, pmax)
         self.anchors.center = Point.O
-        self.obj = solid.cylinder(h=h, d=d, center=True, segments=segments)
+        self.solid = solid.cylinder(h=h, d=d, center=True, segments=segments)
 
 ## class TruncatedCone(PySCADObject):
 
-##     def make_obj(self, *, h=None, r1=None, r2=None, d1=None, d2=None, segments=None):
+##     def make(self, *, h=None, r1=None, r2=None, d1=None, d2=None, segments=None):
 ##         ...
 
 
@@ -216,10 +225,10 @@ class Preview(PySCADObject):
     Override the preview() and render() methods for your needs.
     """
 
-    def make_obj(self):
+    def make(self):
         preview_obj = self.preview()
         render_obj = self.render()
-        self.obj = _PreviewObject(preview_obj, render_obj)
+        self.solid = _PreviewSolid(preview_obj, render_obj)
 
     def preview(self):
         raise NotImplementedError
@@ -228,24 +237,24 @@ class Preview(PySCADObject):
         raise NotImplementedError
 
 
-class _PreviewObject:
+class _PreviewSolid:
 
-    def __init__(self, preview, render):
-        self._preview_obj = preview.obj
-        self._render_obj = render.obj
-        self.children = self._preview_obj.children + self._render_obj.children
+    def __init__(self, preview_obj, render_obj):
+        self._preview_solid = preview_obj.solid
+        self._render_solid = render_obj.solid
+        self.children = self._preview_solid.children + self._render_solid.children
         self.params = {}
-        self.params.update(self._preview_obj.params)
-        self.params.update(self._render_obj.params)
+        self.params.update(self._preview_solid.params)
+        self.params.update(self._render_solid.params)
 
     def _render(self):
         lines = []
         w = lines.append
         w('if ($preview) {')
-        if self._preview_obj:
-            w(self._preview_obj._render())
+        if self._preview_solid:
+            w(self._preview_solid._render())
         w('} else {')
-        if self._render_obj:
-            w(self._render_obj._render())
+        if self._render_solid:
+            w(self._render_solid._render())
         w('}')
         return '\n'.join(lines)
