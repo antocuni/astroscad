@@ -28,11 +28,15 @@ class PySCADObject:
     def __init__(self, *args, **kwargs):
         self.anchors = AnchorPoints()
         self.solid = None
-        self.make(*args, **kwargs)
+        self.init_solid(*args, **kwargs)
         assert self.solid is not None
+        self.make()
+
+    def init_solid(self, *args, **kwargs):
+        raise NotImplementedError
 
     def make(self, *args, **kwargs):
-        raise NotImplementedError
+        pass
 
     def autorender(self, *, filename='/tmp/autorender.scad', **kwargs):
         autorender(self, filename, **kwargs)
@@ -137,7 +141,7 @@ class PySCADObject:
 
 class SCADWrapper(PySCADObject):
 
-    def make(self, obj):
+    def init_solid(self, obj):
         self.solid = obj
 
 class ImportScad:
@@ -169,7 +173,7 @@ class Cube(PySCADObject):
     - bottom, top
     """
 
-    def make(self, sx, sy, sz):
+    def init_solid(self, sx, sy, sz):
         pmin = Point(-sx/2, -sy/2, -sz/2)
         pmax = Point(sx/2, sy/2, sz/2)
         self.solid = solid.cube([sx, sy, sz], center=True)
@@ -189,7 +193,7 @@ def _get_r_d(r, d):
 
 class Sphere(PySCADObject):
 
-    def make(self, r=None, d=None):
+    def init_solid(self, r=None, d=None):
         r, d = _get_r_d(r, d)
         pmin = Point(-r, -r, -r)
         pmax = Point(r, r, r)
@@ -214,7 +218,7 @@ class Cylinder(PySCADObject):
     TruncatedCone().
     """
 
-    def make(self, *, h=None, r=None, d=None, segments=None):
+    def init_solid(self, *, h=None, r=None, d=None, segments=None):
         assert h is not None
         r, d = _get_r_d(r, d)
         pmin = Point(-r, -r, -h/2)
@@ -225,12 +229,12 @@ class Cylinder(PySCADObject):
 
 ## class TruncatedCone(PySCADObject):
 
-##     def make(self, *, h=None, r1=None, r2=None, d1=None, d2=None, segments=None):
+##     def init_solid(self, *, h=None, r1=None, r2=None, d1=None, d2=None, segments=None):
 ##         ...
 
 class Union(PySCADObject):
 
-    def make(self, *objs):
+    def init_solid(self, *objs):
         self.solid = solid.union()
         for obj in objs:
             self.solid += obj.solid
@@ -238,7 +242,7 @@ class Union(PySCADObject):
 
 class Composite(PySCADObject):
 
-    def make(self):
+    def init_solid(self):
         self.solid = solid.union()
 
     def add(self, **kwargs):
@@ -267,7 +271,7 @@ class Preview(PySCADObject):
     Override the preview() and render() methods for your needs.
     """
 
-    def make(self):
+    def init_solid(self):
         preview_obj = self.preview()
         render_obj = self.render()
         self.solid = _PreviewSolid(preview_obj, render_obj)
