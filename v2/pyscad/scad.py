@@ -210,6 +210,13 @@ class Cylinder(PySCADObject):
 ##     def make(self, *, h=None, r1=None, r2=None, d1=None, d2=None, segments=None):
 ##         ...
 
+class Union(PySCADObject):
+
+    def make(self, *objs):
+        self.solid = solid.union()
+        for obj in objs:
+            self.solid += obj.solid
+
 
 def bolt_hole(*, d, h, clearance=0.2):
     h = h + EPSILON*2
