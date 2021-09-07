@@ -24,11 +24,11 @@ def bracket():
     #
     delta = -w/4
     obj -= (
-        bolt_hole(d=3.2, h=h+t, center=True)
+        bolt_hole(d=3.2, h=h+t)
         .tr(x=delta)
         )
     obj -= (
-        bolt_hole(d=3.2, h=50, center=True)
+        bolt_hole(d=3.2, h=50)
         .rot(x=90)
         .tr(delta+r_gear+r_worm)
         )

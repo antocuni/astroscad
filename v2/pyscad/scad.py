@@ -211,11 +211,9 @@ class Cylinder(PySCADObject):
 ##         ...
 
 
-def bolt_hole(*, d, h, clearance=0.2, center=None):
+def bolt_hole(*, d, h, clearance=0.2):
     h = h + EPSILON*2
-    cyl = Cylinder(d=d+clearance, h=h, center=center)
-    if not center:
-        cyl = cyl.translate(z=-EPSILON)
+    cyl = Cylinder(d=d+clearance, h=h)
     return cyl
 
 
