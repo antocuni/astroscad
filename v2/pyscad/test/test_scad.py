@@ -1,6 +1,6 @@
 import pytest
 import re
-from pyscad.scad import Cube, Cylinder
+from pyscad.scad import Cube, Cylinder, Sphere, Composite
 from pyscad.geometry import Point
 from pyscad.util import InvalidAnchorError
 
@@ -47,6 +47,26 @@ class TestAnchors:
         assert c.center == Point(100, 200, 300)
         assert c.pmin == Point(99, 198, 297)
         assert c.pmax == Point(101, 202, 303)
+
+    def test_move_to_recursive(self):
+        class Puppet(Composite):
+            def make(self):
+                super().make()
+                body = Cube(10, 10, 10)
+                head = Sphere(d=5).move_to(bottom=body.top)
+                self.add(body=body, head=head)
+                self.anchors.center = body.center
+
+        puppet = Puppet()
+        assert puppet.center == Point.O
+        assert puppet.body.center == Point.O
+        assert puppet.head.center == Point(0, 0, 7.5)
+        #
+        puppet.move_to(center=Point(20, 20, 20))
+        assert puppet.center == Point(20, 20, 20)
+        assert puppet.body.center == Point(20, 20, 20)
+        assert puppet.head.center == Point(20, 20, 27.5)
+
 
     def test_Cylinder(self):
         c = Cylinder(h=10, d=30)

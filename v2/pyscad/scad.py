@@ -53,6 +53,12 @@ class PySCADObject:
     def invalidate_anchors(self):
         self.anchors = InvalidAnchorPoints(self.anchors)
 
+    def _all_anchors(self):
+        yield self.anchors
+        for item in self.__dict__.values():
+            if isinstance(item, PySCADObject):
+                yield from item._all_anchors()
+
     def move_to(self, **kwargs):
         for anchor, new_p in kwargs.items():
             current_p = getattr(self.anchors, anchor)
@@ -69,7 +75,8 @@ class PySCADObject:
         self.solid += bbox.solid
 
     def translate(self, x=0, y=0, z=0):
-        self.anchors.translate(Vector(x, y, z))
+        for anchors in self._all_anchors():
+            anchors.translate(Vector(x, y, z))
         self.solid = solid.translate([x, y, z])(self.solid)
         return self
     tr = translate
@@ -228,6 +235,25 @@ class Union(PySCADObject):
         for obj in objs:
             self.solid += obj.solid
 
+
+class Composite(PySCADObject):
+
+    def make(self):
+        self.solid = solid.union()
+
+    def add(self, **kwargs):
+        for name, obj in kwargs.items():
+            if not isinstance(obj, PySCADObject):
+                raise TypeError
+            setattr(self, name, obj)
+            self += obj
+
+    def sub(self, **kwargs):
+        for name, obj in kwargs.items():
+            if not isinstance(obj, PySCADObject):
+                raise TypeError
+            setattr(self, name, obj)
+            self -= obj
 
 def bolt_hole(*, d, h, clearance=0.2):
     h = h + EPSILON*2
