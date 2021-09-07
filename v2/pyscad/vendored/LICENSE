@@ -1,0 +1,4 @@
+Each directory is subjected to its own licence. This is a list of where the
+vendored libraries come from:
+
+  - gears/: https://github.com/chrisspen/gears
