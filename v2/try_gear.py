@@ -2,7 +2,7 @@
 
 import os
 from pyscad import autorender, Cube, Cylinder, ImportScad, bolt_hole, Union, Point
-from pyscad.gears import solid_gears as gears
+from pyscad.gears import WormFactory, _gears
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',
@@ -33,37 +33,26 @@ def bracket():
         )
     return obj.tr(x=-delta)
 
-def worm_gear(spur, worm, tooth_number=24):
-    h_gear = 2
-    shaft_w = 3.2
-    return gears.worm_gear(modul = 1,
-                           tooth_number = tooth_number,
-                           thread_starts = 2,
-                           width = h_gear,
-                           length = 15,
-                           worm_bore = 0,
-                           gear_bore = shaft_w,
-                           pressure_angle = 28,
-                           lead_angle = 10,
-                           optimized = 1,
-                           together_built = True,
-                           show_spur = spur,
-                           show_worm = worm);
 
 def lego_gear():
-    return gears.spur_gear(modul=1,
-                           tooth_number=24,
-                           width=3,
-                           bore=0,
-                           pressure_angle=20,
-                           helix_angle=0,
-                           optimized=False).mod()
+    return _gears.spur_gear(modul=1,
+                            tooth_number=24,
+                            width=3,
+                            bore=0,
+                            pressure_angle=20,
+                            helix_angle=0,
+                            optimized=False).mod()
 
 
 def main():
-    root = bracket()
-    root += worm_gear(spur=True, worm=False).translate(x=24/2)
-    root += worm_gear(spur=False, worm=True).translate(x=24/2+R_WORM, y=15/2)
+    root = Union()
+    root += bracket()
+
+    spur = WormFactory.spur(teeth=24, height=2, bore_d=3.2)
+    worm = WormFactory.worm(width=15, bore_d=0)
+
+    root += spur.translate(x=24/2).rotate(z=0)
+    root += worm.translate(x=24/2+R_WORM, y=15/2)
 
     #root -= cylinder(h=16, d=2.74, center=True, segments=6).m().rotate(x=90)
     #root -= cylinder(h=20, d=3.2, center=True).m()
@@ -83,4 +72,4 @@ def main2():
 
 
 if __name__ == '__main__':
-    main2().autorender()
+    main().autorender()
