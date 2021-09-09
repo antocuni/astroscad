@@ -48,7 +48,7 @@ def main():
     root = Union()
     root += bracket()
 
-    spur = WormFactory.spur(teeth=24, height=2, bore_d=3.2)
+    spur = WormFactory.spur(teeth=24, thickness=2, bore_d=3.2)
     worm = WormFactory.worm(width=15, bore_d=0)
 
     root += spur.translate(x=24/2).rotate(z=0)
