@@ -2,10 +2,6 @@ from .scad import ImportScad
 
 _gears = ImportScad('vendored/gears/gears.scad')
 
-# https://www.sdp-si.com/resources/elements-of-metric-gear-technology/page5.php
-#     However, it is true that the smaller the lead angle ɣ, the more likely the
-#     self-locking condition will occur.
-
 
 class WormFactory:
     modul = 1
