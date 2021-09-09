@@ -957,10 +957,8 @@ lead_angle = Lead Angle of the Worm, corresponds to 90° minus Helix Angle. Posi
 together_built = Components assembled for Construction or separated for 3D-Printing */
 module worm(modul, thread_starts, length, bore, pressure_angle=20, lead_angle, together_built=true){
 
-    extra_clearance = 0.1; // by antocuni
-    
     // Dimension Calculations
-    c = modul / 6 + extra_clearance;                            // Tip Clearance
+    c = modul / 6;                                              // Tip Clearance
     r = modul*thread_starts/(2*sin(lead_angle));                // Part-Cylinder Radius
     rf = r - modul - c;                                         // Root-Cylinder Radius
     a = modul*thread_starts/(90*tan(pressure_angle));               // Spiralparameter
@@ -1034,13 +1032,10 @@ lead_angle = Pitch angle of the worm corresponds to 90 ° bevel angle. Positive 
 optimized = Holes for material / weight savings
 together_built =  Components assembled for construction or apart for 3D printing */
 module worm_gear(modul, tooth_number, thread_starts, width, length, worm_bore, gear_bore, pressure_angle=20, lead_angle, optimized=true, together_built=true, show_spur=1, show_worm=1){
+    
     c = modul / 6;                                              // Tip Clearance
     r_worm = modul*thread_starts/(2*sin(lead_angle));       // Worm Part-Cylinder Radius
     r_gear = modul*tooth_number/2;                                   // Spur Gear Part-Cone Radius
-
-    echo(r_worm=r_worm);
-    echo(r_gear=r_gear);
-    
     rf_worm = r_worm - modul - c;                       // Root-Cylinder Radius
     gamma = -90*width*sin(lead_angle)/(pi*r_gear);         // Spur Gear Rotation Angle
     tooth_distance = modul*pi/cos(lead_angle);                // Tooth Spacing in Transverse Section
@@ -1048,7 +1043,7 @@ module worm_gear(modul, tooth_number, thread_starts, width, length, worm_bore, g
 
     if (together_built) {
         if(show_worm)
-            //translate([r_worm,(ceil(length/(2*tooth_distance))-x)*tooth_distance,0])
+        translate([r_worm,(ceil(length/(2*tooth_distance))-x)*tooth_distance,0])
             rotate([90,180/thread_starts,0])
                 worm(modul, thread_starts, length, worm_bore, pressure_angle, lead_angle, together_built);
 
