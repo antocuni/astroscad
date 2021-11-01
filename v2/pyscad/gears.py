@@ -34,21 +34,13 @@ class WormFactory:
                         optimized)
 
     @classmethod
-    def worm(cls, *, width, bore_d):
-        # copied and adapted from gears.scad:worm_gear()
-        module = cls.module
-        thread_starts = cls.thread_starts
-        pressure_angle = cls.pressure_angle
-        lead_angle = cls.lead_angle
-        pi = math.pi
-
-        r_worm = module * thread_starts / (2 * sin(lead_angle))  # worm radius
-
-        worm = _gears.worm(module, thread_starts, width, bore_d, pressure_angle,
-                           lead_angle, together_built=True)
-        worm = worm.rotate(90, 180/thread_starts, 0)
-        #worm = worm.translate([r_worm,(ceil(length/(2*tooth_distance))-x)*tooth_distance,0])
-        return worm
+    def worm(cls, *, length, bore_d):
+        return WormGear(cls.module,
+                        cls.thread_starts,
+                        length,
+                        bore_d,
+                        cls.pressure_angle,
+                        cls.lead_angle)
 
 
 class SpurGear(PySCADObject):
@@ -82,3 +74,29 @@ class SpurGear(PySCADObject):
         #
         # _spur is a GenericSCADWrapper, manually unwrap it
         self.solid = _spur.solid
+
+class WormGear(PySCADObject):
+
+    def init_solid(self, module, thread_starts, length, bore_d,
+                   pressure_angle, lead_angle):
+        # compute anchors
+        self.r = module * thread_starts / (2 * sin(lead_angle))
+        self.length = length
+
+        width = length # gears.scad naming convention
+        _worm = _gears.worm(module, thread_starts, width, bore_d, pressure_angle,
+                            lead_angle, together_built=True)
+        #
+        # - the rotation around the X axis is to "lay it down" in a position
+        #   which is by default compatible with SpurGear. This is also why it
+        #   has a "length" instead of a "height"
+        #
+        # - the rotation around the Y axis is to match the correponding
+        # - rotation of SpurGear, copied from gears.scad
+        _worm.rotate(90, 180/thread_starts, 0)
+        #
+        # center on the Y axis
+        _worm.translate(y=length/2)
+        #
+        # _worm is a GenericSCADWrapper, manually unwrap it
+        self.solid = _worm.solid
