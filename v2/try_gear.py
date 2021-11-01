@@ -48,10 +48,10 @@ def main():
     root = Union()
     root += bracket()
 
-    spur = WormFactory.spur(teeth=24, thickness=2, bore_d=3.2)
+    spur = WormFactory.spur(teeth=24, h=2, bore_d=3.2)
     worm = WormFactory.worm(width=15, bore_d=0)
 
-    root += spur.translate(x=24/2).rotate(z=0)
+    root += spur
     root += worm.translate(x=24/2+R_WORM, y=15/2)
 
     #root -= cylinder(h=16, d=2.74, center=True, segments=6).m().rotate(x=90)
@@ -70,6 +70,12 @@ def main2():
     root += head
     return root
 
+def main3():
+    root = Union()
+    spur = WormFactory.spur(teeth=24, h=2, bore_d=3.2)
+    root += spur
+    root += Cylinder(r=spur.r, h=spur.h).mod()
+    return root
 
 if __name__ == '__main__':
     main().autorender()
