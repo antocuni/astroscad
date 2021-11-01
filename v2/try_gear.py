@@ -52,7 +52,8 @@ def main():
     worm = WormFactory.worm(length=15, bore_d=0)
 
     root += spur
-    root += worm.translate(x=spur.r+worm.r)
+    #root += worm.translate(x=spur.r+worm.r)
+    root += worm.move_to(left=spur.right)
 
     #root -= cylinder(h=16, d=2.74, center=True, segments=6).m().rotate(x=90)
     #root -= cylinder(h=20, d=3.2, center=True).m()
@@ -73,10 +74,17 @@ def main2():
 def main3():
     root = Union()
     spur = WormFactory.spur(teeth=24, h=2, bore_d=3.2)
-    ## root += spur
-    ## root += Cylinder(r=spur.r, h=spur.h).mod()
-    worm = WormFactory.worm(width=15, bore_d=0)
+    #spur.show_bounding_box()
+    root += spur
+    root += Cylinder(r=spur.r, h=spur.h).mod()
+    return root
+
+def main4():
+    root = Union()
+    worm = WormFactory.worm(length=15, bore_d=0)
+    worm.show_bounding_box()
     root += worm
+    root += Cylinder(r=worm.r, h=worm.length).rot(x=90).mod()
     return root
 
 if __name__ == '__main__':

@@ -80,22 +80,28 @@ class WormGear(PySCADObject):
     def init_solid(self, module, thread_starts, length, bore_d,
                    pressure_angle, lead_angle):
         # compute anchors
-        self.r = module * thread_starts / (2 * sin(lead_angle))
+        self.r = r = module * thread_starts / (2 * sin(lead_angle))
         self.length = length
-
+        pmin = Point(-r, -length/2, -r)
+        pmax = Point(+r, +length/2, +r)
+        self.anchors.center = Point.O
+        self.anchors.set_bounding_box(pmin, pmax)
+        #
+        # 1) create the worm
         width = length # gears.scad naming convention
         _worm = _gears.worm(module, thread_starts, width, bore_d, pressure_angle,
                             lead_angle, together_built=True)
         #
-        # - the rotation around the X axis is to "lay it down" in a position
-        #   which is by default compatible with SpurGear. This is also why it
-        #   has a "length" instead of a "height"
+        # 2) rotate
+        #     - the rotation around the X axis is to "lay it down" in a
+        #       position which is by default compatible with SpurGear. This is
+        #       also why it has a "length" instead of a "height"
         #
-        # - the rotation around the Y axis is to match the correponding
-        # - rotation of SpurGear, copied from gears.scad
+        #     - the rotation around the Y axis is to match the correponding
+        #       rotation of SpurGear, copied from gears.scad
         _worm.rotate(90, 180/thread_starts, 0)
         #
-        # center on the Y axis
+        # 3) center on the Y axis
         _worm.translate(y=length/2)
         #
         # _worm is a GenericSCADWrapper, manually unwrap it
