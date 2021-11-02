@@ -13,6 +13,7 @@ import functools
 
 import solid
 from .geometry import Point, Vector, AnchorPoints
+from .camera import Camera
 from .util import InvalidAnchorPoints
 from .autorender import autorender
 
@@ -49,6 +50,21 @@ class PySCADObject:
         if fs: header.append(f'$fs = {fs};')
         header = '\n'.join(header)
         return solid.scad_render_to_file(self.solid, filename, file_header=header)
+
+    def render_to_image(self, filename, camera=Camera.DEFAULT, size=(512, 512),
+                        **kwargs):
+        png = Path(filename)
+        scad = png.with_suffix('.scad')
+        self.render_to_file(scad, **kwargs)
+        cam = camera.as_cmdline()
+        sx, sy = size
+        view = 'axes'
+        ret = os.system(f'openscad "{scad}" -o "{png}" '
+                        f'--camera {cam} '
+                        f'--imgsize {sx},{sy} '
+                        f'--view {view}')
+        if ret != 0:
+            raise ValueError(ret)
 
     def __getattr__(self, name):
         if self.anchors.has_point(name):
