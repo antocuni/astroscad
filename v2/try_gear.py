@@ -89,4 +89,4 @@ def main4():
 
 if __name__ == '__main__':
     main().autorender()
-    #main().render_to_image('/tmp/foo.png', size=(1024,1024))
+    #main().render_to_collage('/tmp/foo.png')

@@ -14,7 +14,7 @@ import functools
 import solid
 from .geometry import Point, Vector, AnchorPoints
 from .camera import Camera
-from .util import InvalidAnchorPoints
+from .util import InvalidAnchorPoints, render_to_collage
 from .autorender import autorender
 
 EPSILON = 0.001
@@ -65,6 +65,9 @@ class PySCADObject:
                         f'--view {view}')
         if ret != 0:
             raise ValueError(ret)
+
+    def render_to_collage(self, filename):
+        render_to_collage(self, filename)
 
     def __getattr__(self, name):
         if self.anchors.has_point(name):

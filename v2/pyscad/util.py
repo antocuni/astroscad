@@ -1,6 +1,8 @@
 import sys
 import textwrap
 import traceback
+from PIL import Image
+from .camera import Camera
 
 def in2mm(inches):
     return inches * 25.4
@@ -30,3 +32,27 @@ class InvalidAnchorPoints:
 
     def translate(self, v):
         pass
+
+
+def render_to_PIL(obj, **kwargs):
+    png = '/tmp/autorender.png'
+    obj.render_to_image(png, **kwargs)
+    img = Image.open(png)
+    img.load()
+    return img
+
+def render_to_collage(obj, filename):
+    size = 512, 512  # size of each frame
+    a = render_to_PIL(obj, size=size, camera=Camera.DEFAULT)
+    b = render_to_PIL(obj, size=size, camera=Camera.TOP)
+    c = render_to_PIL(obj, size=size, camera=Camera.FRONT)
+    d = render_to_PIL(obj, size=size, camera=Camera.RIGHT)
+    #
+    w, h = size
+    final_size = (w*2 + 2, h*2 + 2)
+    res = Image.new("RGBA", final_size, color='black')
+    res.paste(a, (0,   0))     # upper left
+    res.paste(b, (w+2, 0))     # upper right
+    res.paste(c, (0,   h+2))   # lower left
+    res.paste(d, (w+2, h+2))   # lower right
+    res.save(filename)
