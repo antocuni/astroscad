@@ -216,7 +216,7 @@ def _get_r_d(r, d):
 
 class Sphere(PySCADObject):
 
-    def init_solid(self, r=None, d=None):
+    def init_solid(self, *, r=None, d=None):
         r, d = _get_r_d(r, d)
         self.r = r
         self.d = d

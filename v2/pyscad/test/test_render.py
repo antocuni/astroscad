@@ -47,3 +47,17 @@ class TestBasic(OpenSCADTest):
         obj += Cube(3).color('green').move_to(center=x.center, left=x.right)
         obj += Cube(3).color('blue').move_to(center=x.center, top=x.bottom)
         self.check(obj)
+
+    def test_sphere(self):
+        obj = Union()
+        x = Sphere(d=10)
+        obj += x
+        obj += Cube(10).color('red').move_to(left=x.right)
+        self.check(obj)
+
+    def test_show_bounding_box(self):
+        obj = Union()
+        x = Sphere(d=10)
+        x.show_bounding_box()
+        obj += x
+        self.check(obj)
