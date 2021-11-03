@@ -191,7 +191,11 @@ class Cube(PySCADObject):
     - bottom, top
     """
 
-    def init_solid(self, sx, sy, sz):
+    def init_solid(self, sx, sy=None, sz=None):
+        if sy is None:
+            sy = sx
+        if sz is None:
+            sz = sx
         pmin = Point(-sx/2, -sy/2, -sz/2)
         pmax = Point(sx/2, sy/2, sz/2)
         self.solid = solid.cube([sx, sy, sz], center=True)

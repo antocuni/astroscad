@@ -2,7 +2,7 @@ import os
 import py
 import pytest
 from pytest_image_diff import image_diff
-from pyscad.scad import Cube, Cylinder, Sphere, Composite, Union
+from pyscad.scad import Point, Cube, Cylinder, Sphere, Composite, Union
 
 ROOT = py.path.local(__file__).dirpath()
 REFDIR = ROOT.join('screenshots').ensure(dir=True)
@@ -37,4 +37,13 @@ class TestBasic(OpenSCADTest):
 
     def test_cube(self):
         obj = Cube(10, 10, 10)
+        self.check(obj)
+
+    def test_move_to(self):
+        obj = Union()
+        x = Cube(10)
+        obj += x.move_to(center=Point(10, 10, 10))
+        obj += Cube(3).color('red').move_to(center=x.center, bottom=x.top)
+        obj += Cube(3).color('green').move_to(center=x.center, left=x.right)
+        obj += Cube(3).color('blue').move_to(center=x.center, top=x.bottom)
         self.check(obj)
