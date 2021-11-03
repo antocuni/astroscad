@@ -1,4 +1,5 @@
 import sys
+import os
 import textwrap
 import traceback
 from PIL import Image
@@ -42,6 +43,7 @@ def render_to_PIL(obj, **kwargs):
     return img
 
 def render_to_collage(obj, filename):
+    filename = os.fspath(filename)
     size = 512, 512  # size of each frame
     a = render_to_PIL(obj, size=size, camera=Camera.DEFAULT)
     b = render_to_PIL(obj, size=size, camera=Camera.TOP)
