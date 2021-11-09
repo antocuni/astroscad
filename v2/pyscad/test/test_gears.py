@@ -1,5 +1,5 @@
 from pyscad import Cube, Cylinder, ImportScad, bolt_hole, Union, Point
-from pyscad.gears import WormFactory, _gears
+from pyscad.lib.gears import WormFactory, _gears
 from .test_render import OpenSCADTest
 
 

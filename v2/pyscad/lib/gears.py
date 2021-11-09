@@ -1,6 +1,6 @@
 import math
-from .scad import ImportScad, PySCADObject
-from .geometry import Point, Vector, AnchorPoints
+from ..scad import ImportScad, PySCADObject
+from ..geometry import Point, Vector, AnchorPoints
 
 _gears = ImportScad('vendored/gears/gears.scad')
 
