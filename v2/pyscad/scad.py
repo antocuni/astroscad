@@ -17,7 +17,7 @@ from .camera import Camera
 from .util import InvalidAnchorPoints, render_to_collage
 from .autorender import autorender
 
-EPSILON = 0.001
+EPS = 0.001
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',
@@ -323,7 +323,7 @@ class CustomObject(PySCADObject):
             self -= obj
 
 def bolt_hole(*, d, h, clearance=0.2):
-    h = h + EPSILON*2
+    h = h + EPS*2
     cyl = Cylinder(d=d+clearance, h=h)
     return cyl
 

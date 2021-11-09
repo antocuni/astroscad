@@ -1,5 +1,5 @@
-from ..scad import ImportScad, CustomObject, Cylinder, EPSILON
-from ..geometry import Point, Vector, AnchorPoints
+from ..scad import CustomObject
+from .misc import ring
 
 STEEL = [0.65, 0.67, 0.72]
 
@@ -53,7 +53,6 @@ DIMENSIONS = {
     '699': [9, 20,  6],
 }
 
-
 class Bearing(CustomObject):
 
     def init_custom(self, model):
@@ -62,12 +61,7 @@ class Bearing(CustomObject):
         self.d = d
         self.h = h
         rim = 1.90 # this is correct for 608, I don't know the others
-        self._outer = self.ring(d, d-rim, h).color(STEEL)
-        self._seal = self.ring(d-rim, hole_d+rim, h*0.8).color('dodgerblue')
-        self._inner = self.ring(hole_d+rim, hole_d, h).color(STEEL)
+        self._outer = ring(d, d-rim, h).color(STEEL)
+        self._seal = ring(d-rim, hole_d+rim, h*0.8).color('dodgerblue')
+        self._inner = ring(hole_d+rim, hole_d, h).color(STEEL)
         self.anchors.copy_from(self._outer.anchors)
-
-    def ring(self, outer_d, inner_d, h):
-        result = Cylinder(d=outer_d, h=h)
-        result -= Cylinder(d=inner_d, h=h+EPSILON)
-        return result

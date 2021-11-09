@@ -7,6 +7,8 @@ class Point:
     z: float
 
     def __add__(self, v):
+        if isinstance(v, (int, float)):
+            return self + Vector(v, v, v)
         if not isinstance(v, Vector):
             return NotImplemented
         x = self.x
