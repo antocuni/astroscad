@@ -60,18 +60,22 @@ class AnchorPoints:
     def has_point(self, name):
         return name in self.__dict__
 
-    def set_bounding_box(self, p1, p2):
+    def set_bounding_box(self, *points):
         """
-        Set standard anchors for a bounding box delimited by p1, p2.
+        Set standard anchors for a bounding box which contains all the given
+        points.
 
           - pmin, pmax: lower-left and upper-right points
           - left, right: min and max planes on the X axis
           - front, back: min and max planes on the Y axis
           - bottom, top: min and max planes on the Z axis
         """
-        xmin, xmax = sorted((p1.x, p2.x))
-        ymin, ymax = sorted((p1.y, p2.y))
-        zmin, zmax = sorted((p1.z, p2.z))
+        xs = [p.x for p in points]
+        ys = [p.y for p in points]
+        zs = [p.z for p in points]
+        xmin, xmax = min(xs), max(xs)
+        ymin, ymax = min(ys), max(ys)
+        zmin, zmax = min(zs), max(zs)
         self.pmin   = Point(xmin, ymin, zmin)
         self.pmax   = Point(xmax, ymax, zmax)
         self.left   = Point(xmin, None, None)

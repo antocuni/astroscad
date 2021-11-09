@@ -54,9 +54,10 @@ class TestAnchorPoints:
 
     def test_set_bounding_box(self):
         p1 = Point(1, 2, -3)
-        p2 = Point(-1, -2, 3)
+        p2 = Point(-1, -2, 0)
+        p3 = Point(0, 0, 3)
         a = AnchorPoints()
-        a.set_bounding_box(p1, p2)
+        a.set_bounding_box(p1, p2, p3)
         assert a.pmin == Point(-1, -2, -3)
         assert a.pmax == Point(1, 2, 3)
         assert a.left == Point(-1, None, None)
