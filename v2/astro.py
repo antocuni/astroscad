@@ -1,49 +1,29 @@
-#!./autoscad.py
+#!/usr/bin/python3
 
 import os
-from solid import import_scad, union, difference
-import scad
-from scad import cube, cylinder, in2mm, bolt_hole
+from pyscad import Cube, Cylinder, Sphere, bolt_hole, Point, Union, CustomObject, EPS
+from pyscad.lib.misc import TeflonGlide
+from pyscad.lib.bearing import Bearing
+from pyscad import autorender
 
-os.environ['OPENSCADPATH'] = ':'.join([
-    '/usr/share/openscad/libraries/',
-    '..',
-])
-MCAD_bearing = import_scad('MCAD/bearing.scad')
+class BasePlate(CustomObject):
 
-class MyBearing:
-    OUT_D = 22
-    IN_D = 8
-    H = 7
+    BEARING_RIM = 5
 
-    def __new__(cls):
-        return MCAD_bearing.bearing(model=608)
-
-    @classmethod
-    def inner_press_fit(cls, h, **kwargs):
-        cyl = cylinder(h=h, d=cls.IN_D, **kwargs)
-        return cyl
-
-    @classmethod
-    def adapter(cls, hole_d):
-        h = cls.H + 1
-        obj = cls.inner_press_fit(h)
-        obj -= bolt_hole(d=hole_d, h=h)
-        return obj
-
-    @classmethod
-    def slot(cls):
-        return difference()(
-            cylinder(d=cls.OUT_D+3, h=cls.H+3),
-            cylinder(d=cls.OUT_D+0.1, h=cls.H+3).translate(z=3),
-            cylinder(d=17, h=cls.H+2).translate(z=-1),
-            )
+    def init_custom(self):
+        bearing = Bearing('608')
+        self.d = 100
+        self.h = bearing.h + self.BEARING_RIM
+        self.base = Cylinder(d=self.d, h=self.h).color('SandyBrown')
+        self -= bearing.hole(h=self.h+EPS)\
+            .move_to(top=self.base.top - self.BEARING_RIM)
+        self -= Cylinder(d=14, h=self.h+EPS)
+        self.bearing = bearing.move_to(bottom=self.base.bottom)
 
 def main():
-    obj = union()
-    obj += MyBearing()
-    obj += MyBearing.adapter(hole_d = in2mm(1/4))
-
+    obj = CustomObject()
+    obj.baseplate = BasePlate()
+    return obj
 
 if __name__ == '__main__':
-    scad.render_to_file(main(), '/tmp/astro.scad', fa=1, fs=0.4)
+    main().autorender()
