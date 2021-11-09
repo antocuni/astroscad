@@ -16,6 +16,9 @@ class Camera:
         self.vpr = vpr
         self.distance = distance
 
+    def with_distance(self, distance):
+        return self.__class__(self.vpt, self.vpr, distance)
+
     def as_cmdline(self):
         parts = [self.vpt.x, self.vpt.y, self.vpt.z,
                  self.vpr.x, self.vpr.y, self.vpr.z,

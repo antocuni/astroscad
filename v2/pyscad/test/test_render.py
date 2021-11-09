@@ -15,7 +15,7 @@ class OpenSCADTest:
         self.request = request
         self.tmpdir = tmpdir
 
-    def check(self, obj):
+    def check(self, obj, distance=None):
         name = f'{self.__class__.__name__}.{self.request.node.name}'
         ref = REFDIR.join(f'{name}.png')
         actual = self.tmpdir.join(f'{name}.png')
@@ -24,7 +24,7 @@ class OpenSCADTest:
             obj.render_to_file('/tmp/pytest.scad')
             run_openscad_maybe('/tmp/pytest.scad')
         #
-        obj.render_to_collage(actual)
+        obj.render_to_collage(actual, distance)
         # with --save-ref-img we just save the screenshot as the new reference
         # image and be happy
         if self.request.config.option.save_ref_img:

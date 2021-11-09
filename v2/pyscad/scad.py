@@ -66,8 +66,8 @@ class PySCADObject:
         if ret != 0:
             raise ValueError(ret)
 
-    def render_to_collage(self, filename):
-        render_to_collage(self, filename)
+    def render_to_collage(self, filename, distance=None):
+        render_to_collage(self, filename, distance)
 
     def __getattr__(self, name):
         if self.anchors.has_point(name):

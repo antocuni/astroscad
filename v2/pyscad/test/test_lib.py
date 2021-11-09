@@ -9,4 +9,4 @@ class TestLib(OpenSCADTest):
         obj = Union()
         obj += Bearing('608')
         obj += Bearing('608').translate(x=25).show_bounding_box()
-        self.check(obj)
+        self.check(obj, distance=200)

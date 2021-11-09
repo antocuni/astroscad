@@ -42,13 +42,17 @@ def render_to_PIL(obj, **kwargs):
     img.load()
     return img
 
-def render_to_collage(obj, filename):
+def render_to_collage(obj, filename, distance=None):
+    cameras = [Camera.DEFAULT, Camera.TOP, Camera.FRONT, Camera.RIGHT]
+    if distance is not None:
+        cameras = [cam.with_distance(distance) for cam in cameras]
+
     filename = os.fspath(filename)
     size = 512, 512  # size of each frame
-    a = render_to_PIL(obj, size=size, camera=Camera.DEFAULT)
-    b = render_to_PIL(obj, size=size, camera=Camera.TOP)
-    c = render_to_PIL(obj, size=size, camera=Camera.FRONT)
-    d = render_to_PIL(obj, size=size, camera=Camera.RIGHT)
+    a = render_to_PIL(obj, size=size, camera=cameras[0])
+    b = render_to_PIL(obj, size=size, camera=cameras[1])
+    c = render_to_PIL(obj, size=size, camera=cameras[2])
+    d = render_to_PIL(obj, size=size, camera=cameras[3])
     #
     w, h = size
     final_size = (w*2 + 2, h*2 + 2)
