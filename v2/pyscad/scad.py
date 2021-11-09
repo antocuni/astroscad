@@ -250,7 +250,9 @@ class Cylinder(PySCADObject):
         r, d = _get_r_d(r, d)
         self.r = r
         self.d = d
-        #
+        self._init_cylinder(r, r, h, hx, hy, hz, segments)
+
+    def _init_cylinder(self, r1, r2, h, hx, hy, hz, segments):
         # parse the height
         all_hs = (h, hx, hy, hz)
         if all_hs.count(None) != 3:
@@ -260,36 +262,43 @@ class Cylinder(PySCADObject):
             hz = h
         del h # to make sure that we don't use h by mistake below
         #
+        R = max(r1, r2)
         if hz is not None:
             self.h = hz
-            pmin = Point(-r, -r, -hz/2)
-            pmax = Point( r,  r,  hz/2)
+            pmin = Point(-R, -R, -hz/2)
+            pmax = Point( R,  R,  hz/2)
             rot_vector = [0, 0, 0]
         elif hx is not None:
             self.h = hx
-            pmin = Point(-hx/2, -r, -r)
-            pmax = Point( hx/2,  r,  r)
+            pmin = Point(-hx/2, -R, -R)
+            pmax = Point( hx/2,  R,  R)
             rot_vector = [0, 90, 0]
         elif hy is not None:
             self.h = hy
-            pmin = Point(-r, -hy/2, -r)
-            pmax = Point( r,  hy/2,  r)
-            rot_vector = [90, 0, 0]
+            pmin = Point(-R, -hy/2, -R)
+            pmax = Point( R,  hy/2,  R)
+            rot_vector = [-90, 0, 0]
         else:
             assert False
 
         self.anchors.set_bounding_box(pmin, pmax)
         self.anchors.center = Point.O
         self.solid = solid.rotate(rot_vector)(
-            solid.cylinder(h=self.h, d=d, center=True, segments=segments)
+            solid.cylinder(h=self.h, r1=r1, r2=r2, center=True, segments=segments)
         )
 
 
-## class TruncatedCone(PySCADObject):
+class TCone(Cylinder):
+    """
+    Truncated cone
+    """
 
-##     def init_solid(self, *, h=None, r1=None, r2=None, d1=None, d2=None, segments=None):
-##         ...
-
+    def init_solid(self, *, h=None, hx=None, hy=None, hz=None,
+                   r1=None, r2=None, d1=None, d2=None,
+                   segments=None):
+        self.r1, self.d1 = _get_r_d(r1, d1)
+        self.r2, self.d2 = _get_r_d(r2, d2)
+        self._init_cylinder(self.r1, self.r2, h, hx, hy, hz, segments)
 
 class CustomObject(PySCADObject):
     """
