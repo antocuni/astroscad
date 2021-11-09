@@ -97,6 +97,7 @@ class PySCADObject:
         bbox = Cube(size.x, size.y, size.z).mod('%')
         bbox.move_to(center=self.center)
         self.solid += bbox.solid
+        return self
 
     def translate(self, x=0, y=0, z=0):
         for anchors in self._all_anchors():
@@ -293,31 +294,26 @@ class Cylinder(PySCADObject):
 class CustomObject(PySCADObject):
     """
     Base class for custom objects which are implemented in terms of other
-    high-level PySCADObjects (i.e., *without* messing with self.solid)
+    high-level PySCADObject (i.e., *without* messing with self.solid)
     """
 
     def init_solid(self, *args, **kwargs):
         self.solid = solid.union()
-        self.build(*args, **kwargs)
+        self.init_custom(*args, **kwargs)
 
-    def build(self):
+    def init_custom(self):
         pass
 
     def __setattr__(self, name, obj):
-        if name in ('anchors', 'solid', 'children'):
-            super().__setattr__(name, obj)
-        else:
-            self._add_one(name, obj)
-
-    def _add_one(self, name, obj):
-        if not isinstance(obj, PySCADObject):
-            raise TypeError('Only PySCADObject can be children of CustomObject')
+        if isinstance(obj, PySCADObject):
+            self += obj
         super().__setattr__(name, obj)
-        self += obj
 
     def add(self, **kwargs):
         for name, obj in kwargs.items():
-            self._add_one(name, obj)
+            if not isinstance(obj, PySCADObject):
+                raise TypeError
+            setattr(self, name, obj) # this automatically does the +=
 
     def sub(self, **kwargs):
         for name, obj in kwargs.items():

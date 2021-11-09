@@ -71,3 +71,11 @@ class TestAnchorPoints:
         a.translate(v)
         assert a.p1 == Point(11, 22, 33)
         assert a.p2 == Point(14, 25, 36)
+
+    def test_copy_from(self):
+        src = AnchorPoints(p1=Point(1, 2, 3),
+                           p2=Point(4, 5, 6))
+        dst = AnchorPoints()
+        dst.copy_from(src)
+        assert dst.p1 == src.p1
+        assert dst.p2 == src.p2

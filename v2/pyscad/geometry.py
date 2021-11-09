@@ -88,3 +88,10 @@ class AnchorPoints:
                 continue
             newp = p + v
             setattr(self, key, newp)
+
+    def copy_from(self, src):
+        if not isinstance(src, AnchorPoints):
+            raise TypeError
+        for key, p in src.__dict__.items():
+            if isinstance(p, Point):
+                setattr(self, key, p)

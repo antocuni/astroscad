@@ -70,7 +70,7 @@ class TestAnchors:
 
     def test_move_to_recursive(self):
         class Puppet(CustomObject):
-            def build(self):
+            def init_custom(self):
                 self.body = Cube(10, 10, 10)
                 self.head = Sphere(d=5).move_to(bottom=self.body.top)
                 self.anchors.center = self.body.center
