@@ -20,6 +20,8 @@ class Point:
         return Point(x, y, z)
 
     def __sub__(self, p):
+        if isinstance(p, (int, float)):
+            return self + (-p)
         if not isinstance(p, Point):
             return NotImplemented
         dx = dy = dz = 0

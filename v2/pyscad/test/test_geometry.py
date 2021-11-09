@@ -14,7 +14,7 @@ class TestPointVector:
         p2 = p1 + v
         assert p2 == Point(11, None, None)
 
-    def test_Point_add_float(self):
+    def test_Point_add_scalar(self):
         p1 = Point(1, 2, 3)
         p2 = p1 + 10
         assert p2 == Point(11, 12, 13)
@@ -37,6 +37,11 @@ class TestPointVector:
         v = bottom - p1
         assert v == Vector(0, 0, 130)
         assert p1 + v == Point(10, 20, 30)
+
+    def test_Point_sub_scalar(self):
+        p1 = Point(11, 12, 13)
+        p2 = p1 - 10
+        assert p2 == Point(1, 2, 3)
 
 
 class TestAnchorPoints:
