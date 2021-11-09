@@ -95,7 +95,7 @@ class PySCADObject:
             raise ValueError('Cannot find a bounding box')
         size = self.pmax - self.pmin
         bbox = Cube(size.x, size.y, size.z).mod('%')
-        bbox.move_to(center=self.center)
+        bbox.move_to(pmin=self.pmin)
         self.solid += bbox.solid
         return self
 
