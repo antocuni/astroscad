@@ -228,7 +228,7 @@ class Sphere(PySCADObject):
 
 class Cylinder(PySCADObject):
     """
-    Like the builtin opensca cylinder(), but with saner default.
+    Similar to the builtin openscad cylinder(), but with saner default.
 
     By default the cylinder is center in the origin, and defines the following
     anchor points:
@@ -243,17 +243,46 @@ class Cylinder(PySCADObject):
     TruncatedCone().
     """
 
-    def init_solid(self, *, h=None, r=None, d=None, segments=None):
-        assert h is not None
+    def init_solid(self, *, h=None, hx=None, hy=None, hz=None, r=None, d=None,
+                   segments=None):
+        # parse the radius
         r, d = _get_r_d(r, d)
-        self.h = h
         self.r = r
         self.d = d
-        pmin = Point(-r, -r, -h/2)
-        pmax = Point(r, r, h/2)
+        #
+        # parse the height
+        all_hs = (h, hx, hy, hz)
+        if all_hs.count(None) != 3:
+            raise ValueError('You must specify exactly one of h, hx, hy or hz')
+        if h is not None:
+            # h is an alias to hz
+            hz = h
+        del h # to make sure that we don't use h by mistake below
+        #
+        if hz is not None:
+            self.h = hz
+            pmin = Point(-r, -r, -hz/2)
+            pmax = Point( r,  r,  hz/2)
+            rot_vector = [0, 0, 0]
+        elif hx is not None:
+            self.h = hx
+            pmin = Point(-hx/2, -r, -r)
+            pmax = Point( hx/2,  r,  r)
+            rot_vector = [0, 90, 0]
+        elif hy is not None:
+            self.h = hy
+            pmin = Point(-r, -hy/2, -r)
+            pmax = Point( r,  hy/2,  r)
+            rot_vector = [90, 0, 0]
+        else:
+            assert False
+
         self.anchors.set_bounding_box(pmin, pmax)
         self.anchors.center = Point.O
-        self.solid = solid.cylinder(h=h, d=d, center=True, segments=segments)
+        self.solid = solid.rotate(rot_vector)(
+            solid.cylinder(h=self.h, d=d, center=True, segments=segments)
+        )
+
 
 ## class TruncatedCone(PySCADObject):
 

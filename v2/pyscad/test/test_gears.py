@@ -51,5 +51,3 @@ class TestGear(OpenSCADTest):
         root += spur
         root += worm.move_to(left=spur.right)
         self.check(root)
-
-

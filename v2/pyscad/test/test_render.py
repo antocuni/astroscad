@@ -3,6 +3,7 @@ import py
 import pytest
 from pytest_image_diff import image_diff
 from pyscad.scad import Point, Cube, Cylinder, Sphere, Composite, Union
+from pyscad.autorender import run_openscad_maybe
 
 ROOT = py.path.local(__file__).dirpath()
 REFDIR = ROOT.join('screenshots').ensure(dir=True)
@@ -19,6 +20,10 @@ class OpenSCADTest:
         ref = REFDIR.join(f'{name}.png')
         actual = self.tmpdir.join(f'{name}.png')
         diff = self.tmpdir.join(f'{name}-diff.png')
+        if self.request.config.option.show_scad:
+            obj.render_to_file('/tmp/pytest.scad')
+            run_openscad_maybe('/tmp/pytest.scad')
+        #
         obj.render_to_collage(actual)
         # with --save-ref-img we just save the screenshot as the new reference
         # image and be happy
@@ -60,4 +65,21 @@ class TestBasic(OpenSCADTest):
         x = Sphere(d=10)
         x.show_bounding_box()
         obj += x
+        self.check(obj)
+
+    def test_cylinder(self):
+        obj = Union()
+        cube = Cube(6)
+        red = Cylinder(r=3, h=20).color('red', 0.3).move_to(bottom=cube.top)
+        green = Cylinder(r=3, hx=20).color('green', 0.3).move_to(left=cube.right)
+        blue = Cylinder(r=3, hy=20).color('blue', 0.3).move_to(front=cube.back)
+        obj += cube
+        obj += red
+        obj += blue
+        obj += green
+        assert red.h == 20
+        assert green.h == 20
+        assert blue.h == 20
+        assert red.r == 3
+        assert red.d == 6
         self.check(obj)
