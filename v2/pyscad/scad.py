@@ -290,21 +290,34 @@ class Cylinder(PySCADObject):
 ##         ...
 
 
-class Composite(PySCADObject):
+class CustomObject(PySCADObject):
+    """
+    Base class for custom objects which are implemented in terms of other
+    high-level PySCADObjects (i.e., *without* messing with self.solid)
+    """
 
-    def init_solid(self):
+    def init_solid(self, *args, **kwargs):
         self.solid = solid.union()
-        self.build()
+        self.build(*args, **kwargs)
 
     def build(self):
         pass
 
+    def __setattr__(self, name, obj):
+        if name in ('anchors', 'solid', 'children'):
+            super().__setattr__(name, obj)
+        else:
+            self._add_one(name, obj)
+
+    def _add_one(self, name, obj):
+        if not isinstance(obj, PySCADObject):
+            raise TypeError('Only PySCADObject can be children of CustomObject')
+        super().__setattr__(name, obj)
+        self += obj
+
     def add(self, **kwargs):
         for name, obj in kwargs.items():
-            if not isinstance(obj, PySCADObject):
-                raise TypeError
-            setattr(self, name, obj)
-            self += obj
+            self._add_one(name, obj)
 
     def sub(self, **kwargs):
         for name, obj in kwargs.items():

@@ -2,7 +2,7 @@ import os
 import py
 import pytest
 from pytest_image_diff import image_diff
-from pyscad.scad import Point, Cube, Cylinder, Sphere, Composite, Union
+from pyscad.scad import Point, Cube, Cylinder, Sphere, Union
 from pyscad.autorender import run_openscad_maybe
 
 ROOT = py.path.local(__file__).dirpath()
