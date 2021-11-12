@@ -159,6 +159,13 @@ class PySCADObject:
         self.solid -= other.solid
         return self
 
+    def __imul__(self, other):
+        if not isinstance(other, PySCADObject):
+            return NotImplemented
+        self.children.append(other)
+        self.solid *= other.solid
+        return self
+
 
 class Union(PySCADObject):
 
