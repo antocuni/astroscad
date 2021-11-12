@@ -23,5 +23,6 @@ class TestLib(OpenSCADTest):
     def test_manfrotto_200PL(self):
         obj = CustomObject()
         obj.plate = Manfrotto_200PL().show_bounding_box()
+        obj -= Cylinder(d=10, h=20).move_to(center=obj.plate.center).mod()
         self.check(obj, distance=400)
 
