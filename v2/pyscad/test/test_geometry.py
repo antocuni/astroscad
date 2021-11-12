@@ -25,6 +25,11 @@ class TestPointVector:
         v3 = v1 + v2
         assert v3 == Vector(11, 22, 33)
 
+    def test_Vector_div_mul_scalar(self):
+        v = Vector(10, 20, 30)
+        assert v * 2 == Vector(20, 40, 60)
+        assert v / 2 == Vector( 5, 10, 15)
+
     def test_sub(self):
         p1 = Point(10, 20, 30)
         p2 = Point(1, 2, 3)
@@ -53,19 +58,20 @@ class TestAnchorPoints:
         assert a.p2 == Point(4, 5, 6)
 
     def test_set_bounding_box(self):
-        p1 = Point(1, 2, -3)
-        p2 = Point(-1, -2, 0)
-        p3 = Point(0, 0, 3)
+        p1 = Point( 8, 18, 28)
+        p2 = Point( 9, 20, 29)
+        p3 = Point(10, 19, 30)
         a = AnchorPoints()
         a.set_bounding_box(p1, p2, p3)
-        assert a.pmin == Point(-1, -2, -3)
-        assert a.pmax == Point(1, 2, 3)
-        assert a.left == Point(-1, None, None)
-        assert a.right == Point(1, None, None)
-        assert a.front == Point(None, -2, None)
-        assert a.back == Point(None, 2, None)
-        assert a.bottom == Point(None, None, -3)
-        assert a.top == Point(None, None, 3)
+        assert a.pmin == Point( 8, 18, 28)
+        assert a.pmax == Point(10, 20, 30)
+        assert a.left == Point(8, None, None)
+        assert a.right == Point(10, None, None)
+        assert a.front == Point(None, 18, None)
+        assert a.back == Point(None, 20, None)
+        assert a.bottom == Point(None, None, 28)
+        assert a.top == Point(None, None, 30)
+        assert a.center == Point(9, 19, 29)
 
     def test_iter(self):
         p1 = Point(1, 2, 3)

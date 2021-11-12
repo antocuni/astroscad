@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 
+def is_scalar(x):
+    return isinstance(x, (int, float))
+
 @dataclass
 class Point:
     x: float
@@ -7,7 +10,7 @@ class Point:
     z: float
 
     def __add__(self, v):
-        if isinstance(v, (int, float)):
+        if is_scalar(v):
             return self + Vector(v, v, v)
         if not isinstance(v, Vector):
             return NotImplemented
@@ -20,7 +23,7 @@ class Point:
         return Point(x, y, z)
 
     def __sub__(self, p):
-        if isinstance(p, (int, float)):
+        if is_scalar(p):
             return self + (-p)
         if not isinstance(p, Point):
             return NotImplemented
@@ -48,6 +51,16 @@ class Vector:
                       y=self.y+v.y,
                       z=self.z+v.z)
 
+    def __mul__(self, k):
+        if is_scalar(k):
+            return Vector(self.x*k, self.y*k, self.z*k)
+        return NotImplemented
+
+    def __truediv__(self, k):
+        if is_scalar(k):
+            return Vector(self.x/k, self.y/k, self.z/k)
+        return NotImplemented
+
 
 class AnchorPoints:
 
@@ -60,7 +73,7 @@ class AnchorPoints:
     def has_point(self, name):
         return name in self.__dict__
 
-    def set_bounding_box(self, *points):
+    def set_bounding_box(self, *points, set_center=True):
         """
         Set standard anchors for a bounding box which contains all the given
         points.
@@ -69,6 +82,9 @@ class AnchorPoints:
           - left, right: min and max planes on the X axis
           - front, back: min and max planes on the Y axis
           - bottom, top: min and max planes on the Z axis
+
+        If set_center == True, it also set a 'center' anchor point which is in
+        the middle of the diagonal connecting pmin and pmax.
         """
         xs = [p.x for p in points]
         ys = [p.y for p in points]
@@ -84,6 +100,8 @@ class AnchorPoints:
         self.back   = Point(None, ymax, None)
         self.bottom = Point(None, None, zmin)
         self.top    = Point(None, None, zmax)
+        if set_center:
+            self.center = self.pmin + (self.pmax - self.pmin)/2
 
     def __iter__(self):
         for value in self.__dict__.values():

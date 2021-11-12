@@ -208,7 +208,7 @@ class Cube(PySCADObject):
         pmax = Point(sx/2, sy/2, sz/2)
         self.solid = solid.cube([sx, sy, sz], center=True)
         self.anchors.set_bounding_box(pmin, pmax)
-        self.anchors.center = Point.O
+        assert self.anchors.center == Point.O
         self.size = Vector(sx, sy, sz)
 
 def _get_r_d(r, d):
@@ -231,7 +231,7 @@ class Sphere(PySCADObject):
         pmin = Point(-r, -r, -r)
         pmax = Point(r, r, r)
         self.anchors.set_bounding_box(pmin, pmax)
-        self.anchors.center = Point.O
+        assert self.anchors.center == Point.O
         self.solid = solid.sphere(d=d)
 
 class Cylinder(PySCADObject):
@@ -289,7 +289,7 @@ class Cylinder(PySCADObject):
             assert False
 
         self.anchors.set_bounding_box(pmin, pmax)
-        self.anchors.center = Point.O
+        assert self.anchors.center == Point.O
         self.solid = solid.rotate(rot_vector)(
             solid.cylinder(h=self.h, r1=r1, r2=r2, center=True, segments=segments)
         )
