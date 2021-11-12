@@ -2,3 +2,5 @@ Each directory is subjected to its own licence. This is a list of where the
 vendored libraries come from:
 
   - gears/: https://github.com/chrisspen/gears
+
+  - photo/manfrotto-200PL-03.scad: https://www.thingiverse.com/thing:2943710/
