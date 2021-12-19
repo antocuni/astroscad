@@ -335,7 +335,7 @@ class CustomObject(PySCADObject):
         for name, obj in kwargs.items():
             if not isinstance(obj, PySCADObject):
                 raise TypeError
-            setattr(self, name, obj)
+            object.__setattr__(self, name, obj)
             self -= obj
 
 def bolt_hole(*, d, h, clearance=0.2):

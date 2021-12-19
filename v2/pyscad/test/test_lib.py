@@ -26,3 +26,8 @@ class TestLib(OpenSCADTest):
         obj -= Cylinder(d=10, h=20).move_to(center=obj.plate.center).mod()
         self.check(obj, distance=400)
 
+    def test_manfrotto_200PL_with_holes(self):
+        obj = CustomObject()
+        obj.plate = Manfrotto_200PL(with_holes=True)
+        self.check(obj, distance=400)
+

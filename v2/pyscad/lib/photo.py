@@ -43,7 +43,7 @@ class Manfrotto_200PL(CustomObject):
     sy = _tpy # size y (it's Tpy, not Bpy)
     sz = _bpz # size z
 
-    def init_custom(self):
+    def init_custom(self, with_holes=False):
         self._obj = _manfrotto.plate()
         pmin = Point(0, 0, 0)
         pmax = Point(self.sx, self.sy, self.sz)
@@ -65,3 +65,18 @@ class Manfrotto_200PL(CustomObject):
         )
         self.anchors.center = self.top_plate.center
         self.move_to(center=Point.O)
+
+        # scren holes are arranged like a clock. The default manfrotto plate
+        # has holes at 6, 9 and 12 hours, but we also compute the 3 for
+        # completeness
+        self.anchors.hole3  = Point(x =  14, y =   0, z=None)
+        self.anchors.hole6  = Point(x =   0, y = -14, z=None)
+        self.anchors.hole9  = Point(x = -14, y =   0, z=None)
+        self.anchors.hole12 = Point(x =   0, y =  14, z=None)
+        #
+        if with_holes:
+            self -= Cylinder(d=9.9, h=20).move_to(center=self.center)
+            #self -= Cylinder(d=4.9, h=20).move_to(center=self.hole3)
+            self -= Cylinder(d=4.9, h=20).move_to(center=self.hole6)
+            self -= Cylinder(d=4.9, h=20).move_to(center=self.hole9)
+            self -= Cylinder(d=4.9, h=20).move_to(center=self.hole12)
