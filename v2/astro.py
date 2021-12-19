@@ -12,6 +12,9 @@ from pyscad import autorender
 
 VITAMINS = True
 
+IRON = [0.36, 0.33, 0.33]
+
+
 class BallHead(CustomObject):
 
     def init_custom(self):
@@ -28,7 +31,7 @@ class BasePlate(CustomObject):
 
     def init_custom(self):
         bearing = Bearing('608')
-        photo_plate = Manfrotto_200PL()
+        photo_plate = Manfrotto_200PL(with_holes=True)
 
         # the smaller d must be large enough to cover the whole photo plate,
         # the larger d must be large enough to cover the spur
@@ -41,7 +44,6 @@ class BasePlate(CustomObject):
         h = bearing.h + self.BEARING_RIM
 
         self.body = TCone(d1=self.d1, d2=self.d2, h=h).color('SandyBrown')
-        self.photo_plate = photo_plate.move_to(top=self.body.bottom).color('grey', 0.5)
 
         # big hole where to put the bearing. h=100 means "very long"
         self -= bearing.hole(h=100)\
@@ -51,6 +53,8 @@ class BasePlate(CustomObject):
         self -= Cylinder(d=bearing.d-5, h=100)
         if VITAMINS:
             self.bearing = bearing.move_to(bottom=self.body.bottom)
+            self.photo_plate = photo_plate.move_to(top=self.body.bottom-EPS)\
+                .color(IRON, 0.7)
 
 
 def main():
@@ -63,6 +67,7 @@ def main():
 
     if VITAMINS:
         obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)
+
     return obj
 
 if __name__ == '__main__':
