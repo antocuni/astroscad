@@ -73,21 +73,27 @@ class BasePlate(CustomObject):
 
     BEARING_RIM = 5
 
-    def init_custom(self):
-        bearing = Bearing('608')
-        photo_plate = Manfrotto_200PL(with_holes=True)
-
+    def init_custom(self, bearing, adapter, photo_plate):
         # the smaller d must be large enough to cover the whole photo plate,
         # the larger d must be large enough to cover the spur
         pp_dim = photo_plate.pmax - photo_plate.pmin
         self.d1 = math.hypot(pp_dim.x, pp_dim.y)
         self.d2 = 80
 
-        # the cone must contain the bearing, plus an upper rim which prevents
-        # the bearing from "falling up"
-        h = bearing.h + self.BEARING_RIM
-
+        # the cone must be tall enough to contain:
+        #   1. the bearing
+        #   2. an upper rim which prevents the bearing from "falling up"
+        #   3. the washer
+        #   4. the bearing-bolt adapter
+        #   5. some additional space to make sure that the bolt does not
+        #      hit the photo_plate
+        h = (bearing.h +
+             self.BEARING_RIM +
+             adapter.WASHER_H +
+             adapter.HEAD_H +
+             2)
         self.body = TCone(d1=self.d1, d2=self.d2, h=h).color('SandyBrown')
+        self.rim_bottom = self.body.top - self.BEARING_RIM
 
         # big hole where to put the bearing. h=100 means "very long"
         self -= bearing.hole(h=100)\
@@ -95,25 +101,29 @@ class BasePlate(CustomObject):
 
         # smaller hole to make the bearing accessible from the top
         self -= Cylinder(d=bearing.d-5, h=100)
-        if VITAMINS:
-            self.bearing = bearing.move_to(bottom=self.body.bottom)
-            # XXX re-enable this
-            #self.photo_plate = photo_plate.move_to(top=self.body.bottom-EPS)\
-            #    .color(IRON, 0.7)
 
 
 def main():
     obj = CustomObject()
-    obj.baseplate = BasePlate()
+    bearing = Bearing('608')
+    bolt = PHBolt()
+    adapter = BearingBoltAdapter(bearing, bolt)
+    photo_plate = Manfrotto_200PL(with_holes=True)
+
+    obj.baseplate = BasePlate(bearing, adapter, photo_plate)
+    obj.adapter = adapter.move_to(top=bearing.top)
+
+    if VITAMINS:
+        obj.bolt = bolt.move_to(bottom=adapter.bottom)
+        obj.bearing = bearing.move_to(top=obj.baseplate.rim_bottom)
+        obj.photo_plate = photo_plate.move_to(top=obj.baseplate.body.bottom-EPS)\
+                                     .color(IRON, 0.7)
+
+
     obj.spur = WormFactory.spur(teeth=70, h=4, optimized=False)\
                           .move_to(bottom=obj.baseplate.body.top+5)
     obj.worm = WormFactory.worm(length=15, bore_d=4)\
                           .move_to(center=obj.spur.center, left=obj.spur.right)
-
-    bolt = PHBolt()
-    adapter = BearingBoltAdapter(obj.baseplate.bearing, bolt)
-    obj.adapter = adapter.move_to(top=obj.baseplate.bearing.top)
-    obj.bolt = bolt.move_to(bottom=adapter.bottom)
 
     if VITAMINS:
         obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)
