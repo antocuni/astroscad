@@ -135,17 +135,25 @@ class PySCADObject:
         self.solid.set_modifier(mod)
         return self
 
+    def __neg__(self):
+        return Neg(self)
+
     def __add__(self, other):
-        if not isinstance(other, PySCADObject):
-            return NotImplemented
-        return Union(self, other)
+        if isinstance(other, PySCADObject):
+            return Union(self, other)
+        elif isinstance(other, Neg):
+            return self - other.x
+        return NotImplemented
 
     def __iadd__(self, other):
-        if not isinstance(other, PySCADObject):
-            return NotImplemented
-        self.children.append(other)
-        self.solid += other.solid
-        return self
+        if isinstance(other, PySCADObject):
+            self.children.append(other)
+            self.solid += other.solid
+            return self
+        elif isinstance(other, Neg):
+            self -= other.x
+            return self
+        return NotImplemented
 
     def __sub__(self, other):
         if not isinstance(other, PySCADObject):
@@ -165,6 +173,12 @@ class PySCADObject:
         self.children.append(other)
         self.solid *= other.solid
         return self
+
+class Neg:
+
+    def __init__(self, x):
+        self.x = x
+
 
 
 class Union(PySCADObject):

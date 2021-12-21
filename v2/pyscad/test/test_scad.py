@@ -1,6 +1,7 @@
 import pytest
 import re
-from pyscad.scad import Cube, Cylinder, Sphere, CustomObject
+import solid
+from pyscad.scad import Cube, Cylinder, Sphere, CustomObject, Union, Difference
 from pyscad.geometry import Point, Vector
 from pyscad.util import InvalidAnchorError
 
@@ -85,6 +86,9 @@ class TestAnchors:
         assert puppet.body.center == Point(20, 20, 20)
         assert puppet.head.center == Point(20, 20, 27.5)
 
+
+class TestScad:
+
     def test_CustomObject_list_attribute(self):
         class MyObject(CustomObject):
             def init_custom(self):
@@ -119,3 +123,52 @@ class TestAnchors:
         s2 = Sphere(d=30)
         assert s2.r == 15
         assert s2.d == 30
+
+    def test_add(self):
+        a = Cube(10)
+        b = Cube(20)
+        c = a + b
+        assert isinstance(c, Union)
+        assert c.children == [a, b]
+
+    def test_add_neg(self):
+        a = Cube(10)
+        b = -Cube(20)
+        c = a + b
+        assert isinstance(c, Difference)
+        assert c.children == [a, b.x]
+
+    def test_iadd(self):
+        a = Cube(10)
+        a_solid = a.solid
+        b = Cube(20)
+        a += b
+        assert isinstance(a, Cube)
+        assert isinstance(a.solid, solid.union)
+        assert a.solid.children == [a_solid, b.solid]
+
+    def test_iadd_neg(self):
+        a = Cube(10)
+        a_solid = a.solid
+        b = -Cube(20)
+        a += b
+        assert isinstance(a, Cube)
+        assert isinstance(a.solid, solid.difference)
+        assert a.solid.children == [a_solid, b.x.solid]
+
+    def test_sub(self):
+        a = Cube(10)
+        b = Cube(20)
+        c = a - b
+        assert isinstance(c, Difference)
+        assert c.children == [a, b]
+
+    def test_isub(self):
+        a = Cube(10)
+        a_solid = a.solid
+        b = Cube(20)
+        a -= b
+        assert isinstance(a, Cube)
+        assert isinstance(a.solid, solid.difference)
+        assert a.solid.children == [a_solid, b.solid]
+
