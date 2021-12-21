@@ -92,7 +92,7 @@ class BasePlate(CustomObject):
              adapter.WASHER_H +
              adapter.HEAD_H +
              2)
-        self.body = TCone(d1=self.d1, d2=self.d2, h=h).color('SandyBrown')
+        self.body = TCone(d1=self.d1, d2=self.d2, h=h).color('SandyBrown') #.mod('#')
         self.rim_bottom = self.body.top - self.BEARING_RIM
 
         # big hole where to put the bearing. h=100 means "very long"
@@ -101,6 +101,37 @@ class BasePlate(CustomObject):
 
         # smaller hole to make the bearing accessible from the top
         self -= Cylinder(d=bearing.d-5, h=100)
+
+
+class RotatingPlate(CustomObject):
+
+    GROOVE_H = 1
+
+    def init_custom(self, bolt):
+        self.spur = WormFactory.spur(teeth=70, h=4, optimized=False)
+        self -= bolt_hole(d=bolt.D, h=self.spur.h)
+        self.anchors.set_bounding_box(self.spur.pmin, self.spur.pmax)
+        #
+        glides = []
+        for angle in (0, 120, 240):
+            glide = TeflonGlide()
+            r = (self.spur.d - glide.d) / 2 - 5
+            angle = math.radians(angle)
+            x = r * math.cos(angle)
+            y = r * math.sin(angle)
+            groove = glide.make_groove(self.GROOVE_H + EPS)
+            groove.move_to(
+                center=Point(x=x, y=y, z=None),
+                top=self.spur.bottom + self.GROOVE_H
+            )
+            self -= groove
+            glide.move_to(
+                center=groove.center,
+                top=groove.top
+            )
+            glides.append(glide)
+
+        self.glides = glides
 
 
 def main():
@@ -120,10 +151,12 @@ def main():
                                      .color(IRON, 0.7)
 
 
-    obj.spur = WormFactory.spur(teeth=70, h=4, optimized=False)\
-                          .move_to(bottom=obj.baseplate.body.top+5)
+    rplate = RotatingPlate(bolt)
+    obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top+5)
+    #return rplate
+
     obj.worm = WormFactory.worm(length=15, bore_d=4)\
-                          .move_to(center=obj.spur.center, left=obj.spur.right)
+                          .move_to(center=rplate.spur.center, left=rplate.spur.right)
 
     if VITAMINS:
         obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)

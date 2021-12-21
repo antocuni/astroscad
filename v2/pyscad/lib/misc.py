@@ -28,3 +28,8 @@ class TeflonGlide(CustomObject):
         self.translate(z = -self.h/2)
         self.anchors.set_bounding_box(self._teflon.pmin, self._base.pmax)
         self.anchors.center = Point.O
+
+    def make_groove(self, h):
+        # XXX calibrate properly
+        tolerance = 0.1
+        return Cylinder(d=self.d + tolerance, h=h).move_to(center=self.center)
