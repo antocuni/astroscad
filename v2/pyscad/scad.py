@@ -307,6 +307,7 @@ class TCone(Cylinder):
         self.r2, self.d2 = _get_r_d(r2, d2)
         self._init_cylinder(self.r1, self.r2, h, hx, hy, hz, segments)
 
+
 class CustomObject(PySCADObject):
     """
     Base class for custom objects which are implemented in terms of other
