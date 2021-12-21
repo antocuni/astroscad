@@ -324,6 +324,11 @@ class CustomObject(PySCADObject):
     def __setattr__(self, name, obj):
         if isinstance(obj, PySCADObject):
             self += obj
+        elif isinstance(obj, list):
+            # this is a bit of a hack, we need to think more about this
+            for item in obj:
+                if isinstance(item, PySCADObject):
+                    self += item
         super().__setattr__(name, obj)
 
     def add(self, **kwargs):

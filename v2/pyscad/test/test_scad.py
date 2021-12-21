@@ -85,6 +85,15 @@ class TestAnchors:
         assert puppet.body.center == Point(20, 20, 20)
         assert puppet.head.center == Point(20, 20, 27.5)
 
+    def test_CustomObject_list_attribute(self):
+        class MyObject(CustomObject):
+            def init_custom(self):
+                self.parts = [Cube(10), Cube(20), Cube(30)]
+                self.anchors.center = Point.O
+        #
+        obj = MyObject()
+        assert obj.children == obj.parts
+
     def test_Cylinder(self):
         c = Cylinder(h=10, d=30)
         assert c.h == 10
