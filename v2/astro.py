@@ -78,7 +78,7 @@ class BasePlate(CustomObject):
         # the larger d must be large enough to cover the spur
         pp_dim = photo_plate.pmax - photo_plate.pmin
         self.d1 = math.hypot(pp_dim.x, pp_dim.y)
-        self.d2 = 80
+        self.d2 = 90
 
         # the cone must be tall enough to contain:
         #   1. the bearing
