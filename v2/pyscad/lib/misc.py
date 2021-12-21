@@ -18,13 +18,13 @@ class TeflonGlide(CustomObject):
         self.base_h = 3.5
         self.upper_h = 1.9
         self.h = self.base_h + self.upper_h
+        self._teflon = ring(self.d, self.inner_d, self.upper_h)\
+            .move_to(bottom=Point.O)\
+            .color('LightSteelBlue')
         self._base = ring(self.d, self.hole_d, self.base_h)\
             .color([0.3, 0.3, 0.3])\
-            .move_to(bottom=Point.O)
-        self._upper = ring(self.d, self.inner_d, self.upper_h)\
-            .move_to(bottom=self._base.top-EPS)\
-            .color('LightSteelBlue')
+            .move_to(bottom=self._teflon.top)
         #
         self.translate(z = -self.h/2)
-        self.anchors.set_bounding_box(self._base.pmin, self._upper.pmax)
+        self.anchors.set_bounding_box(self._teflon.pmin, self._base.pmax)
         self.anchors.center = Point.O
