@@ -108,8 +108,7 @@ class RotatingPlate(CustomObject):
     GROOVE_H = 1
 
     def init_custom(self, bolt):
-        self.spur = WormFactory.spur(teeth=70, h=4, optimized=False)
-        self -= bolt_hole(d=bolt.D, h=self.spur.h)
+        self.spur = WormFactory.spur(teeth=70, h=4, bore_d=bolt.D+0.1, optimized=False)
         self.anchors.set_bounding_box(self.spur.pmin, self.spur.pmax)
         #
         glides = []
