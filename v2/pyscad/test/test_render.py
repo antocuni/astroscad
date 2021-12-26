@@ -2,7 +2,8 @@ import os
 import py
 import pytest
 from pytest_image_diff import image_diff
-from pyscad.scad import Point, Cube, Cylinder, Sphere, Union, TCone, CustomObject
+from pyscad.scad import (Point, Cube, Cylinder, Sphere, Union, Difference, TCone,
+                         CustomObject, EPS)
 from pyscad.autorender import run_openscad_maybe
 
 ROOT = py.path.local(__file__).dirpath()
@@ -87,4 +88,11 @@ class TestBasic(OpenSCADTest):
         assert obj.a.r2 == 1
         assert obj.a.d1 == 6
         assert obj.a.d2 == 2
+        self.check(obj)
+
+    def test_Difference(self):
+        obj = Difference(
+            Cylinder(d=50, h=3),
+            Cylinder(d=48, h=4),
+            )
         self.check(obj)

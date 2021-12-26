@@ -193,7 +193,9 @@ class Difference(PySCADObject):
     def init_solid(self, *objs):
         # note: the solid.union() below is not a mistake, it's just used to
         # make an empty object. The actual solid.difference() is created by
-        # the -= operator
+        # the -= operator.
+        # Note that it works because when doing a difference(), OpenSCAD
+        # ignores all the "empty objects" before the first non-empty one.
         self.solid = solid.union()
         for obj in objs:
             self -= obj
