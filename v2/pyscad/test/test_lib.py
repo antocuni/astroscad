@@ -42,3 +42,9 @@ class TestRoundHole(OpenSCADTest):
         obj = Cube(30, 30, 3)
         obj -= RoundHole(d=10, h=3+EPS, extra_walls=3)
         self.check(obj)
+
+    def test_other_axes(self):
+        obj = Union()
+        obj = RoundHole(d=10, h=3+EPS, axis='x', extra_walls=1).tr(z=-10)
+        obj += RoundHole(d=10, h=3+EPS, axis='y', extra_walls=1).tr(z=10)
+        self.check(obj)

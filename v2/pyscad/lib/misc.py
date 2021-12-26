@@ -65,17 +65,15 @@ class RoundHole(CustomObject):
     def init_custom(self, *, extra_walls=0, **kwargs):
         self.hole = Cylinder(**kwargs)
         for i in range(extra_walls):
-            self._add_ring(i, **kwargs)
+            self._add_ring(i)
 
-    def _add_ring(self, i, **kwargs):
-        kwargs.pop('d', None)
-        kwargs.pop('r', None)
-        #
+    def _add_ring(self, i):
         W = self._WALL_THICKNESS
         G = self._GAP
         r = self.hole.r
         h = self.hole.h
+        axis = self.hole.axis
         #
         x = r + (W+G)*(i+1)
-        ring = Cylinder(r=x, h=h) - Cylinder(r=x-G, h=h+EPS)
+        ring = Cylinder(r=x, h=h, axis=axis) - Cylinder(r=x-G, h=h+EPS, axis=axis)
         self += ring
