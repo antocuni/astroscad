@@ -267,39 +267,29 @@ class Cylinder(PySCADObject):
     TruncatedCone().
     """
 
-    def init_solid(self, *, h=None, hx=None, hy=None, hz=None, r=None, d=None,
-                   segments=None):
+    def init_solid(self, *, h, axis='z', r=None, d=None, segments=None):
         # parse the radius
         r, d = _get_r_d(r, d)
         self.r = r
         self.d = d
-        self._init_cylinder(r, r, h, hx, hy, hz, segments)
+        self._init_cylinder(h, axis, r, r, segments)
 
-    def _init_cylinder(self, r1, r2, h, hx, hy, hz, segments):
-        # parse the height
-        all_hs = (h, hx, hy, hz)
-        if all_hs.count(None) != 3:
-            raise ValueError('You must specify exactly one of h, hx, hy or hz')
-        if h is not None:
-            # h is an alias to hz
-            hz = h
-        del h # to make sure that we don't use h by mistake below
-        #
+    def _init_cylinder(self, h, axis, r1, r2, segments):
+        assert axis in ('x', 'y', 'z')
+        self.h = h
+        self.axis = axis
         R = max(r1, r2)
-        if hz is not None:
-            self.h = hz
-            pmin = Point(-R, -R, -hz/2)
-            pmax = Point( R,  R,  hz/2)
+        if axis == 'z':
+            pmin = Point(-R, -R, -h/2)
+            pmax = Point( R,  R,  h/2)
             rot_vector = [0, 0, 0]
-        elif hx is not None:
-            self.h = hx
-            pmin = Point(-hx/2, -R, -R)
-            pmax = Point( hx/2,  R,  R)
+        elif axis == 'x':
+            pmin = Point(-h/2, -R, -R)
+            pmax = Point( h/2,  R,  R)
             rot_vector = [0, 90, 0]
-        elif hy is not None:
-            self.h = hy
-            pmin = Point(-R, -hy/2, -R)
-            pmax = Point( R,  hy/2,  R)
+        elif axis == 'y':
+            pmin = Point(-R, -h/2, -R)
+            pmax = Point( R,  h/2,  R)
             rot_vector = [-90, 0, 0]
         else:
             assert False
@@ -307,7 +297,7 @@ class Cylinder(PySCADObject):
         self.anchors.set_bounding_box(pmin, pmax)
         assert self.anchors.center == Point.O
         self.solid = solid.rotate(rot_vector)(
-            solid.cylinder(h=self.h, r1=r1, r2=r2, center=True, segments=segments)
+            solid.cylinder(h=h, r1=r1, r2=r2, center=True, segments=segments)
         )
 
 
@@ -316,12 +306,12 @@ class TCone(Cylinder):
     Truncated cone
     """
 
-    def init_solid(self, *, h=None, hx=None, hy=None, hz=None,
+    def init_solid(self, *, h, axis='z',
                    r1=None, r2=None, d1=None, d2=None,
                    segments=None):
         self.r1, self.d1 = _get_r_d(r1, d1)
         self.r2, self.d2 = _get_r_d(r2, d2)
-        self._init_cylinder(self.r1, self.r2, h, hx, hy, hz, segments)
+        self._init_cylinder(h, axis, self.r1, self.r2, segments)
 
 
 class CustomObject(PySCADObject):

@@ -72,8 +72,8 @@ class TestBasic(OpenSCADTest):
         obj = CustomObject()
         obj.cube = Cube(6)
         obj.a = Cylinder(r=3, h=20).color('blue', 0.3).move_to(bottom=obj.cube.top)
-        obj.b = Cylinder(r=3, hx=20).color('red', 0.3).move_to(left=obj.cube.right)
-        obj.c = Cylinder(r=3, hy=20).color('green', 0.3).move_to(front=obj.cube.back)
+        obj.b = Cylinder(r=3, h=20, axis='x').color('red', 0.3).move_to(left=obj.cube.right)
+        obj.c = Cylinder(r=3, h=20, axis='y').color('green', 0.3).move_to(front=obj.cube.back)
         assert obj.a.h == obj.b.h == obj.c.h == 20
         self.check(obj)
 
@@ -81,8 +81,8 @@ class TestBasic(OpenSCADTest):
         obj = CustomObject()
         obj.cube = Cube(6)
         obj.a = TCone(r1=3, r2=1, h=10).color('blue', 0.3).move_to(bottom=obj.cube.top)
-        obj.b = TCone(r1=3, r2=1, hx=10).color('red', 0.3).move_to(left=obj.cube.right)
-        obj.c = TCone(r1=3, r2=1, hy=10).color('green', 0.3).move_to(front=obj.cube.back)
+        obj.b = TCone(r1=3, r2=1, h=10, axis='x').color('red', 0.3).move_to(left=obj.cube.right)
+        obj.c = TCone(r1=3, r2=1, h=10, axis='y').color('green', 0.3).move_to(front=obj.cube.back)
         assert obj.a.h == obj.b.h == obj.c.h == 10
         assert obj.a.r1 == 3
         assert obj.a.r2 == 1
