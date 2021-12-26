@@ -1,6 +1,6 @@
-from pyscad import Cube, Cylinder, ImportScad, bolt_hole, Union, Point, CustomObject
+from pyscad import Cube, Cylinder, ImportScad, bolt_hole, Union, Point, CustomObject, EPS
 from pyscad.lib.bearing import Bearing
-from pyscad.lib.misc import TeflonGlide
+from pyscad.lib.misc import TeflonGlide, RoundHole
 from pyscad.lib.photo import Manfrotto_200PL
 from .test_render import OpenSCADTest
 
@@ -31,3 +31,14 @@ class TestLib(OpenSCADTest):
         obj.plate = Manfrotto_200PL(with_holes=True)
         self.check(obj, distance=400)
 
+
+class TestRoundHole(OpenSCADTest):
+
+    def test_positive(self):
+        obj = RoundHole(d=10, h=3+EPS, extra_walls=3)
+        self.check(obj)
+
+    def test_negative(self):
+        obj = Cube(30, 30, 3)
+        obj -= RoundHole(d=10, h=3+EPS, extra_walls=3)
+        self.check(obj)

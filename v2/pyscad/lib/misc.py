@@ -33,3 +33,49 @@ class TeflonGlide(CustomObject):
         # XXX calibrate properly
         tolerance = 0.1
         return Cylinder(d=self.d + tolerance, h=h).move_to(center=self.center)
+
+
+class RoundHole(CustomObject):
+    """
+    Like a Cylinder, but it is meant to be used as a negative part to make a hole.
+
+    It supports adding extra reinforcing walls by using the technique
+    described here:
+    https://3dprinting.stackexchange.com/questions/7019/using-multiple-infill-types-within-one-model/7022#7022
+
+    NOTE: it is hard to automatically test that it "works", i.e. that Cura
+    creates extra walls after slicing. The default params seem to work with my
+    current settings, but before printing it is adviced to double check that
+    it works as intended:
+      1. run TestRoundHole.test_negative
+      2. open /tmp/pytest.scad in Cura
+      3. slice
+      4. manually check that it contains multiple walls around the hole, with
+         no visible gap in between
+    """
+
+    # this must match the "Wall Thickness" setting in cura, and it's used to
+    # determine where to cut the thin ring
+    _WALL_THICKNESS = 1.6
+
+    # size of the ring: it creates a very small gap which will be filled by
+    # plastic anyway, but that convinces Cura to create the extra walls
+    _GAP = 0.02
+
+    def init_custom(self, *, extra_walls=0, **kwargs):
+        self.hole = Cylinder(**kwargs)
+        for i in range(extra_walls):
+            self._add_ring(i, **kwargs)
+
+    def _add_ring(self, i, **kwargs):
+        kwargs.pop('d', None)
+        kwargs.pop('r', None)
+        #
+        W = self._WALL_THICKNESS
+        G = self._GAP
+        r = self.hole.r
+        h = self.hole.h
+        #
+        x = r + (W+G)*(i+1)
+        ring = Cylinder(r=x, h=h) - Cylinder(r=x-G, h=h+EPS)
+        self += ring
