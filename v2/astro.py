@@ -1,5 +1,6 @@
-#!/usr/bin/python3
+#!./venv/bin/python3
 
+import sys
 import math
 import os
 from pyscad import (Cube, Cylinder, Sphere, bolt_hole, Point, Union, CustomObject, EPS,
@@ -133,7 +134,7 @@ class RotatingPlate(CustomObject):
         self.glides = glides
 
 
-def main():
+def build():
     obj = CustomObject()
     bearing = Bearing('608')
     bolt = PHBolt()
@@ -151,16 +152,26 @@ def main():
 
 
     rplate = RotatingPlate(bolt)
-    obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top+5)
+    obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top+25)
     #return rplate
 
     obj.worm = WormFactory.worm(length=15, bore_d=4)\
                           .move_to(center=rplate.spur.center, left=rplate.spur.right)
 
-    if VITAMINS:
-        obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)
+    ## if VITAMINS:
+    ##     obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)
 
     return obj
 
+def main():
+    part_name = None
+    if len(sys.argv) >= 2:
+        part_name = sys.argv[1]
+    #
+    obj = build()
+    if part_name:
+        obj = getattr(obj, part_name)
+    obj.autorender()
+
 if __name__ == '__main__':
-    main().autorender()
+    main()
