@@ -64,6 +64,10 @@ class RoundHole(CustomObject):
 
     def init_custom(self, *, extra_walls=0, **kwargs):
         self.hole = Cylinder(**kwargs)
+        # we explicitly do NOT consider the extra rings as part of the
+        # bounding box. They exists solely for the sake of the slicer, but
+        # they should not have any other structural behavior
+        self.anchors.set_bounding_box(self.hole.pmin, self.hole.pmax)
         for i in range(extra_walls):
             self._add_ring(i)
 

@@ -6,7 +6,7 @@ import os
 from pyscad import (Cube, Cylinder, Sphere, bolt_hole, Point, Union, CustomObject, EPS,
                     TCone)
 from pyscad.shapes import DonutSlice
-from pyscad.lib.misc import TeflonGlide
+from pyscad.lib.misc import TeflonGlide, RoundHole
 from pyscad.lib.bearing import Bearing
 from pyscad.lib.gears import WormFactory
 from pyscad.lib.photo import Manfrotto_200PL
@@ -99,6 +99,12 @@ class BasePlate(CustomObject):
         # big hole where to put the bearing. h=100 means "very long"
         self -= bearing.hole(h=100)\
             .move_to(top=self.body.top - self.BEARING_RIM)
+
+        # screw holes to attach the photo plate
+        pp = photo_plate
+        for p in (pp.hole3, pp.hole6, pp.hole9, pp.hole12):
+            screw_hole = RoundHole(d=3, h=18, extra_walls=1)
+            self -= screw_hole.move_to(center=p, bottom=self.body.bottom-EPS)
 
         # smaller hole to make the bearing accessible from the top
         self -= Cylinder(d=bearing.d-5, h=100)
