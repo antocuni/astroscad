@@ -21,17 +21,19 @@ class OpenSCADTest:
         ref = REFDIR.join(f'{name}.png')
         actual = self.tmpdir.join(f'{name}.png')
         diff = self.tmpdir.join(f'{name}-diff.png')
-        if self.request.config.option.show_scad:
-            obj.render_to_file('/tmp/pytest.scad')
-            run_openscad_maybe('/tmp/pytest.scad')
         #
         obj.render_to_collage(actual, distance)
-        # with --save-ref-img we just save the screenshot as the new reference
-        # image and be happy
-        if self.request.config.option.save_ref_img:
+        if self.request.config.option.dev: # py.test --dev
+            # 1. save the screenshot as the new reference image
+            # 2. show the .scad file in OpenSCAD
+            # 3. show the screenshot in eog
+            # 4. return, to skip the screenshot check
             actual.copy(ref)
+            run_openscad_maybe('/tmp/autorender.scad')
+            os.system(f'eog -w "{ref}" &')
             return
         #
+        # check whether the screenshot matches the reference image
         if ref.check(exists=False):
             raise Exception(f'Reference does not exist: {ref.relto(ROOT)}')
         res = image_diff._diff(str(ref), str(actual), str(diff))
