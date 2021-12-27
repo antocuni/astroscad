@@ -148,11 +148,11 @@ class SmallWormFactory(WormFactory):
 class MyWorm(CustomObject):
 
     def init_custom(self):
-        self.worm = WormFactory.worm(h=40, bore_d=4, axis='y')
-        spur = SmallWormFactory.spur(teeth=24, h=4, axis='y', optimized=False)
-        self.spur = spur.move_to(center=self.worm.center, front=self.worm.back)
+        self.worm = WormFactory.worm(h=40, bore_d=4, axis='x')
+        spur = SmallWormFactory.spur(teeth=24, h=4, axis='x', optimized=False)
+        self.spur = spur.move_to(center=self.worm.center, left=self.worm.right)
         self.anchors.worm_center = self.worm.center
-        self.anchors.worm_left = self.worm.left
+        self.anchors.worm_back = self.worm.back
 
 
 def build():
@@ -177,7 +177,7 @@ def build():
     #return rplate
 
     obj.myworm = MyWorm().move_to(worm_center=rplate.spur.center,
-                                  worm_left=rplate.spur.right)
+                                  worm_back=rplate.spur.front)
 
     ## if VITAMINS:
     ##     obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)
