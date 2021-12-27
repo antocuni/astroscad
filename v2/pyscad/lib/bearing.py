@@ -1,5 +1,5 @@
 from ..scad import CustomObject, Cylinder
-from .misc import ring
+from .misc import ring, RoundHole
 
 STEEL = [0.65, 0.67, 0.72]
 
@@ -67,5 +67,5 @@ class Bearing(CustomObject):
         self._inner = ring(self.inner_rim_d, hole_d, h).color(STEEL)
         self.anchors.copy_from(self._outer.anchors)
 
-    def hole(self, h, *, clearance=0.1):
-        return Cylinder(d=self.d+clearance, h=h)
+    def hole(self, h, *, clearance=0.1, extra_walls=0):
+        return RoundHole(d=self.d+clearance, h=h, extra_walls=extra_walls)

@@ -97,7 +97,7 @@ class BasePlate(CustomObject):
         self.rim_bottom = self.body.top - self.BEARING_RIM
 
         # big hole where to put the bearing. h=100 means "very long"
-        self -= bearing.hole(h=100)\
+        self -= bearing.hole(h=100, extra_walls=1)\
             .move_to(top=self.body.top - self.BEARING_RIM)
 
         # screw holes to attach the photo plate
