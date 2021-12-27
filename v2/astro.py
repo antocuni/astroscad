@@ -162,7 +162,7 @@ def build():
     obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top+25)
     #return rplate
 
-    obj.worm = WormFactory.worm(length=15, bore_d=4)\
+    obj.worm = WormFactory.worm(h=40, bore_d=4, axis='y')\
                           .move_to(center=rplate.spur.center, left=rplate.spur.right)
 
     ## if VITAMINS:
