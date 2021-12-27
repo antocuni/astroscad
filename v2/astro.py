@@ -141,6 +141,20 @@ class RotatingPlate(CustomObject):
         self.glides = glides
 
 
+class SmallWormFactory(WormFactory):
+    module = 0.5
+
+
+class MyWorm(CustomObject):
+
+    def init_custom(self):
+        self.worm = WormFactory.worm(h=40, bore_d=4, axis='y')
+        spur = SmallWormFactory.spur(teeth=24, h=4, axis='y', optimized=False)
+        self.spur = spur.move_to(center=self.worm.center, front=self.worm.back)
+        self.anchors.worm_center = self.worm.center
+        self.anchors.worm_left = self.worm.left
+
+
 def build():
     obj = CustomObject()
     bearing = Bearing('608')
@@ -162,8 +176,8 @@ def build():
     obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top+25)
     #return rplate
 
-    obj.worm = WormFactory.worm(h=40, bore_d=4, axis='y')\
-                          .move_to(center=rplate.spur.center, left=rplate.spur.right)
+    obj.myworm = MyWorm().move_to(worm_center=rplate.spur.center,
+                                  worm_left=rplate.spur.right)
 
     ## if VITAMINS:
     ##     obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)
