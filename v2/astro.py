@@ -39,6 +39,7 @@ class PHBolt(CustomObject):
     def init_custom(self):
         self.head = TCone(d1=14, d2=self.D, h=self.HEAD_H)
         self.thread = Cylinder(d=self.D, h=self.H).move_to(bottom=self.head.top)
+        self -= Cylinder(d=4.5, h=self.HEAD_H, segments=6).move_to(bottom=self.head.bottom-EPS)
         self.anchors.set_bounding_box(self.head.pmin, self.head.pmax,
                                       self.thread.pmin, self.thread.pmax)
         self.color(BRASS)
