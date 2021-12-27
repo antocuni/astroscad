@@ -282,21 +282,21 @@ class Cylinder(PySCADObject):
         if axis == 'z':
             pmin = Point(-R, -R, -h/2)
             pmax = Point( R,  R,  h/2)
-            rot_vector = [0, 0, 0]
+            self.rot_vector = [0, 0, 0]
         elif axis == 'x':
             pmin = Point(-h/2, -R, -R)
             pmax = Point( h/2,  R,  R)
-            rot_vector = [0, 90, 0]
+            self.rot_vector = [0, 90, 0]
         elif axis == 'y':
             pmin = Point(-R, -h/2, -R)
             pmax = Point( R,  h/2,  R)
-            rot_vector = [-90, 0, 0]
+            self.rot_vector = [-90, 0, 0]
         else:
             assert False
 
         self.anchors.set_bounding_box(pmin, pmax)
         assert self.anchors.center == Point.O
-        self.solid = solid.rotate(rot_vector)(
+        self.solid = solid.rotate(self.rot_vector)(
             solid.cylinder(h=h, r1=r1, r2=r2, center=True, segments=segments)
         )
 

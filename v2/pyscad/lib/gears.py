@@ -1,5 +1,5 @@
 import math
-from ..scad import ImportScad, PySCADObject
+from ..scad import ImportScad, PySCADObject, Cylinder
 from ..geometry import Point, Vector, AnchorPoints
 
 _gears = ImportScad('vendored/gears/gears.scad')
@@ -24,14 +24,15 @@ class WormFactory:
     lead_angle = 10
 
     @classmethod
-    def spur(cls, teeth, h, bore_d=0, optimized=True):
+    def spur(cls, teeth, h, bore_d=0, optimized=True, *, axis='z'):
         return SpurGear(cls.module,
                         teeth,
                         h,
                         bore_d,
                         cls.pressure_angle,
                         -cls.lead_angle,
-                        optimized)
+                        optimized,
+                        axis=axis)
 
     @classmethod
     def worm(cls, *, length, bore_d):
@@ -51,15 +52,16 @@ class SpurGear(PySCADObject):
     """
 
     def init_solid(self, module, teeth, h, bore_d, pressure_angle,
-                   lead_angle, optimized):
-        # compute anchors
+                   lead_angle, optimized, *, axis='z'):
         self.h = h
         self.d = module * teeth
         self.r = r = self.d / 2
-        pmin = Point(-r, -r, -h/2)
-        pmax = Point(r, r, h/2)
+        #
+        # to compute the anchors, we create a thrown-away Cylinder which is
+        # "equivalent" to the spur
+        cyl = Cylinder(d=self.d, h=h, axis=axis)
         self.anchors.center = Point.O
-        self.anchors.set_bounding_box(pmin, pmax)
+        self.anchors.set_bounding_box(cyl.pmin, cyl.pmax)
         #
         # create the spur and place it at center
         width = h # gears.scad naming convention
@@ -71,6 +73,10 @@ class SpurGear(PySCADObject):
         # This is computed to match the corresponding rotation angle of the worm
         gamma = -90 * width * sin(-lead_angle) / (math.pi * r)
         _spur.rotate(0, 0, gamma)
+        #
+        # rotate as needed by the 'axis', by re-using the rot_vector provided
+        # by the equivalent cylinder
+        _spur.rotate(*cyl.rot_vector)
         #
         # _spur is a GenericSCADWrapper, manually unwrap it
         self.solid = _spur.solid

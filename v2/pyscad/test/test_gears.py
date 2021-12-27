@@ -12,6 +12,14 @@ class TestGear(OpenSCADTest):
         obj += Cylinder(r=spur.r, h=1).color('red', 0.3).move_to(bottom=spur.top)
         self.check(obj)
 
+    def test_spur_other_axes(self):
+        obj = Union()
+        spur_x = WormFactory.spur(teeth=24, h=2, bore_d=3.2, axis='x').tr(z=15)
+        spur_y = WormFactory.spur(teeth=24, h=2, bore_d=3.2, axis='y').tr(z=-15)
+        obj += spur_x.show_bounding_box()
+        obj += spur_y.show_bounding_box()
+        self.check(obj, distance=160)
+
     def test_worm(self):
         obj = Union()
         worm = WormFactory.worm(length=15, bore_d=4)
