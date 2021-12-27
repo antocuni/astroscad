@@ -35,13 +35,14 @@ class WormFactory:
                         axis=axis)
 
     @classmethod
-    def worm(cls, *, length, bore_d):
+    def worm(cls, *, h, bore_d, axis='z'):
         return WormGear(cls.module,
                         cls.thread_starts,
-                        length,
+                        h,
                         bore_d,
                         cls.pressure_angle,
-                        cls.lead_angle)
+                        cls.lead_angle,
+                        axis=axis)
 
 
 class SpurGear(PySCADObject):
@@ -83,32 +84,31 @@ class SpurGear(PySCADObject):
 
 class WormGear(PySCADObject):
 
-    def init_solid(self, module, thread_starts, length, bore_d,
-                   pressure_angle, lead_angle):
-        # compute anchors
+    def init_solid(self, module, thread_starts, h, bore_d,
+                   pressure_angle, lead_angle, *, axis='z'):
         self.r = r = module * thread_starts / (2 * sin(lead_angle))
-        self.length = length
-        pmin = Point(-r, -length/2, -r)
-        pmax = Point(+r, +length/2, +r)
+        self.d = r*2
+        self.h = h
+        # to compute the anchors, we create a thrown-away Cylinder which is
+        # "equivalent" to the worm
+        cyl = Cylinder(d=self.d, h=h, axis=axis)
         self.anchors.center = Point.O
-        self.anchors.set_bounding_box(pmin, pmax)
-        #
+        self.anchors.set_bounding_box(cyl.pmin, cyl.pmax)
+
         # 1) create the worm
-        width = length # gears.scad naming convention
+        width = h # gears.scad naming convention
         _worm = _gears.worm(module, thread_starts, width, bore_d, pressure_angle,
                             lead_angle, together_built=True)
-        #
-        # 2) rotate
-        #     - the rotation around the X axis is to "lay it down" in a
-        #       position which is by default compatible with SpurGear. This is
-        #       also why it has a "length" instead of a "height"
-        #
-        #     - the rotation around the Y axis is to match the correponding
-        #       rotation of SpurGear, copied from gears.scad
-        _worm.rotate(90, 180/thread_starts, 0)
-        #
-        # 3) center on the Y axis
-        _worm.translate(y=length/2)
-        #
+
+        # 2) center on the Z axis
+        _worm.translate(z=-h/2)
+
+        # 3) rotate around the Z axis to match the correponding rotation of
+        #    SpurGear, copied&adapted from gears.scad
+        _worm.rotate(z=180/thread_starts)
+
+        # 4) rotate to match the equivalent cylinder
+        _worm.rotate(*cyl.rot_vector)
+
         # _worm is a GenericSCADWrapper, manually unwrap it
         self.solid = _worm.solid

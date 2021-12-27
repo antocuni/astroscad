@@ -37,8 +37,8 @@ class OpenSCADTest:
         if ref.check(exists=False):
             raise Exception(f'Reference does not exist: {ref.relto(ROOT)}')
         res = image_diff._diff(str(ref), str(actual), str(diff))
-        if res != 0:
-            os.system(f'eog "{diff}" &')
+        ## if res != 0:
+        ##     os.system(f'eog "{diff}" &')
         assert res == 0
 
 class TestBasic(OpenSCADTest):

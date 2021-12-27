@@ -5,7 +5,7 @@ from .test_render import OpenSCADTest
 
 class TestGear(OpenSCADTest):
 
-    def test_spur(self):
+    def test_spur_simple(self):
         obj = Union()
         spur = WormFactory.spur(teeth=24, h=2, bore_d=3.2)
         obj += spur
@@ -20,12 +20,19 @@ class TestGear(OpenSCADTest):
         obj += spur_y.show_bounding_box()
         self.check(obj, distance=160)
 
-    def test_worm(self):
+    def test_worm_simple(self):
         obj = Union()
-        worm = WormFactory.worm(length=15, bore_d=4)
-        obj += worm
-        obj += Cylinder(r=worm.r, h=worm.length).color('red', 0.3).rot(x=90)
-        obj += Cube(worm.r, worm.length, 2).color('green', 0.3).move_to(bottom=worm.top)
+        worm = WormFactory.worm(h=15, bore_d=4)
+        obj += worm.show_bounding_box()
+        obj += Cylinder(r=worm.r, h=1).color('red', 0.3).move_to(bottom=worm.top)
+        self.check(obj)
+
+    def test_worm_other_axes(self):
+        obj = Union()
+        worm_x = WormFactory.worm(h=15, bore_d=4, axis='x').tr(z=15)
+        worm_y = WormFactory.worm(h=15, bore_d=4, axis='y').tr(z=-15)
+        obj += worm_x.show_bounding_box()
+        obj += worm_y.show_bounding_box()
         self.check(obj)
 
     def test_bracket(self):
@@ -55,7 +62,7 @@ class TestGear(OpenSCADTest):
         root = Union()
         root += bracket().mod('%')
         spur = WormFactory.spur(teeth=24, h=2, bore_d=3.2)
-        worm = WormFactory.worm(length=15, bore_d=0)
+        worm = WormFactory.worm(h=15, bore_d=0, axis='y')
         root += spur
         root += worm.move_to(left=spur.right)
         self.check(root)
