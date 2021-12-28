@@ -313,6 +313,19 @@ class TCone(Cylinder):
         self.r2, self.d2 = _get_r_d(r2, d2)
         self._init_cylinder(h, axis, self.r1, self.r2, segments)
 
+class Text(PySCADObject):
+
+    def init_solid(self, text, *, h, size=None, font=None, halign=None, valign=None,
+                   spacing=None, direction=None, language=None, script=None,
+                   segments=None):
+        assert h is not None
+        t = solid.text(text, size, font, halign, valign,
+                       spacing, direction, language, script, segments)
+        self.solid = solid.linear_extrude(h)(t)
+        self.anchors.top = Point(None, None, h)
+        self.anchors.bottom = Point(None, None, 0)
+        self.anchors.origin = Point.O
+
 
 class CustomObject(PySCADObject):
     """
