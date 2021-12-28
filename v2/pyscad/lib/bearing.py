@@ -55,17 +55,20 @@ DIMENSIONS = {
 
 class Bearing(CustomObject):
 
-    def init_custom(self, model):
+    def init_custom(self, model, *, axis='z'):
         hole_d, d, h = DIMENSIONS[model]
         rim = 1.90 # this is correct for 608, I don't know the others
         self.hole_d = hole_d
         self.d = d
         self.h = h
+        self.axis = axis
         self.inner_rim_d = hole_d + rim
-        self._outer = ring(d, d-rim, h).color(STEEL)
-        self._seal = ring(d-rim, hole_d+rim, h*0.8).color('dodgerblue')
-        self._inner = ring(self.inner_rim_d, hole_d, h).color(STEEL)
+        self._outer = ring(d, d-rim, h, axis=axis).color(STEEL)
+        self._seal = ring(d-rim, hole_d+rim, h*0.8, axis=axis).color('dodgerblue')
+        self._inner = ring(self.inner_rim_d, hole_d, h, axis=axis).color(STEEL)
         self.anchors.copy_from(self._outer.anchors)
 
-    def hole(self, h, *, clearance=0.1, extra_walls=0):
-        return RoundHole(d=self.d+clearance, h=h, extra_walls=extra_walls)
+    def hole(self, h, *, clearance=0.1, extra_walls=0, axis=None):
+        if axis is None:
+            axis = self.axis
+        return RoundHole(d=self.d+clearance, h=h, extra_walls=extra_walls, axis=axis)

@@ -1,9 +1,9 @@
 from ..geometry import Point
 from ..scad import Cylinder, EPS, CustomObject
 
-def ring(outer_d, inner_d, h):
-    result = Cylinder(d=outer_d, h=h)
-    result -= Cylinder(d=inner_d, h=h+EPS)
+def ring(outer_d, inner_d, h, *, axis='z'):
+    result = Cylinder(d=outer_d, h=h, axis=axis)
+    result -= Cylinder(d=inner_d, h=h+EPS, axis=axis)
     return result
 
 

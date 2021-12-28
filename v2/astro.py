@@ -147,14 +147,67 @@ class SmallWormFactory(WormFactory):
 
 class MyWorm(CustomObject):
 
-    def init_custom(self):
-        self.worm = worm = WormFactory.worm(h=40, bore_d=0, axis='x')
-        spur = SmallWormFactory.spur(teeth=24, h=4, axis='x', optimized=False)
-        self.spur = spur.move_to(center=worm.center, left=worm.right)
-        self -= Cylinder(d=4, h=100, axis='x').\
-            move_to(center=worm.center)
+    def init_custom(self, *, axis):
+        self.worm = worm = WormFactory.worm(h=40, bore_d=0, axis=axis)
+        spur = SmallWormFactory.spur(teeth=24, h=4, axis=axis, optimized=False)
+        self.spur = spur = spur.move_to(center=worm.center, left=worm.right)
+        l_bulge = Cylinder(d=8, h=2, axis=axis).color('orange')
+        r_bulge = Cylinder(d=8, h=2, axis=axis).color('orange')
+        self.l_bulge = l_bulge.move_to(left=spur.right)
+        self.r_bulge = r_bulge.move_to(right=worm.left)
+        # central bore
+        self -= Cylinder(d=3.1, h=100, axis=axis).move_to(center=worm.center)
+
+        self.anchors.set_bounding_box(spur.pmin, spur.pmax,
+                                      worm.pmin, worm.pmax,
+                                      l_bulge.pmin, l_bulge.pmax,
+                                      r_bulge.pmin, r_bulge.pmax)
         self.anchors.worm_center = worm.center
         self.anchors.worm_back = worm.back
+
+
+class WormBracket(CustomObject):
+
+    B = 1.5 # extra border around the bearings
+
+    def init_custom(self, myworm):
+        b = self.B
+        lb = Bearing('604', axis='x')    # left bearing
+        rb = Bearing('604', axis='x')    # right bearing
+        lpil = self.pillar(lb, 'left')   # left pillar
+        rpil = self.pillar(rb, 'right')  # right pillar
+        #
+        self.lpil = lpil.move_to(socket_center=myworm.center, right=myworm.left)
+        self.rpil = rpil.move_to(socket_center=myworm.center, left=myworm.right)
+        #
+        if VITAMINS:
+            self.lb = lb.move_to(center=lpil.socket_center, right=lpil.socket_right)
+            self.rb = rb.move_to(center=rpil.socket_center, left=rpil.socket_left)
+
+    def pillar(self, bearing, which):
+        assert which in ('left', 'right')
+        b = self.B
+        p = Cube(bearing.h + 4, bearing.d + b*2, 20)
+        #
+        socket = bearing.hole(bearing.h + 1)
+        if which == 'left':
+            socket.move_to(top=p.top-b, right=p.right+EPS)
+        else:
+            socket.move_to(top=p.top-b, left=p.left-EPS)
+        p -= socket
+        #
+        p -= RoundHole(d=9, h=100, axis='x').move_to(center=socket.center)
+        p.anchors.socket_center = socket.center
+        p.anchors.socket_left = socket.left
+        p.anchors.socket_right = socket.right
+        return p
+
+
+def build_worm_bracket():
+    obj = CustomObject()
+    obj.myworm = MyWorm(axis='x')
+    obj.bracket = WormBracket(obj.myworm)
+    return obj
 
 
 def build():
@@ -191,7 +244,8 @@ def main():
     if len(sys.argv) >= 2:
         part_name = sys.argv[1]
     #
-    obj = build()
+    #obj = build()
+    obj = build_worm_bracket()
     if part_name:
         obj = getattr(obj, part_name)
     obj.autorender()
