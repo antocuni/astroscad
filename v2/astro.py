@@ -231,8 +231,9 @@ def build():
     obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top+25)
     #return rplate
 
-    obj.myworm = MyWorm().move_to(worm_center=rplate.spur.center,
-                                  worm_back=rplate.spur.front)
+    obj.myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
+                                          worm_back=rplate.spur.front)
+    obj.bracket = WormBracket(obj.myworm)
 
     ## if VITAMINS:
     ##     obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)
@@ -244,8 +245,8 @@ def main():
     if len(sys.argv) >= 2:
         part_name = sys.argv[1]
     #
-    #obj = build()
-    obj = build_worm_bracket()
+    obj = build()
+    #obj = build_worm_bracket()
     if part_name:
         obj = getattr(obj, part_name)
     obj.autorender()
