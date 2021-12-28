@@ -245,6 +245,7 @@ def build():
         diff = bolt.top.z - obj.ball_head.screw_hole_top.z
         if diff > 0:
             print(f'** WARNING **: the bolt is too long for the ball head: {diff:.2f}')
+            print('baseplate H: ', obj.baseplate.body.top.z - obj.baseplate.body.bottom.z)
 
     return obj
 
