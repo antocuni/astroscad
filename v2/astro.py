@@ -25,9 +25,12 @@ class BallHead(CustomObject):
     def init_custom(self):
         self.cyl = Cylinder(d=55, h=30)
         self.ball = Sphere(d=self.cyl.d-10).move_to(center=self.cyl.top)
-        self.color([0.4, 0.4, 0.4])
+        screw_hole = RoundHole(d=in2mm(3/8), h=25)
+        self -= screw_hole.move_to(center=self.cyl.center, bottom=self.cyl.bottom-EPS*2)
+        self.mod()
         self.anchors.set_bounding_box(self.cyl.pmin, self.cyl.pmax,
                                       self.ball.pmin, self.ball.pmax)
+        self.anchors.screw_hole_top = screw_hole.top
 
 
 class PHBolt(CustomObject):
@@ -117,7 +120,6 @@ class RotatingPlate(CustomObject):
 
     def init_custom(self, bolt):
         self.spur = WormFactory.spur(teeth=70, h=4, bore_d=bolt.D+0.1, optimized=False)
-        self.anchors.set_bounding_box(self.spur.pmin, self.spur.pmax)
         #
         glides = []
         for angle in (0, 120, 240):
@@ -139,6 +141,9 @@ class RotatingPlate(CustomObject):
             glides.append(glide)
 
         self.glides = glides
+        self.anchors.set_bounding_box(self.spur.pmin, self.spur.pmax,
+                                      self.glides[0].pmin, self.glides[0].pmax)
+
 
 
 class SmallWormFactory(WormFactory):
@@ -228,15 +233,18 @@ def build():
 
 
     rplate = RotatingPlate(bolt)
-    obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top+25)
+    obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top) #+25)
     #return rplate
 
     obj.myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
                                           worm_back=rplate.spur.front)
     obj.bracket = WormBracket(obj.myworm)
 
-    ## if VITAMINS:
-    ##     obj.ball_head = BallHead().move_to(bottom=obj.baseplate.body.top + 20)
+    if VITAMINS:
+        obj.ball_head = BallHead().move_to(bottom=obj.rplate.top)# + 20)
+        diff = bolt.top.z - obj.ball_head.screw_hole_top.z
+        if diff > 0:
+            print(f'** WARNING **: the bolt is too long for the ball head: {diff:.2f}')
 
     return obj
 
