@@ -148,11 +148,13 @@ class SmallWormFactory(WormFactory):
 class MyWorm(CustomObject):
 
     def init_custom(self):
-        self.worm = WormFactory.worm(h=40, bore_d=4, axis='x')
+        self.worm = worm = WormFactory.worm(h=40, bore_d=0, axis='x')
         spur = SmallWormFactory.spur(teeth=24, h=4, axis='x', optimized=False)
-        self.spur = spur.move_to(center=self.worm.center, left=self.worm.right)
-        self.anchors.worm_center = self.worm.center
-        self.anchors.worm_back = self.worm.back
+        self.spur = spur.move_to(center=worm.center, left=worm.right)
+        self -= Cylinder(d=4, h=100, axis='x').\
+            move_to(center=worm.center)
+        self.anchors.worm_center = worm.center
+        self.anchors.worm_back = worm.back
 
 
 def build():
