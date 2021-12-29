@@ -57,6 +57,16 @@ class PHBolt(CustomObject):
                                       self.thread.pmin, self.thread.pmax)
         self.color(BRASS)
 
+    def nut(self, *, axis='z'):
+        d = 12.36
+        h = 5.47
+        hex = Cylinder(d=d, h=h, segments=6, axis=axis).color(IRON)
+        hole = Cylinder(d=self.D, h=h+1, axis=axis)
+        nut = hex-hole
+        nut.anchors.set_bounding_box(hex.pmin, hex.pmax)
+        return nut
+
+
 class BearingBoltAdapter(CustomObject):
 
     WASHER_H = 1.5
@@ -238,6 +248,7 @@ def build():
     if VITAMINS:
         obj.bolt = bolt.move_to(bottom=adapter.bottom)
         obj.bearing = bearing.move_to(top=obj.baseplate.rim_bottom)
+        obj.nut = bolt.nut().move_to(bottom=bearing.top+EPS)
         obj.photo_plate = photo_plate.move_to(top=obj.baseplate.body.bottom-EPS)\
                                      .color(IRON, 0.7)
 
@@ -246,12 +257,13 @@ def build():
     obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top) #+25)
     #return rplate
 
-    obj.myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
-                                          worm_back=rplate.spur.front)
+    myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
+                                      worm_back=rplate.spur.front)
+    obj.myworm = myworm
     obj.bracket = WormBracket(obj.myworm)
 
     if VITAMINS:
-        ball_head = BallHead().move_to(bottom=obj.rplate.top)
+        ball_head = BallHead().move_to(bottom=rplate.top)
         obj.ball_head = ball_head
         diff = bolt.top.z - ball_head.screw_hole_top.z
         if diff > 0:
