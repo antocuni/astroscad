@@ -160,9 +160,10 @@ class RotatingPlate(CustomObject):
             )
             glides.append(glide)
 
-        self.glides = glides
+        if VITAMINS:
+            self.glides = glides
         self.anchors.set_bounding_box(self.spur.pmin, self.spur.pmax,
-                                      self.glides[0].pmin, self.glides[0].pmax)
+                                      glides[0].pmin, glides[0].pmax)
 
 
 
