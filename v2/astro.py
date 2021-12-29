@@ -23,12 +23,22 @@ BRASS = [0.88, 0.78, 0.5]
 class BallHead(CustomObject):
 
     def init_custom(self):
-        self.cyl = Cylinder(d=55, h=30)
+        self.bcyl = bcyl = Cylinder(d=55, h=8) # base cylinder
+        self.cyl = Cylinder(d=45, h=52).move_to(bottom=bcyl.top)
         self.ball = Sphere(d=self.cyl.d-10).move_to(center=self.cyl.top)
         screw_hole = RoundHole(d=in2mm(3/8), h=25)
-        self -= screw_hole.move_to(center=self.cyl.center, bottom=self.cyl.bottom-EPS*2)
+        self -= screw_hole.move_to(center=bcyl.center, bottom=bcyl.bottom-EPS*2)
+        # handles
+        h3 = Cylinder(d=22.40, h=18, axis='x')
+        h9 = Cylinder(d=22.40, h=18, axis='x')
+        h6 = Cylinder(d=19.40, h=18.60, axis='y')
+        self.h3 = h3.move_to(center=self.cyl.center, left=self.cyl.right)
+        self.h6 = h6.move_to(back=self.cyl.front, bottom=bcyl.bottom+7)
+        self.h9 = h9.move_to(center=self.cyl.center, right=self.cyl.left)
+        #
         self.mod()
-        self.anchors.set_bounding_box(self.cyl.pmin, self.cyl.pmax,
+        self.anchors.set_bounding_box(self.bcyl.pmin, self.bcyl.pmax,
+                                      self.cyl.pmin, self.cyl.pmax,
                                       self.ball.pmin, self.ball.pmax)
         self.anchors.screw_hole_top = screw_hole.top
 
@@ -242,7 +252,7 @@ def build():
 
     if VITAMINS:
         ball_head = BallHead().move_to(bottom=obj.rplate.top)
-        #obj.ball_head = ball_head
+        obj.ball_head = ball_head
         diff = bolt.top.z - ball_head.screw_hole_top.z
         if diff > 0:
             print(f'** WARNING **: the bolt is too long for the ball head: {diff:.2f}')
