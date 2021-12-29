@@ -256,7 +256,6 @@ def build():
 
     rplate = RotatingPlate(bolt)
     obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top) #+25)
-    #return rplate
 
     myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
                                       worm_back=rplate.spur.front)
@@ -275,14 +274,18 @@ def build():
     return obj
 
 def main():
-    part_name = None
+    parts = None
     if len(sys.argv) >= 2:
-        part_name = sys.argv[1]
+        parts = sys.argv[1:]
     #
     obj = build()
     #obj = build_worm_bracket()
-    if part_name:
-        obj = getattr(obj, part_name)
+    if parts:
+        new_obj = CustomObject()
+        for part_name in parts:
+            part_obj = getattr(obj, part_name)
+            setattr(new_obj, part_name, part_obj)
+        obj = new_obj
     obj.autorender()
 
 if __name__ == '__main__':
