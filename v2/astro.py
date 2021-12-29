@@ -122,7 +122,7 @@ class BasePlate(CustomObject):
              adapter.HEAD_H +
              2)
         self.body = TCone(d1=self.d1, d2=self.d2, h=h).color('SandyBrown') #.mod('#')
-        self.rim_bottom = self.body.top - self.BEARING_RIM
+        self.anchors.rim_bottom = self.body.top - self.BEARING_RIM
 
         # big hole where to put the bearing. h=100 means "very long"
         self -= bearing.hole(h=100, extra_walls=1)\
@@ -140,6 +140,7 @@ class BasePlate(CustomObject):
 
         # smaller hole to make the bearing accessible from the top
         self -= Cylinder(d=bearing.d-5, h=100)
+        self.anchors.set_bounding_box(self.body.pmin, self.body.pmax)
 
 
 class RotatingPlate(CustomObject):
@@ -251,12 +252,14 @@ def build():
     adapter = BearingBoltAdapter(bearing, bolt)
     photo_plate = Manfrotto_200PL(with_holes=True)
 
-    obj.baseplate = BasePlate(bearing, adapter, photo_plate)
+    obj.baseplate = BasePlate(bearing, adapter, photo_plate).move_to(bottom=Point.O)
+
+    bearing = bearing.move_to(top=obj.baseplate.rim_bottom)
     obj.adapter = adapter.move_to(top=bearing.top)
 
     if VITAMINS:
         obj.bolt = bolt.move_to(bottom=adapter.bottom)
-        obj.bearing = bearing.move_to(top=obj.baseplate.rim_bottom)
+        obj.bearing = bearing
         obj.nut = bolt.nut().move_to(bottom=bearing.top+EPS)
         obj.photo_plate = photo_plate.move_to(top=obj.baseplate.body.bottom-EPS)\
                                      .color(IRON, 0.7)
@@ -277,7 +280,6 @@ def build():
             ball_head.mod()
             ball_head.highlight_screw_hole()
             print(f'** WARNING **: the bolt is too long for the ball head: {diff:.2f}')
-            print('baseplate H: ', obj.baseplate.body.top.z - obj.baseplate.body.bottom.z)
         obj.ball_head = ball_head
 
 
