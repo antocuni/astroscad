@@ -130,6 +130,10 @@ class BasePlate(CustomObject):
             screw_hole = RoundHole(d=3, h=18, extra_walls=1)
             self -= screw_hole.move_to(center=p, bottom=self.body.bottom-EPS)
 
+        # groove for the manfrotto plate
+        groove = photo_plate.make_rubber_pad_groove()
+        self -= groove.move_to(bottom=self.body.bottom-EPS)
+
         # smaller hole to make the bearing accessible from the top
         self -= Cylinder(d=bearing.d-5, h=100)
 
