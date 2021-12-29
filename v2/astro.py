@@ -36,7 +36,7 @@ class BallHead(CustomObject):
         self.h6 = h6.move_to(back=self.cyl.front, bottom=bcyl.bottom+7)
         self.h9 = h9.move_to(center=self.cyl.center, right=self.cyl.left)
         #
-        self.mod()
+        self.color([0.4, 0.4, 0.4])
         self.anchors.set_bounding_box(self.bcyl.pmin, self.bcyl.pmax,
                                       self.cyl.pmin, self.cyl.pmax,
                                       self.ball.pmin, self.ball.pmax)
@@ -255,6 +255,7 @@ def build():
         obj.ball_head = ball_head
         diff = bolt.top.z - ball_head.screw_hole_top.z
         if diff > 0:
+            ball_head.mod()
             print(f'** WARNING **: the bolt is too long for the ball head: {diff:.2f}')
             print('baseplate H: ', obj.baseplate.body.top.z - obj.baseplate.body.bottom.z)
 
