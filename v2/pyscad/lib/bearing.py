@@ -1,4 +1,5 @@
 from ..scad import CustomObject, Cylinder
+from ..calibration import CalibrationData
 from .misc import ring, RoundHole
 
 STEEL = [0.65, 0.67, 0.72]
@@ -56,6 +57,7 @@ DIMENSIONS = {
 class Bearing(CustomObject):
 
     def init_custom(self, model, *, axis='z'):
+        self.model = model
         hole_d, d, h = DIMENSIONS[model]
         rim = 1.90 # this is correct for 608, I don't know the others
         self.hole_d = hole_d
@@ -68,7 +70,11 @@ class Bearing(CustomObject):
         self._inner = ring(self.inner_rim_d, hole_d, h, axis=axis).color(STEEL)
         self.anchors.copy_from(self._outer.anchors)
 
-    def hole(self, h, *, clearance=0.1, extra_walls=0, axis=None):
+    def hole(self, h, *, clearance=None, extra_walls=0, axis=None):
+        if clearance is None:
+            clearance = CalibrationData.BEARING_HOLE_CLEARANCE.get(self.model)
+            if clearance is None:
+                raise Exception('Cannot find the clearance for this bearing model')
         if axis is None:
             axis = self.axis
         return RoundHole(d=self.d+clearance, h=h, extra_walls=extra_walls, axis=axis)

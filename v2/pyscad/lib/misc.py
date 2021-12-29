@@ -1,5 +1,6 @@
 from ..geometry import Point
 from ..scad import Cylinder, EPS, CustomObject
+from ..calibration import CalibrationData
 
 def ring(outer_d, inner_d, h, *, axis='z'):
     result = Cylinder(d=outer_d, h=h, axis=axis)
@@ -30,9 +31,8 @@ class TeflonGlide(CustomObject):
         self.anchors.center = Point.O
 
     def make_groove(self, h):
-        # XXX calibrate properly
-        tolerance = 0.1
-        return Cylinder(d=self.d + tolerance, h=h).move_to(center=self.center)
+        clearance = CalibrationData.TEFLON_GLIDE_GROOVE_CLEARANCE
+        return Cylinder(d=self.d + clearance, h=h).move_to(center=self.center)
 
 
 class RoundHole(CustomObject):
