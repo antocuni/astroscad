@@ -42,6 +42,10 @@ class BallHead(CustomObject):
                                       self.ball.pmin, self.ball.pmax)
         self.anchors.screw_hole_top = screw_hole.top
 
+    def highlight_screw_hole(self):
+        disc = Cylinder(d=self.cyl.d+1, h=0.1)
+        self.disc = disc.move_to(top=self.screw_hole_top)
+
 
 class PHBolt(CustomObject):
     D = in2mm(1/4)
@@ -268,12 +272,14 @@ def build():
 
     if VITAMINS:
         ball_head = BallHead().move_to(bottom=rplate.top)
-        obj.ball_head = ball_head
         diff = bolt.top.z - ball_head.screw_hole_top.z
         if diff > 0:
             ball_head.mod()
+            ball_head.highlight_screw_hole()
             print(f'** WARNING **: the bolt is too long for the ball head: {diff:.2f}')
             print('baseplate H: ', obj.baseplate.body.top.z - obj.baseplate.body.bottom.z)
+        obj.ball_head = ball_head
+
 
     return obj
 
