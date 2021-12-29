@@ -1,6 +1,7 @@
 import math
-from ..scad import ImportScad, CustomObject, Cylinder, Union
+from ..scad import ImportScad, CustomObject, Cylinder, Union, Cube
 from ..geometry import Point, Vector, AnchorPoints
+from ..calibration import CalibrationData
 
 _manfrotto = ImportScad('vendored/photo/manfrotto-200PL-003.scad')
 
@@ -80,3 +81,11 @@ class Manfrotto_200PL(CustomObject):
             self -= Cylinder(d=4.9, h=20).move_to(center=self.hole6)
             self -= Cylinder(d=4.9, h=20).move_to(center=self.hole9)
             self -= Cylinder(d=4.9, h=20).move_to(center=self.hole12)
+
+    def make_rubber_pad_groove(self):
+        # a groove for the rubber pad on top
+        # nominal size, measured by caliper
+        sx, sy, sz = 47.5, 33.3, 0.6
+        # clearanze
+        cx, cy, cz = CalibrationData.MANFROTTO_RUBBER_PAD_CLEARANCE
+        return Cube(sx+cx, sy+cy, sz+cz)

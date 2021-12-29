@@ -14,3 +14,5 @@ class CalibrationData:
     }
 
     TEFLON_GLIDE_GROOVE_CLEARANCE = 0.8
+
+    MANFROTTO_RUBBER_PAD_CLEARANCE = (0.5, 0.5, 0) # x, y, z
