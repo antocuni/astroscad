@@ -148,7 +148,7 @@ class RotatingPlate(CustomObject):
     GROOVE_H = 1
 
     def init_custom(self, bolt):
-        self.spur = WormFactory.spur(teeth=70, h=4, bore_d=bolt.D+0.1, optimized=False)
+        self.spur = WormFactory.spur(teeth=70, h=11, bore_d=bolt.D+0.1, optimized=False)
         #
         glides = []
         for angle in (0, 120, 240):
@@ -281,7 +281,6 @@ def build():
             ball_head.highlight_screw_hole()
             print(f'** WARNING **: the bolt is too long for the ball head: {diff:.2f}')
         obj.ball_head = ball_head
-
 
     return obj
 
