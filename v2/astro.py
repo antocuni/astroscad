@@ -14,6 +14,7 @@ from pyscad.util import in2mm
 from pyscad import autorender
 
 VITAMINS = True
+FAST_RENDERING = False
 
 IRON = [0.36, 0.33, 0.33]
 BRASS = [0.88, 0.78, 0.5]
@@ -148,7 +149,8 @@ class RotatingPlate(CustomObject):
     GROOVE_H = 1
 
     def init_custom(self, bolt):
-        self.spur = WormFactory.spur(teeth=70, h=11, bore_d=bolt.D+0.1, optimized=False)
+        self.spur = WormFactory.spur(teeth=70, h=11, bore_d=bolt.D+0.1, optimized=False,
+                                     fast_rendering=FAST_RENDERING)
         #
         glides = []
         for angle in (0, 120, 240):
@@ -183,11 +185,13 @@ class SmallWormFactory(WormFactory):
 class MyWorm(CustomObject):
 
     def init_custom(self, *, axis):
-        self.worm = worm = WormFactory.worm(h=40, bore_d=0, axis=axis)
-        spur = SmallWormFactory.spur(teeth=24, h=4, axis=axis, optimized=False)
+        self.worm = worm = WormFactory.worm(h=40, bore_d=0, axis=axis,
+                                            fast_rendering=FAST_RENDERING)
+        spur = SmallWormFactory.spur(teeth=24, h=4, axis=axis, optimized=False,
+                                     fast_rendering=FAST_RENDERING)
         self.spur = spur = spur.move_to(center=worm.center, left=worm.right)
-        l_bulge = Cylinder(d=8, h=2, axis=axis).color('orange')
-        r_bulge = Cylinder(d=8, h=2, axis=axis).color('orange')
+        l_bulge = Cylinder(d=8, h=2, axis=axis)
+        r_bulge = Cylinder(d=8, h=2, axis=axis)
         self.l_bulge = l_bulge.move_to(left=spur.right)
         self.r_bulge = r_bulge.move_to(right=worm.left)
         # central bore
@@ -269,7 +273,7 @@ def build():
     obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top) #+25)
 
     myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
-                                      worm_back=rplate.spur.front)
+                                      worm_back=rplate.spur.front).color('green')
     obj.myworm = myworm
     obj.bracket = WormBracket(obj.myworm)
 
@@ -285,9 +289,15 @@ def build():
     return obj
 
 def main():
+    global FAST_RENDERING
     parts = None
+    if '--fast' in sys.argv:
+        FAST_RENDERING = True
+
     if len(sys.argv) >= 2:
         parts = sys.argv[1:]
+        if '--fast' in parts:
+            parts.remove('--fast')
     #
     obj = build()
     #obj = build_worm_bracket()

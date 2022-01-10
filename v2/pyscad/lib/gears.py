@@ -24,7 +24,7 @@ class WormFactory:
     lead_angle = 10
 
     @classmethod
-    def spur(cls, teeth, h, bore_d=0, optimized=True, *, axis='z'):
+    def spur(cls, teeth, h, bore_d=0, optimized=True, *, axis='z', fast_rendering=False):
         return SpurGear(cls.module,
                         teeth,
                         h,
@@ -32,17 +32,19 @@ class WormFactory:
                         cls.pressure_angle,
                         -cls.lead_angle,
                         optimized,
-                        axis=axis)
+                        axis=axis,
+                        fast_rendering=fast_rendering)
 
     @classmethod
-    def worm(cls, *, h, bore_d, axis='z'):
+    def worm(cls, *, h, bore_d, axis='z', fast_rendering=False):
         return WormGear(cls.module,
                         cls.thread_starts,
                         h,
                         bore_d,
                         cls.pressure_angle,
                         cls.lead_angle,
-                        axis=axis)
+                        axis=axis,
+                        fast_rendering=fast_rendering)
 
 
 class SpurGear(PySCADObject):
@@ -53,7 +55,7 @@ class SpurGear(PySCADObject):
     """
 
     def init_solid(self, module, teeth, h, bore_d, pressure_angle,
-                   lead_angle, optimized, *, axis='z'):
+                   lead_angle, optimized, *, axis='z', fast_rendering=False):
         self.h = h
         self.d = module * teeth
         self.r = r = self.d / 2
@@ -63,6 +65,9 @@ class SpurGear(PySCADObject):
         cyl = Cylinder(d=self.d, h=h, axis=axis)
         self.anchors.center = Point.O
         self.anchors.set_bounding_box(cyl.pmin, cyl.pmax)
+        if fast_rendering:
+            self.solid = cyl.solid
+            return
         #
         # create the spur and place it at center
         width = h # gears.scad naming convention
@@ -85,7 +90,7 @@ class SpurGear(PySCADObject):
 class WormGear(PySCADObject):
 
     def init_solid(self, module, thread_starts, h, bore_d,
-                   pressure_angle, lead_angle, *, axis='z'):
+                   pressure_angle, lead_angle, *, axis='z', fast_rendering=False):
         self.r = r = module * thread_starts / (2 * sin(lead_angle))
         self.d = r*2
         self.h = h
@@ -94,6 +99,9 @@ class WormGear(PySCADObject):
         cyl = Cylinder(d=self.d, h=h, axis=axis)
         self.anchors.center = Point.O
         self.anchors.set_bounding_box(cyl.pmin, cyl.pmax)
+        if fast_rendering:
+            self.solid = cyl.solid
+            return
 
         # 1) create the worm
         width = h # gears.scad naming convention
