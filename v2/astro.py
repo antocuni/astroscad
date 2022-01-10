@@ -265,7 +265,7 @@ def build():
         obj.bolt = bolt.move_to(bottom=adapter.bottom)
         obj.bearing = bearing
         obj.nut = bolt.nut().move_to(bottom=bearing.top+EPS)
-        obj.photo_plate = photo_plate.move_to(top=obj.baseplate.body.bottom-EPS)\
+        obj.photo_plate = photo_plate.move_to(top=obj.baseplate.bottom-EPS)\
                                      .color(IRON, 0.7)
 
 
