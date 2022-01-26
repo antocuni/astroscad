@@ -18,7 +18,7 @@ FAST_RENDERING = False
 
 IRON = [0.36, 0.33, 0.33]
 BRASS = [0.88, 0.78, 0.5]
-
+STEEL = [0.65, 0.67, 0.72]
 
 
 class BallHead(CustomObject):
@@ -48,19 +48,25 @@ class BallHead(CustomObject):
         self.disc = disc.move_to(top=self.screw_hole_top)
 
 
-class PHBolt(CustomObject):
+class GenericPHBolt(CustomObject):
+    """
+    Generic countersunk photographic bolt (1/4" UNC-20).
+    The relevant standard seems to be ANSI B18.3.
+    """
+    COLOR = STEEL
     D = in2mm(1/4)
-    TOTAL_H = 50  # mm
-    HEAD_H = 3.85 # mm
-    H = TOTAL_H + HEAD_H
+    TOTAL_H = in2mm(1.25)
+    HEAD_H = in2mm(0.161) # by spec
+    HEAD_D = in2mm(0.5) # by spec. Specs says min=0.480, max=0.531
+    THREAD_H = TOTAL_H - HEAD_H
 
     def init_custom(self):
         self.head = TCone(d1=14, d2=self.D, h=self.HEAD_H)
-        self.thread = Cylinder(d=self.D, h=self.H).move_to(bottom=self.head.top)
+        self.thread = Cylinder(d=self.D, h=self.THREAD_H).move_to(bottom=self.head.top)
         self -= Cylinder(d=4.5, h=self.HEAD_H, segments=6).move_to(bottom=self.head.bottom-EPS)
         self.anchors.set_bounding_box(self.head.pmin, self.head.pmax,
                                       self.thread.pmin, self.thread.pmax)
-        self.color(BRASS)
+        self.color(self.COLOR)
 
     def nut(self, *, axis='z'):
         d = 12.36
@@ -71,20 +77,37 @@ class PHBolt(CustomObject):
         nut.anchors.set_bounding_box(hex.pmin, hex.pmax)
         return nut
 
+class BrassPHBolt(GenericPHBolt):
+    """
+    My "brass" bolt seems to have non-standard measures, and the head is
+    slightly smaller than all the other 1/4" bolts I have
+    """
+    COLOR = BRASS
+    TOTAL_H = 49.8  # mm, measured by caliper
+    HEAD_H = 3.85   # mm, measured by caliper
+    HEAD_D = 11.80  # mm, measured by caliper
+    THREAD_H = TOTAL_H - HEAD_H
+
 
 class BearingBoltAdapter(CustomObject):
 
     WASHER_H = 1.5
     WASHER_D = 17
     WASHER_INNER_D = 8
-    HEAD_H = 3.85
+
+    # XXX this needs more proper calibration for the actual bolt that you are
+    # going to use
+    BEARING_HOLE_CLEARANCE = 0.2
+    BOLT_HOLE_CLEARANCE = 0.3
+    BOLT_HEAD_CLEARANCE = 2
 
     def init_custom(self, bearing, bolt):
-        head = Cylinder(d=self.WASHER_D, h=self.HEAD_H)
-        head -= TCone(d1=14, d2=bolt.D, h=self.HEAD_H+EPS*2)
+        self.head_h = bolt.HEAD_H + self.BOLT_HEAD_CLEARANCE
+        head = Cylinder(d=self.WASHER_D, h=self.head_h)
+        head -= TCone(d1=14, d2=bolt.D, h=self.head_h+EPS*2)
         self.head = head
-        self.cyl = DonutSlice(d1=bolt.D,
-                              d2=bearing.hole_d,
+        self.cyl = DonutSlice(d1=bolt.D + self.BOLT_HOLE_CLEARANCE,
+                              d2=bearing.hole_d - self.BEARING_HOLE_CLEARANCE,
                               h=bearing.h + self.WASHER_H).move_to(bottom=head.top)
 
         self.color('white')
@@ -95,8 +118,6 @@ class BearingBoltAdapter(CustomObject):
             washer = DonutSlice(d1=self.WASHER_INNER_D, d2=self.WASHER_D,
                                 h=self.WASHER_H).color('grey')
             self.washer = washer.move_to(bottom=self.head.top)
-
-
 
 
 class BasePlate(CustomObject):
@@ -120,7 +141,7 @@ class BasePlate(CustomObject):
         h = (bearing.h +
              self.BEARING_RIM +
              adapter.WASHER_H +
-             adapter.HEAD_H +
+             adapter.head_h +
              2)
         self.body = TCone(d1=self.d1, d2=self.d2, h=h).color('SandyBrown') #.mod('#')
         self.anchors.rim_bottom = self.body.top - self.BEARING_RIM
@@ -252,7 +273,7 @@ def build_worm_bracket():
 def build():
     obj = CustomObject()
     bearing = Bearing('608')
-    bolt = PHBolt()
+    bolt = BrassPHBolt()
     adapter = BearingBoltAdapter(bearing, bolt)
     photo_plate = Manfrotto_200PL(with_holes=True)
 
