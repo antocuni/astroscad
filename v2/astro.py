@@ -170,7 +170,7 @@ class RotatingPlate(CustomObject):
     GROOVE_H = 1
 
     def init_custom(self, bolt):
-        self.spur = WormFactory.spur(teeth=70, h=11, bore_d=bolt.D+0.1, optimized=False,
+        self.spur = WormFactory.spur(teeth=70, h=5, bore_d=bolt.D+0.1, optimized=False,
                                      fast_rendering=FAST_RENDERING)
         #
         glides = []
@@ -274,6 +274,7 @@ def build():
     obj = CustomObject()
     bearing = Bearing('608')
     bolt = BrassPHBolt()
+    #bolt = GenericPHBolt()
     adapter = BearingBoltAdapter(bearing, bolt)
     photo_plate = Manfrotto_200PL(with_holes=True)
 
@@ -305,7 +306,10 @@ def build():
             ball_head.mod()
             ball_head.highlight_screw_hole()
             print(f'** WARNING **: the bolt is too long for the ball head: {diff:.2f}')
-        obj.ball_head = ball_head
+        diff = bolt.top.z - rplate.top.z
+        if diff < 8:
+            print(f'** WARNING **: the bolt is too short for the 1/4"-3/8" adapter: {diff:.2f}')
+        #obj.ball_head = ball_head
 
     return obj
 
