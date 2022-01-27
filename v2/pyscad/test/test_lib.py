@@ -58,3 +58,9 @@ class TestStepper_48BYJ48(OpenSCADTest):
         obj.stepper = Stepper_28BYJ48()
         obj.cyl = Cylinder(d=1, h=50, axis='x').mod().move_to(center=obj.stepper.shaft)
         self.check(obj, distance=200)
+
+    def test_mounting_holes(self):
+        obj = CustomObject()
+        obj.stepper = Stepper_28BYJ48().tr(x=-20, y=20)
+        obj.holes = obj.stepper.make_mounting_holes(h=50).tr(x=20).mod()
+        self.check(obj, distance=250)
