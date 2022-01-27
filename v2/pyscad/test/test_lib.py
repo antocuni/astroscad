@@ -2,6 +2,7 @@ from pyscad import Cube, Cylinder, ImportScad, bolt_hole, Union, Point, CustomOb
 from pyscad.lib.bearing import Bearing
 from pyscad.lib.misc import TeflonGlide, RoundHole
 from pyscad.lib.photo import Manfrotto_200PL
+from pyscad.lib.motors import Stepper_28BYJ48
 from .test_render import OpenSCADTest
 
 
@@ -48,3 +49,12 @@ class TestRoundHole(OpenSCADTest):
         obj = RoundHole(d=10, h=3+EPS, axis='x', extra_walls=1).tr(z=-10)
         obj += RoundHole(d=10, h=3+EPS, axis='y', extra_walls=1).tr(z=10)
         self.check(obj)
+
+
+class TestStepper_48BYJ48(OpenSCADTest):
+
+    def test_motor(self):
+        obj = CustomObject()
+        obj.stepper = Stepper_28BYJ48()
+        obj.cyl = Cylinder(d=1, h=50, axis='x').mod().move_to(center=obj.stepper.shaft)
+        self.check(obj, distance=200)

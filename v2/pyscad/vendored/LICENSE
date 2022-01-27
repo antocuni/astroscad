@@ -4,3 +4,8 @@ vendored libraries come from:
   - gears/: https://github.com/chrisspen/gears
 
   - photo/manfrotto-200PL-03.scad: https://www.thingiverse.com/thing:2943710/
+
+  - motors/StepMotor_28BYJ-48.scad by J.Beale:
+    https://www.youmagine.com/designs/28byj-48-step-motor (remixed from
+    RGriffoGoes at http://www.thingiverse.com/thing:204734)
+
