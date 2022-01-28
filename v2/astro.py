@@ -10,6 +10,7 @@ from pyscad.lib.misc import TeflonGlide, RoundHole
 from pyscad.lib.bearing import Bearing
 from pyscad.lib.gears import WormFactory
 from pyscad.lib.photo import Manfrotto_200PL
+from pyscad.lib.motors import Stepper_28BYJ48
 from pyscad.util import in2mm
 from pyscad import autorender
 
@@ -206,31 +207,44 @@ class SmallWormFactory(WormFactory):
 class MyWorm(CustomObject):
 
     def init_custom(self, *, axis):
-        self.worm = worm = WormFactory.worm(h=40, bore_d=0, axis=axis,
+        self.worm = worm = WormFactory.worm(h=25, bore_d=0, axis=axis,
                                             fast_rendering=FAST_RENDERING)
-        spur = SmallWormFactory.spur(teeth=24, h=4, axis=axis, optimized=False,
+        #
+        l_trunk = Cylinder(d=8, h=15, axis=axis)
+        r_trunk = Cylinder(d=8, h=15, axis=axis)
+        self.l_trunk = l_trunk.move_to(right=worm.left)
+        self.r_trunk = r_trunk.move_to(left=worm.right)
+        #
+        spur = SmallWormFactory.spur(teeth=40, h=4, axis=axis, optimized=False,
                                      fast_rendering=FAST_RENDERING)
-        self.spur = spur = spur.move_to(center=worm.center, left=worm.right)
+        self.spur = spur = spur.move_to(center=worm.center, right=l_trunk.left)
+        #
         l_bulge = Cylinder(d=8, h=2, axis=axis)
-        r_bulge = Cylinder(d=8, h=2, axis=axis)
-        self.l_bulge = l_bulge.move_to(left=spur.right)
-        self.r_bulge = r_bulge.move_to(right=worm.left)
+        self.l_bulge = l_bulge.move_to(right=spur.left)
+        #
         # central bore
         self -= Cylinder(d=3.1, h=100, axis=axis).move_to(center=worm.center)
-
+        #
         self.anchors.set_bounding_box(spur.pmin, spur.pmax,
                                       worm.pmin, worm.pmax,
                                       l_bulge.pmin, l_bulge.pmax,
-                                      r_bulge.pmin, r_bulge.pmax)
+                                      r_trunk.pmin, r_trunk.pmax)
         self.anchors.worm_center = worm.center
         self.anchors.worm_back = worm.back
+
+
+class StepperSpur(CustomObject):
+
+    def init_custom(self, myworm):
+        spur = SmallWormFactory.spur(teeth=20, h=4, axis='x').color('red')
+        self.spur = spur.move_to(center=myworm.spur.center, back=myworm.spur.front)
 
 
 class WormBracket(CustomObject):
 
     B = 1.5 # extra border around the bearings
 
-    def init_custom(self, myworm):
+    def init_custom(self, myworm, stepper_spur):
         b = self.B
         lb = Bearing('604', axis='x')    # left bearing
         rb = Bearing('604', axis='x')    # right bearing
@@ -240,9 +254,14 @@ class WormBracket(CustomObject):
         self.lpil = lpil.move_to(socket_center=myworm.center, right=myworm.left)
         self.rpil = rpil.move_to(socket_center=myworm.center, left=myworm.right)
         #
+        stepper = Stepper_28BYJ48().move_to(
+            shaft=stepper_spur.spur.center,
+            right=stepper_spur.spur.left).tr(x=-10)
+
         if VITAMINS:
             self.lb = lb.move_to(center=lpil.socket_center, right=lpil.socket_right)
             self.rb = rb.move_to(center=rpil.socket_center, left=rpil.socket_left)
+            self.stepper = stepper
 
     def pillar(self, bearing, which):
         assert which in ('left', 'right')
@@ -297,7 +316,9 @@ def build():
     myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
                                       worm_back=rplate.spur.front).color('green')
     obj.myworm = myworm
-    obj.bracket = WormBracket(obj.myworm)
+    obj.stepper_spur = StepperSpur(myworm)
+    obj.bracket = WormBracket(obj.myworm, obj.stepper_spur)
+
 
     if VITAMINS:
         ball_head = BallHead().move_to(bottom=rplate.top)
