@@ -319,6 +319,7 @@ def build():
     obj.stepper_spur = StepperSpur(myworm)
     obj.bracket = WormBracket(obj.myworm, obj.stepper_spur)
 
+    compute_ratio(obj)
 
     if VITAMINS:
         ball_head = BallHead().move_to(bottom=rplate.top)
@@ -333,6 +334,22 @@ def build():
         #obj.ball_head = ball_head
 
     return obj
+
+def compute_ratio(obj):
+    main_worm = obj.myworm.worm
+    main_spur = obj.rplate.spur
+    ratio1 = main_spur.teeth / main_worm.thread_starts
+    #
+    motor_spur = obj.stepper_spur.spur
+    myworm_spur = obj.myworm.spur
+    ratio2 = myworm_spur.teeth / motor_spur.teeth
+    #
+    total_ratio = ratio1 * ratio2
+    steps_per_360 = 512*8 * total_ratio
+    steps_per_sec = steps_per_360 / (24*60*60)
+    sec_per_steps = 1 / steps_per_sec
+    print(f'Total ratio: 1:{total_ratio} -- 1 step every {sec_per_steps:.4f}s')
+
 
 def main():
     global FAST_RENDERING

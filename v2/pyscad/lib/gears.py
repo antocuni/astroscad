@@ -56,6 +56,7 @@ class SpurGear(PySCADObject):
 
     def init_solid(self, module, teeth, h, bore_d, pressure_angle,
                    lead_angle, optimized, *, axis='z', fast_rendering=False):
+        self.teeth = teeth
         self.h = h
         self.d = module * teeth
         self.r = r = self.d / 2
@@ -91,6 +92,7 @@ class WormGear(PySCADObject):
 
     def init_solid(self, module, thread_starts, h, bore_d,
                    pressure_angle, lead_angle, *, axis='z', fast_rendering=False):
+        self.thread_starts = thread_starts
         self.r = r = module * thread_starts / (2 * sin(lead_angle))
         self.d = r*2
         self.h = h
