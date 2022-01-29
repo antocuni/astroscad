@@ -150,9 +150,9 @@ class BasePlate(CustomObject):
 
         # platform for the worm bracket
         platform = Cube(self.d, 80, 5).color(self._color)
-        self.platform = platform.move_to(
-            bottom=self.body.bottom,
-            back=self.body.front+self.d/2)
+        ## self.platform = platform.move_to(
+        ##     bottom=self.body.bottom,
+        ##     back=self.body.front+self.d/2)
 
         # big hole where to put the bearing. h=100 means "very long"
         self -= bearing.hole(h=100, extra_walls=1)\
@@ -172,14 +172,14 @@ class BasePlate(CustomObject):
         self -= Cylinder(d=bearing.d-5, h=100)
 
         self.anchors.set_bounding_box(self.body.pmin, self.body.pmax,
-                                      self.platform.pmin, self.platform.pmax)
+                                      platform.pmin, platform.pmax)
 
 class RotatingPlate(CustomObject):
 
     GROOVE_H = 1
 
     def init_custom(self, bolt):
-        self.spur = WormFactory.spur(teeth=70, h=10, bore_d=bolt.D+0.1, optimized=False,
+        self.spur = WormFactory.spur(teeth=70, h=7, bore_d=bolt.D+0.1, optimized=False,
                                      fast_rendering=FAST_RENDERING).color('violet')#.mod()
         #
         glides = []
@@ -273,7 +273,7 @@ class WormBracket(CustomObject):
         floor = Cube(rpil.right.x - lpil.left.x,
                      lpil.back.y - lpil.front.y,
                      2)
-        self.floor = floor.move_to(top=lpil.bottom, left=lpil.left, back=lpil.back)
+        #self.floor = floor.move_to(top=lpil.bottom, left=lpil.left, back=lpil.back)
 
         if VITAMINS:
             self.lb = lb.move_to(center=lpil.socket_center, right=lpil.socket_right)
