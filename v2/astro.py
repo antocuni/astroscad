@@ -127,7 +127,7 @@ class BasePlate(CustomObject):
     _color = 'SandyBrown'
 
     def init_custom(self, bearing, adapter, photo_plate):
-        self.d = 75
+        self.d = 80
         # the cylinder must be large enough to cover the whole photo plate,
         pp_dim = photo_plate.pmax - photo_plate.pmin
         min_d = math.hypot(pp_dim.x, pp_dim.y)
@@ -217,8 +217,8 @@ class MyWorm(CustomObject):
         self.worm = worm = WormFactory.worm(h=25, bore_d=0, axis=axis,
                                             fast_rendering=FAST_RENDERING)
         #
-        l_trunk = Cylinder(d=8, h=15, axis=axis)
-        r_trunk = Cylinder(d=8, h=15+h_spur+h_bulge, axis=axis)
+        l_trunk = Cylinder(d=8, h=13.5, axis=axis)
+        r_trunk = Cylinder(d=8, h=13.5+h_spur+h_bulge, axis=axis)
         self.l_trunk = l_trunk.move_to(right=worm.left)
         self.r_trunk = r_trunk.move_to(left=worm.right)
         #
