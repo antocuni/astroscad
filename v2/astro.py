@@ -124,13 +124,14 @@ class BearingBoltAdapter(CustomObject):
 class BasePlate(CustomObject):
 
     BEARING_RIM = 5
+    _color = 'SandyBrown'
 
     def init_custom(self, bearing, adapter, photo_plate):
-        # the smaller d must be large enough to cover the whole photo plate,
-        # the larger d must be large enough to cover the spur
+        self.d = 75
+        # the cylinder must be large enough to cover the whole photo plate,
         pp_dim = photo_plate.pmax - photo_plate.pmin
-        self.d1 = math.hypot(pp_dim.x, pp_dim.y)
-        self.d2 = 90
+        min_d = math.hypot(pp_dim.x, pp_dim.y)
+        assert self.d > min_d
 
         # the cone must be tall enough to contain:
         #   1. the bearing
@@ -144,8 +145,14 @@ class BasePlate(CustomObject):
              adapter.WASHER_H +
              adapter.head_h +
              2)
-        self.body = TCone(d1=self.d1, d2=self.d2, h=h).color('SandyBrown') #.mod('#')
+        self.body = Cylinder(d=self.d, h=h).color(self._color) #.mod('#')
         self.anchors.rim_bottom = self.body.top - self.BEARING_RIM
+
+        # platform for the worm bracket
+        platform = Cube(self.d, 80, 5).color(self._color)
+        self.platform = platform.move_to(
+            bottom=self.body.bottom,
+            back=self.body.front+self.d/2)
 
         # big hole where to put the bearing. h=100 means "very long"
         self -= bearing.hole(h=100, extra_walls=1)\
@@ -163,8 +170,9 @@ class BasePlate(CustomObject):
 
         # smaller hole to make the bearing accessible from the top
         self -= Cylinder(d=bearing.d-5, h=100)
-        self.anchors.set_bounding_box(self.body.pmin, self.body.pmax)
 
+        self.anchors.set_bounding_box(self.body.pmin, self.body.pmax,
+                                      self.platform.pmin, self.platform.pmax)
 
 class RotatingPlate(CustomObject):
 
@@ -172,12 +180,12 @@ class RotatingPlate(CustomObject):
 
     def init_custom(self, bolt):
         self.spur = WormFactory.spur(teeth=70, h=5, bore_d=bolt.D+0.1, optimized=False,
-                                     fast_rendering=FAST_RENDERING).color('violet')
+                                     fast_rendering=FAST_RENDERING).color('violet').mod()
         #
         glides = []
         for angle in (0, 120, 240):
             glide = TeflonGlide()
-            r = (self.spur.d - glide.d) / 2 - 5
+            r = (self.spur.d - glide.d) / 2 - 2
             angle = math.radians(angle)
             x = r * math.cos(angle)
             y = r * math.sin(angle)
@@ -275,7 +283,7 @@ class WormBracket(CustomObject):
         sx = bearing.h + 4
         if sy is None:
             sy = bearing.d + b*2 # default value
-        sz = 40
+        sz = 20
         p = Cube(sx, sy, sz)
         #
         socket = bearing.hole(bearing.h + 1)
