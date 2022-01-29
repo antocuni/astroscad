@@ -180,12 +180,12 @@ class RotatingPlate(CustomObject):
 
     def init_custom(self, bolt):
         self.spur = WormFactory.spur(teeth=70, h=5, bore_d=bolt.D+0.1, optimized=False,
-                                     fast_rendering=FAST_RENDERING).color('violet').mod()
+                                     fast_rendering=FAST_RENDERING).color('violet')#.mod()
         #
         glides = []
         for angle in (0, 120, 240):
             glide = TeflonGlide()
-            r = (self.spur.d - glide.d) / 2 - 2
+            r = (self.spur.d - glide.d) / 2 - 3
             angle = math.radians(angle)
             x = r * math.cos(angle)
             y = r * math.sin(angle)
@@ -371,14 +371,19 @@ def compute_ratio(obj):
 
 def main():
     global FAST_RENDERING
+    global VITAMINS
     parts = None
     if '--fast' in sys.argv:
         FAST_RENDERING = True
+    if '--no-vitamins' in sys.argv:
+        VITAMINS = False
 
     if len(sys.argv) >= 2:
         parts = sys.argv[1:]
         if '--fast' in parts:
             parts.remove('--fast')
+        if '--no-vitamins' in parts:
+            parts.remove('--no-vitamins')
     #
     obj = build()
     #obj = build_worm_bracket()
