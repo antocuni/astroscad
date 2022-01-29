@@ -296,7 +296,7 @@ class WormBracket(CustomObject):
             socket.move_to(top=p.top-b, left=p.left-EPS, back=p.back -b)
         p -= socket
         #
-        p -= RoundHole(d=9, h=100, axis='x').move_to(center=socket.center)
+        p -= RoundHole(d=10, h=100, axis='x').move_to(center=socket.center)
         p.anchors.socket_center = socket.center
         p.anchors.socket_left = socket.left
         p.anchors.socket_right = socket.right
