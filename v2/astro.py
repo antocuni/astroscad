@@ -172,7 +172,7 @@ class RotatingPlate(CustomObject):
 
     def init_custom(self, bolt):
         self.spur = WormFactory.spur(teeth=70, h=5, bore_d=bolt.D+0.1, optimized=False,
-                                     fast_rendering=FAST_RENDERING)
+                                     fast_rendering=FAST_RENDERING).color('violet')
         #
         glides = []
         for angle in (0, 120, 240):
@@ -236,7 +236,7 @@ class MyWorm(CustomObject):
 class StepperSpur(CustomObject):
 
     def init_custom(self, myworm):
-        spur = SmallWormFactory.spur(teeth=20, h=4, axis='x').color('red')
+        spur = SmallWormFactory.spur(teeth=20, h=4, axis='x', fast_rendering=FAST_RENDERING).color('cyan')
         self.spur = spur.move_to(center=myworm.spur.center, back=myworm.spur.front)
 
 
@@ -248,31 +248,41 @@ class WormBracket(CustomObject):
         b = self.B
         lb = Bearing('604', axis='x')    # left bearing
         rb = Bearing('604', axis='x')    # right bearing
-        lpil = self.pillar(lb, 'left')   # left pillar
-        rpil = self.pillar(rb, 'right')  # right pillar
-        #
+        lpil = self.pillar(lb, 'left', sy=50)   # left pillar
+        rpil = self.pillar(rb, 'right')         # right pillar
         self.lpil = lpil.move_to(socket_center=myworm.center, right=myworm.left)
         self.rpil = rpil.move_to(socket_center=myworm.center, left=myworm.right)
         #
         stepper = Stepper_28BYJ48().move_to(
             shaft=stepper_spur.spur.center,
-            right=stepper_spur.spur.left).tr(x=-10)
+            right=self.lpil.left)
+        self -= stepper.make_mounting_holes(h=50)
+        #
+
+        floor = Cube(rpil.right.x - lpil.left.x,
+                     lpil.back.y - lpil.front.y,
+                     2)
+        self.floor = floor.move_to(top=lpil.bottom, left=lpil.left, back=lpil.back)
 
         if VITAMINS:
             self.lb = lb.move_to(center=lpil.socket_center, right=lpil.socket_right)
             self.rb = rb.move_to(center=rpil.socket_center, left=rpil.socket_left)
             self.stepper = stepper
 
-    def pillar(self, bearing, which):
+    def pillar(self, bearing, which, *, sy=None):
         assert which in ('left', 'right')
         b = self.B
-        p = Cube(bearing.h + 4, bearing.d + b*2, 20)
+        sx = bearing.h + 4
+        if sy is None:
+            sy = bearing.d + b*2 # default value
+        sz = 40
+        p = Cube(sx, sy, sz)
         #
         socket = bearing.hole(bearing.h + 1)
         if which == 'left':
-            socket.move_to(top=p.top-b, right=p.right+EPS)
+            socket.move_to(top=p.top-b, right=p.right+EPS, back=p.back - b)
         else:
-            socket.move_to(top=p.top-b, left=p.left-EPS)
+            socket.move_to(top=p.top-b, left=p.left-EPS, back=p.back -b)
         p -= socket
         #
         p -= RoundHole(d=9, h=100, axis='x').move_to(center=socket.center)
