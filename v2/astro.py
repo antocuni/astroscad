@@ -3,7 +3,7 @@
 import sys
 import math
 import os
-from pyscad import (Cube, Cylinder, Sphere, bolt_hole, Point, Union, CustomObject, EPS,
+from pyscad import (Cube, Cylinder, Sphere, Point, Union, CustomObject, EPS,
                     TCone)
 from pyscad.shapes import DonutSlice
 from pyscad.lib.misc import TeflonGlide, RoundHole
@@ -179,7 +179,7 @@ class RotatingPlate(CustomObject):
     GROOVE_H = 1
 
     def init_custom(self, bolt):
-        self.spur = WormFactory.spur(teeth=70, h=5, bore_d=bolt.D+0.1, optimized=False,
+        self.spur = WormFactory.spur(teeth=70, h=10, bore_d=bolt.D+0.1, optimized=False,
                                      fast_rendering=FAST_RENDERING).color('violet')#.mod()
         #
         glides = []
@@ -194,7 +194,10 @@ class RotatingPlate(CustomObject):
                 center=Point(x=x, y=y, z=None),
                 top=self.spur.bottom + self.GROOVE_H
             )
+            hole = RoundHole(d=2.9, h=100).move_to(center=groove.center)
+            #
             self -= groove
+            self -= hole
             glide.move_to(
                 center=groove.center,
                 top=groove.top
