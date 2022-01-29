@@ -212,19 +212,21 @@ class SmallWormFactory(WormFactory):
 class MyWorm(CustomObject):
 
     def init_custom(self, *, axis):
+        h_spur = 4
+        h_bulge = 2
         self.worm = worm = WormFactory.worm(h=25, bore_d=0, axis=axis,
                                             fast_rendering=FAST_RENDERING)
         #
         l_trunk = Cylinder(d=8, h=15, axis=axis)
-        r_trunk = Cylinder(d=8, h=15, axis=axis)
+        r_trunk = Cylinder(d=8, h=15+h_spur+h_bulge, axis=axis)
         self.l_trunk = l_trunk.move_to(right=worm.left)
         self.r_trunk = r_trunk.move_to(left=worm.right)
         #
-        spur = SmallWormFactory.spur(teeth=40, h=4, axis=axis, optimized=False,
+        spur = SmallWormFactory.spur(teeth=40, h=h_spur, axis=axis, optimized=False,
                                      fast_rendering=FAST_RENDERING)
         self.spur = spur = spur.move_to(center=worm.center, right=l_trunk.left)
         #
-        l_bulge = Cylinder(d=8, h=2, axis=axis)
+        l_bulge = Cylinder(d=8, h=h_bulge, axis=axis)
         self.l_bulge = l_bulge.move_to(right=spur.left)
         #
         # central bore
