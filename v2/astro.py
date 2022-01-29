@@ -147,7 +147,12 @@ class BasePlate(CustomObject):
              2)
         self.body = Cylinder(d=self.d, h=h).color(self._color) #.mod('#')
         self.anchors.rim_bottom = self.body.top - self.BEARING_RIM
+        self.anchors.set_bounding_box(self.body.pmin, self.body.pmax)
 
+    def make_bracket(self, bearing, photo_plate, myworm, stepper_spur):
+        self.bracket = MotorBracket(self, myworm, stepper_spur)
+        #
+        # make holes
         # big hole where to put the bearing. h=100 means "very long"
         self -= bearing.hole(h=100, extra_walls=1)\
             .move_to(top=self.body.top - self.BEARING_RIM)
@@ -164,8 +169,6 @@ class BasePlate(CustomObject):
 
         # smaller hole to make the bearing accessible from the top
         self -= Cylinder(d=bearing.d-5, h=100)
-
-        self.anchors.set_bounding_box(self.body.pmin, self.body.pmax)
 
 
 class RotatingPlate(CustomObject):
@@ -271,7 +274,9 @@ class MotorBracket(CustomObject):
         floor_sy = abs(lpil.front.y)
 
         floor = Cube(floor_sx, floor_sy, 5).color('cyan')
-        self.floor = floor.move_to(left=lpil.left, bottom=baseplate.bottom, back=baseplate.center)
+        self.floor = floor.move_to(left=lpil.left,
+                                   bottom=baseplate.bottom+EPS,
+                                   back=baseplate.center)
         #
         stepper = Stepper_28BYJ48().move_to(
             shaft=stepper_spur.spur.center,
@@ -314,22 +319,21 @@ def build():
     adapter = BearingBoltAdapter(bearing, bolt)
     photo_plate = Manfrotto_200PL(with_holes=True)
 
-    obj.baseplate = BasePlate(bearing, adapter, photo_plate).move_to(bottom=Point.O)
-
-    bearing = bearing.move_to(top=obj.baseplate.rim_bottom)
+    baseplate = BasePlate(bearing, adapter, photo_plate).move_to(bottom=Point.O)
+    bearing = bearing.move_to(top=baseplate.rim_bottom)
+    #
     obj.adapter = adapter.move_to(top=bearing.top)
     bolt.move_to(bottom=adapter.bottom)
 
-
-
     rplate = RotatingPlate(bolt)
-    obj.rplate = rplate.move_to(bottom=obj.baseplate.body.top) #+25)
+    obj.rplate = rplate.move_to(bottom=baseplate.body.top) #+25)
 
     myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
                                       worm_back=rplate.spur.front).color('green')
     obj.myworm = myworm
     obj.stepper_spur = StepperSpur(myworm)
-    obj.bracket = MotorBracket(obj.baseplate, obj.myworm, obj.stepper_spur)
+    baseplate.make_bracket(bearing, photo_plate, myworm, obj.stepper_spur)
+    obj.baseplate = baseplate
 
     compute_ratio(obj)
 
