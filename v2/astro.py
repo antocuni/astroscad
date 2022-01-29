@@ -243,7 +243,7 @@ class MyWorm(CustomObject):
 class StepperSpur(CustomObject):
 
     def init_custom(self, myworm):
-        spur = SmallWormFactory.spur(teeth=20, h=4, axis='x', fast_rendering=FAST_RENDERING).color('cyan')
+        spur = SmallWormFactory.spur(teeth=20, h=4, axis='x', fast_rendering=FAST_RENDERING).color('Pink')
         self.spur = spur.move_to(center=myworm.spur.center, back=myworm.spur.front)
 
 
@@ -318,13 +318,8 @@ def build():
 
     bearing = bearing.move_to(top=obj.baseplate.rim_bottom)
     obj.adapter = adapter.move_to(top=bearing.top)
+    bolt.move_to(bottom=adapter.bottom)
 
-    if VITAMINS:
-        obj.bolt = bolt.move_to(bottom=adapter.bottom)
-        obj.bearing = bearing
-        obj.nut = bolt.nut().move_to(bottom=bearing.top+EPS)
-        obj.photo_plate = photo_plate.move_to(top=obj.baseplate.bottom-EPS)\
-                                     .color(IRON, 0.7)
 
 
     rplate = RotatingPlate(bolt)
@@ -339,6 +334,11 @@ def build():
     compute_ratio(obj)
 
     if VITAMINS:
+        obj.bolt = bolt
+        obj.bearing = bearing
+        obj.nut = bolt.nut().move_to(bottom=bearing.top+EPS)
+        obj.photo_plate = photo_plate.move_to(top=obj.baseplate.bottom-EPS)\
+                                     .color(IRON, 0.7)
         ball_head = BallHead().move_to(bottom=rplate.top)
         diff = bolt.top.z - ball_head.screw_hole_top.z
         if diff > 0:
