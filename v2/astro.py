@@ -148,12 +148,6 @@ class BasePlate(CustomObject):
         self.body = Cylinder(d=self.d, h=h).color(self._color) #.mod('#')
         self.anchors.rim_bottom = self.body.top - self.BEARING_RIM
 
-        # platform for the worm bracket
-        platform = Cube(self.d, 80, 5).color(self._color)
-        ## self.platform = platform.move_to(
-        ##     bottom=self.body.bottom,
-        ##     back=self.body.front+self.d/2)
-
         # big hole where to put the bearing. h=100 means "very long"
         self -= bearing.hole(h=100, extra_walls=1)\
             .move_to(top=self.body.top - self.BEARING_RIM)
@@ -171,8 +165,8 @@ class BasePlate(CustomObject):
         # smaller hole to make the bearing accessible from the top
         self -= Cylinder(d=bearing.d-5, h=100)
 
-        self.anchors.set_bounding_box(self.body.pmin, self.body.pmax,
-                                      platform.pmin, platform.pmax)
+        self.anchors.set_bounding_box(self.body.pmin, self.body.pmax)
+
 
 class RotatingPlate(CustomObject):
 
@@ -251,33 +245,40 @@ class StepperSpur(CustomObject):
         self.spur = spur.move_to(center=myworm.spur.center, back=myworm.spur.front)
 
 
-class WormBracket(CustomObject):
+class MotorBracket(CustomObject):
+    """
+    NOTE: this MUST be printed together with the baseplate
+    """
 
     B = 1.5 # extra border around the bearings
 
-    def init_custom(self, myworm, stepper_spur):
-        b = self.B
+    # XXX: put two washers between the worm and the bearings!
+
+    def init_custom(self, baseplate, myworm, stepper_spur):
         lb = Bearing('604', axis='x')    # left bearing
         rb = Bearing('604', axis='x')    # right bearing
+        lb.move_to(center=myworm.center, right=myworm.left)
+        rb.move_to(center=myworm.center, left=myworm.right)
+
         lpil = self.pillar(lb, 'left', sy=50)   # left pillar
         rpil = self.pillar(rb, 'right')         # right pillar
-        self.lpil = lpil.move_to(socket_center=myworm.center, right=myworm.left)
-        self.rpil = rpil.move_to(socket_center=myworm.center, left=myworm.right)
+        self.lpil = lpil.move_to(socket_center=lb.center, right=myworm.left)
+        self.rpil = rpil.move_to(socket_center=rb.center, left=myworm.right)
+
+        floor_sx = rpil.right.x - lpil.left.x
+        floor_sy = abs(lpil.front.y)
+
+        floor = Cube(floor_sx, floor_sy, 5).color('cyan')
+        self.floor = floor.move_to(left=lpil.left, bottom=baseplate.bottom, back=baseplate.center)
         #
         stepper = Stepper_28BYJ48().move_to(
             shaft=stepper_spur.spur.center,
             right=self.lpil.left)
         self -= stepper.make_mounting_holes(h=50)
-        #
-
-        floor = Cube(rpil.right.x - lpil.left.x,
-                     lpil.back.y - lpil.front.y,
-                     2)
-        #self.floor = floor.move_to(top=lpil.bottom, left=lpil.left, back=lpil.back)
 
         if VITAMINS:
-            self.lb = lb.move_to(center=lpil.socket_center, right=lpil.socket_right)
-            self.rb = rb.move_to(center=rpil.socket_center, left=rpil.socket_left)
+            self.lb = lb
+            self.rb = rb
             self.stepper = stepper
 
     def pillar(self, bearing, which, *, sy=None):
@@ -286,8 +287,8 @@ class WormBracket(CustomObject):
         sx = bearing.h + 4
         if sy is None:
             sy = bearing.d + b*2 # default value
-        sz = 20
-        p = Cube(sx, sy, sz)
+        sz = 35
+        p = Cube(sx, sy, sz).color('cyan')
         #
         socket = bearing.hole(bearing.h + 1)
         if which == 'left':
@@ -301,13 +302,6 @@ class WormBracket(CustomObject):
         p.anchors.socket_left = socket.left
         p.anchors.socket_right = socket.right
         return p
-
-
-def build_worm_bracket():
-    obj = CustomObject()
-    obj.myworm = MyWorm(axis='x')
-    obj.bracket = WormBracket(obj.myworm)
-    return obj
 
 
 def build():
@@ -338,7 +332,7 @@ def build():
                                       worm_back=rplate.spur.front).color('green')
     obj.myworm = myworm
     obj.stepper_spur = StepperSpur(myworm)
-    obj.bracket = WormBracket(obj.myworm, obj.stepper_spur)
+    obj.bracket = MotorBracket(obj.baseplate, obj.myworm, obj.stepper_spur)
 
     compute_ratio(obj)
 
