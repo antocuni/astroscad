@@ -256,8 +256,6 @@ class MotorBracket(CustomObject):
     NOTE: this MUST be printed together with the baseplate
     """
 
-    B = 1.5 # extra border around the bearings
-
     # XXX: put two washers between the worm and the bearings!
 
     def init_custom(self, baseplate, myworm, stepper_spur):
@@ -300,18 +298,20 @@ class MotorBracket(CustomObject):
 
     def pillar(self, bearing, which, *, sy=None):
         assert which in ('left', 'right')
-        b = self.B
+        # extra borders around the bearing
+        bz = 1.5
+        by = 3
         sx = bearing.h + 4
         if sy is None:
-            sy = bearing.d + b*2 # default value
+            sy = bearing.d + by*2 # default value
         sz = 37 # it should be computed, not hard coded
         p = Cube(sx, sy, sz).color('cyan')
         #
         socket = bearing.hole(bearing.h + 1)
         if which == 'left':
-            socket.move_to(top=p.top-b, right=p.right+EPS, back=p.back - b)
+            socket.move_to(top=p.top-bz, right=p.right+EPS, back=p.back-by)
         else:
-            socket.move_to(top=p.top-b, left=p.left-EPS, back=p.back -b)
+            socket.move_to(top=p.top-bz, left=p.left-EPS, back=p.back-by)
         p -= socket
         #
         p -= RoundHole(d=10, h=100, axis='x').move_to(center=socket.center)
