@@ -73,3 +73,13 @@ class Stepper_28BYJ48(PySCADObject):
         holes += Cylinder(d=d, h=h, axis='x').move_to(center=self.mh1)
         holes += Cylinder(d=d, h=h, axis='x').move_to(center=self.mh2)
         return holes
+
+    @classmethod
+    def make_shaft_hole(cls, *, h, clearance=0.2):
+        # copied & adapted from https://www.thingiverse.com/thing:3047726 by
+        # Dries Pruimboom
+        d = cls._SHD + clearance
+        cyl = Cylinder(d=d, h=h, axis='x')
+        cyl -= Cube(h+1, d, d).move_to(bottom=cyl.center+1.5+clearance)
+        cyl -= Cube(h+1, d, d).move_to(top=cyl.center-1.5-clearance)
+        return cyl

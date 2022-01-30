@@ -258,9 +258,20 @@ class MyWorm(CustomObject):
 
 class StepperSpur(CustomObject):
 
+    color = 'pink'
+    SHAFT_H = 7.84
+
     def init_custom(self, myworm):
-        self.spur = SmallWormFactory.spur(teeth=20, h=4, axis='x',
-                                          fast_rendering=FAST_RENDERING).color('Pink')
+        spur = SmallWormFactory.spur(teeth=20, h=3, axis='x',
+                                     fast_rendering=FAST_RENDERING)
+        d = Stepper_28BYJ48._SBD - 2
+        shaft = Cylinder(d=d, h=self.SHAFT_H, axis='x').move_to(right=spur.left)
+        self.spur = spur.color(self.color)
+        self.shaft = shaft.color(self.color)
+
+        hole = Stepper_28BYJ48.make_shaft_hole(h=self.SHAFT_H)
+        self -= hole.move_to(left=shaft.left-EPS).mod()
+
         self.anchors.set_bounding_box(self.spur.pmin, self.spur.pmax)
 
 
@@ -294,8 +305,8 @@ class MotorBracket(CustomObject):
         assert myworm.length == expected_worm_l
 
         motor_mount = Cube(lpil.size.x, 30, lpil.size.z).color('cyan')
-        self.motor_mount = motor_mount.move_to(top=lpil.top, back=lpil.front+EPS,
-                                           left=lpil.left)
+        motor_mount.move_to(top=lpil.top, back=lpil.front+EPS, left=lpil.left)
+        self.motor_mount = motor_mount
 
         floor_sx = rpil.right.x - lpil.left.x
         floor_sy = abs(rpil.front.y)
@@ -311,13 +322,16 @@ class MotorBracket(CustomObject):
         dist = (stepper_spur.spur.r + myworm.spur.r)
         a = math.radians(260)
         v = Vector(0, dist*math.sin(a), dist*math.cos(a))
-        stepper_spur.move_to(center=myworm.spur.center + v)
+        stepper_spur.move_to(center=myworm.spur.center + v, right=myworm.spur.right)
         #
         stepper = Stepper_28BYJ48()
         stepper.move_to(
             shaft=stepper_spur.spur.center,
             right=self.lpil.left)
         self -= stepper.make_mounting_holes(h=50, d=2.9)
+
+        expected_stepper_spur_shaft_h = stepper_spur.spur.left.x - stepper.right.x - 4
+        assert almost_equal(expected_stepper_spur_shaft_h, stepper_spur.SHAFT_H)
 
         if VITAMINS:
             self.lb = lb
