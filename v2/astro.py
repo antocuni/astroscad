@@ -264,14 +264,17 @@ class MotorBracket(CustomObject):
         lb.move_to(center=myworm.center, right=myworm.left)
         rb.move_to(center=myworm.center, left=myworm.right)
 
-        lpil = self.pillar(lb, 'left', sy=50)   # left pillar
-        rpil = self.pillar(rb, 'right')         # right pillar
+        lpil = self.pillar(lb, 'left')   # left pillar
+        rpil = self.pillar(rb, 'right')  # right pillar
         self.lpil = lpil.move_to(socket_center=lb.center, right=myworm.left)
         self.rpil = rpil.move_to(socket_center=rb.center, left=myworm.right)
 
+        motor_mount = Cube(lpil.size.x, 30, lpil.size.z).color('cyan')
+        self.motor_mount = motor_mount.move_to(top=lpil.top, back=lpil.front+EPS,
+                                           left=lpil.left)
+
         floor_sx = rpil.right.x - lpil.left.x
         floor_sy = abs(rpil.front.y)
-
         lfloor = Cube(floor_sx, floor_sy, 5).color('cyan')
         self.lfloor = lfloor.move_to(left=lpil.left,
                                      bottom=baseplate.bottom+EPS,
