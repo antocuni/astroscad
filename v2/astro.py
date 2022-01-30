@@ -6,7 +6,7 @@ import os
 from pyscad import (Cube, Cylinder, Sphere, Point, Union, CustomObject, EPS,
                     TCone, Vector)
 from pyscad.shapes import DonutSlice
-from pyscad.lib.misc import TeflonGlide, RoundHole
+from pyscad.lib.misc import TeflonGlide, RoundHole, Washer
 from pyscad.lib.bearing import Bearing
 from pyscad.lib.gears import WormFactory
 from pyscad.lib.photo import Manfrotto_200PL
@@ -20,6 +20,10 @@ FAST_RENDERING = False
 IRON = [0.36, 0.33, 0.33]
 BRASS = [0.88, 0.78, 0.5]
 STEEL = [0.65, 0.67, 0.72]
+
+
+def almost_equal(x, y):
+    return abs(x-y) < 0.0001
 
 
 class BallHead(CustomObject):
@@ -116,8 +120,7 @@ class BearingBoltAdapter(CustomObject):
                                       self.cyl.pmin, self.cyl.pmax)
 
         if VITAMINS:
-            washer = DonutSlice(d1=self.WASHER_INNER_D, d2=self.WASHER_D,
-                                h=self.WASHER_H).color('grey')
+            washer = Washer(d1=self.WASHER_INNER_D, d2=self.WASHER_D, h=self.WASHER_H)
             self.washer = washer.move_to(bottom=self.head.top)
 
 
@@ -214,14 +217,19 @@ class SmallWormFactory(WormFactory):
 
 class MyWorm(CustomObject):
 
+    _total_length = 62.32 # this must match the 'expected_worm_l' in MotorBracket
+
     def init_custom(self, *, axis):
         h_spur = 4
         h_bulge = 2
         self.worm = worm = WormFactory.worm(h=25, bore_d=0, axis=axis,
                                             fast_rendering=FAST_RENDERING)
         #
-        l_trunk = Cylinder(d=8, h=13.5, axis=axis)
-        r_trunk = Cylinder(d=8, h=13.5+h_spur+h_bulge, axis=axis)
+        # left trunk length, right truck length
+        ltl = self._total_length/2 - worm.h/2 - h_spur - h_bulge
+        rtl = self._total_length/2 - worm.h/2
+        l_trunk = Cylinder(d=8, h=ltl, axis=axis)
+        r_trunk = Cylinder(d=8, h=rtl, axis=axis)
         self.l_trunk = l_trunk.move_to(right=worm.left)
         self.r_trunk = r_trunk.move_to(left=worm.right)
         #
@@ -241,6 +249,11 @@ class MyWorm(CustomObject):
                                       r_trunk.pmin, r_trunk.pmax)
         self.anchors.worm_center = worm.center
         self.anchors.worm_back = worm.back
+        assert almost_equal(self.length, self._total_length)
+
+    @property
+    def length(self):
+        return self.r_trunk.right.x - self.l_bulge.left.x
 
 
 class StepperSpur(CustomObject):
@@ -256,18 +269,29 @@ class MotorBracket(CustomObject):
     NOTE: this MUST be printed together with the baseplate
     """
 
-    # XXX: put two washers between the worm and the bearings!
+    WASHER_ID = 4.20
+    WASHER_OD = 8.88
+    WASHER_H = 0.84
 
     def init_custom(self, baseplate, myworm, stepper_spur):
+        lwasher = self.washer()
+        rwasher = self.washer()
+        lwasher.move_to(center=myworm.center, right=myworm.left)
+        rwasher.move_to(center=myworm.center, left=myworm.right)
+        #
         lb = Bearing('604', axis='x')    # left bearing
         rb = Bearing('604', axis='x')    # right bearing
-        lb.move_to(center=myworm.center, right=myworm.left)
-        rb.move_to(center=myworm.center, left=myworm.right)
-
+        lb.move_to(center=myworm.center, right=lwasher.left)
+        rb.move_to(center=myworm.center, left=rwasher.right)
+        #
         lpil = self.pillar(lb, 'left')   # left pillar
         rpil = self.pillar(rb, 'right')  # right pillar
-        self.lpil = lpil.move_to(socket_center=lb.center, right=myworm.left)
-        self.rpil = rpil.move_to(socket_center=rb.center, left=myworm.right)
+        self.lpil = lpil.move_to(socket_center=lb.center, right=lwasher.left)
+        self.rpil = rpil.move_to(socket_center=rb.center, left=rwasher.right)
+        #
+        # sanity check. See also MyWorm._total_length
+        expected_worm_l = rwasher.left.x - lwasher.right.x
+        assert myworm.length == expected_worm_l
 
         motor_mount = Cube(lpil.size.x, 30, lpil.size.z).color('cyan')
         self.motor_mount = motor_mount.move_to(top=lpil.top, back=lpil.front+EPS,
@@ -275,6 +299,7 @@ class MotorBracket(CustomObject):
 
         floor_sx = rpil.right.x - lpil.left.x
         floor_sy = abs(rpil.front.y)
+        assert floor_sx == baseplate.d
         lfloor = Cube(floor_sx, floor_sy, 5).color('cyan')
         self.lfloor = lfloor.move_to(left=lpil.left,
                                      bottom=baseplate.bottom+EPS,
@@ -297,7 +322,13 @@ class MotorBracket(CustomObject):
         if VITAMINS:
             self.lb = lb
             self.rb = rb
+            self.lwasher = lwasher
+            self.rwasher = rwasher
             self.stepper = stepper
+
+    def washer(self):
+        return Washer(d1=self.WASHER_ID, d2=self.WASHER_OD,
+                      h=self.WASHER_H, axis='x', color='white')
 
     def pillar(self, bearing, which, *, sy=None):
         assert which in ('left', 'right')

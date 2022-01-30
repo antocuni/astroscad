@@ -84,6 +84,6 @@ class RoundHole(CustomObject):
         self += ring
 
 
-def Washer(*, d1, d2, h, color='grey'):
+def Washer(*, d1, d2, h, axis='z', color='grey'):
     assert d1 < d2
-    return DonutSlice(d1=d1, d2=d2, h=h).color(color)
+    return DonutSlice(d1=d1, d2=d2, h=h, axis=axis).color(color)
