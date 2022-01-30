@@ -4,7 +4,7 @@ import sys
 import math
 import os
 from pyscad import (Cube, Cylinder, Sphere, Point, Union, CustomObject, EPS,
-                    TCone, Vector)
+                    TCone, Vector, PySCADObject)
 from pyscad.shapes import DonutSlice
 from pyscad.lib.misc import TeflonGlide, RoundHole, Washer
 from pyscad.lib.bearing import Bearing
@@ -435,7 +435,19 @@ def main():
     #
     obj = build()
     #obj = build_worm_bracket()
-    if parts:
+    if parts and parts[0].startswith('-'):
+        # show everything APART the parts which are given
+        hidden_parts = [p[1:] for p in parts] # remove the '-' from everywhere
+        new_obj = CustomObject()
+        for part_name, part_obj in obj.__dict__.items():
+            if isinstance(part_obj, PySCADObject):
+                if part_name not in hidden_parts:
+                    print(part_name)
+                    setattr(new_obj, part_name, part_obj)
+        obj = new_obj
+
+    elif parts:
+        # show only the parts which are given
         new_obj = CustomObject()
         for part_name in parts:
             part_obj = getattr(obj, part_name)
