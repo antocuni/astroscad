@@ -1,5 +1,6 @@
 from ..geometry import Point
 from ..scad import Cylinder, EPS, CustomObject
+from ..shapes import DonutSlice
 from ..calibration import CalibrationData
 
 def ring(outer_d, inner_d, h, *, axis='z'):
@@ -81,3 +82,8 @@ class RoundHole(CustomObject):
         x = r + (W+G)*(i+1)
         ring = Cylinder(r=x, h=h, axis=axis) - Cylinder(r=x-G, h=h+EPS, axis=axis)
         self += ring
+
+
+def Washer(*, d1, d2, h, color='grey'):
+    assert d1 < d2
+    return DonutSlice(d1=d1, d2=d2, h=h).color(color)
