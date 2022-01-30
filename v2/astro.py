@@ -241,7 +241,7 @@ class MyWorm(CustomObject):
         self.l_bulge = l_bulge.move_to(right=spur.left)
         #
         # central bore
-        self -= Cylinder(d=3.1, h=100, axis=axis).move_to(center=worm.center)
+        self -= Cylinder(d=4.1, h=100, axis=axis).move_to(center=worm.center)
         #
         self.anchors.set_bounding_box(spur.pmin, spur.pmax,
                                       worm.pmin, worm.pmax,
@@ -373,7 +373,7 @@ def build():
     obj.rplate = rplate.move_to(bottom=baseplate.body.top) #+25)
 
     myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
-                                      worm_back=rplate.spur.front).color('green')
+                                      worm_back=rplate.spur.front).color('LawnGreen')
     obj.myworm = myworm
     stepper_spur = StepperSpur(myworm) # note: this is moved inside make_bracket
     baseplate.make_bracket(bearing, photo_plate, myworm, stepper_spur)
