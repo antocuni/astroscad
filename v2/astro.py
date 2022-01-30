@@ -410,7 +410,9 @@ def main():
             part_obj = getattr(obj, part_name)
             setattr(new_obj, part_name, part_obj)
         obj = new_obj
-    obj.autorender()
+
+    # fn=100 is needed to make sure that cura makes fully circular top/bottom patterns
+    obj.autorender(fn=100)
 
 if __name__ == '__main__':
     main()
