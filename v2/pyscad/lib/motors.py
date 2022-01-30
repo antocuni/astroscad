@@ -63,11 +63,13 @@ class Stepper_28BYJ48(PySCADObject):
         # _stepper is a GenericSCADWrapper, manually unwrap it
         self.solid = _stepper.solid
 
-    def make_mounting_holes(self, *, h, clearance=0.5):
+    def make_mounting_holes(self, *, h, clearance=0.5, d=None):
         # mounting holes for the motor. This is supposed to be used in a
         # difference() block
         holes = Union()
         holes += Cylinder(d=self._SBD+clearance, h=h, axis='x').move_to(center=self.shaft)
-        holes += Cylinder(d=4+clearance, h=h, axis='x').move_to(center=self.mh1)
-        holes += Cylinder(d=4+clearance, h=h, axis='x').move_to(center=self.mh2)
+        if d is None:
+            d = 4 + clearance
+        holes += Cylinder(d=d, h=h, axis='x').move_to(center=self.mh1)
+        holes += Cylinder(d=d, h=h, axis='x').move_to(center=self.mh2)
         return holes

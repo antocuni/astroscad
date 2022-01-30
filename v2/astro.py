@@ -4,7 +4,7 @@ import sys
 import math
 import os
 from pyscad import (Cube, Cylinder, Sphere, Point, Union, CustomObject, EPS,
-                    TCone)
+                    TCone, Vector)
 from pyscad.shapes import DonutSlice
 from pyscad.lib.misc import TeflonGlide, RoundHole
 from pyscad.lib.bearing import Bearing
@@ -246,8 +246,9 @@ class MyWorm(CustomObject):
 class StepperSpur(CustomObject):
 
     def init_custom(self, myworm):
-        spur = SmallWormFactory.spur(teeth=20, h=4, axis='x', fast_rendering=FAST_RENDERING).color('Pink')
-        self.spur = spur.move_to(center=myworm.spur.center, back=myworm.spur.front)
+        self.spur = SmallWormFactory.spur(teeth=20, h=4, axis='x',
+                                          fast_rendering=FAST_RENDERING).color('Pink')
+        self.anchors.set_bounding_box(self.spur.pmin, self.spur.pmax)
 
 
 class MotorBracket(CustomObject):
@@ -271,17 +272,26 @@ class MotorBracket(CustomObject):
         self.rpil = rpil.move_to(socket_center=rb.center, left=myworm.right)
 
         floor_sx = rpil.right.x - lpil.left.x
-        floor_sy = abs(lpil.front.y)
+        floor_sy = abs(rpil.front.y)
 
-        floor = Cube(floor_sx, floor_sy, 5).color('cyan')
-        self.floor = floor.move_to(left=lpil.left,
-                                   bottom=baseplate.bottom+EPS,
-                                   back=baseplate.center)
+        lfloor = Cube(floor_sx, floor_sy, 5).color('cyan')
+        self.lfloor = lfloor.move_to(left=lpil.left,
+                                     bottom=baseplate.bottom+EPS,
+                                     back=baseplate.center)
         #
-        stepper = Stepper_28BYJ48().move_to(
+        # we want to place the stepper-spur so that meshes with the worm-spur,
+        # but we need to be careful else the stepper mounting holes touch the
+        # bearing
+        dist = (stepper_spur.spur.r + myworm.spur.r)
+        a = math.radians(260)
+        v = Vector(0, dist*math.sin(a), dist*math.cos(a))
+        stepper_spur.move_to(center=myworm.spur.center + v)
+        #
+        stepper = Stepper_28BYJ48()
+        stepper.move_to(
             shaft=stepper_spur.spur.center,
             right=self.lpil.left)
-        self -= stepper.make_mounting_holes(h=50)
+        self -= stepper.make_mounting_holes(h=50, d=2.9)
 
         if VITAMINS:
             self.lb = lb
@@ -294,7 +304,7 @@ class MotorBracket(CustomObject):
         sx = bearing.h + 4
         if sy is None:
             sy = bearing.d + b*2 # default value
-        sz = 35
+        sz = 37 # it should be computed, not hard coded
         p = Cube(sx, sy, sz).color('cyan')
         #
         socket = bearing.hole(bearing.h + 1)
@@ -331,9 +341,10 @@ def build():
     myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
                                       worm_back=rplate.spur.front).color('green')
     obj.myworm = myworm
-    obj.stepper_spur = StepperSpur(myworm)
-    baseplate.make_bracket(bearing, photo_plate, myworm, obj.stepper_spur)
+    stepper_spur = StepperSpur(myworm) # note: this is moved inside make_bracket
+    baseplate.make_bracket(bearing, photo_plate, myworm, stepper_spur)
     obj.baseplate = baseplate
+    obj.stepper_spur = stepper_spur
 
     compute_ratio(obj)
 
