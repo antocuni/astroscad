@@ -1,4 +1,4 @@
-use <gears/gears.scad> // https://github.com/chrisspen/gears
+use <v2/pyscad/vendored/gears/gears.scad> // https://github.com/chrisspen/gears
 include <contrib/StepMotor_28BYJ-48.scad>
 use <thrust_bearing.scad>
 
@@ -64,5 +64,5 @@ module BYJ48_Hole(h=10)
 
 
 //stepper();
-stepper_gear(H=4, H_SHAFT=5); // DON'T PRINT FROM THIS FILE! Print from astro.scad, which has the correct height
+stepper_gear_with_shaft(H=4, H_SHAFT=5); // DON'T PRINT FROM THIS FILE! Print from astro.scad, which has the correct height
 //stepper_mounting_holes();
