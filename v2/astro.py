@@ -270,7 +270,7 @@ class WormShaft(CustomObject):
 class StepperSpur(CustomObject):
 
     color = 'pink'
-    SHAFT_H = 7.84
+    SHAFT_H = 5.84
 
     def init_custom(self, myworm):
         spur = SmallWormFactory.spur(teeth=10, h=3, axis='x',
