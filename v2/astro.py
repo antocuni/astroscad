@@ -21,10 +21,9 @@ IRON = [0.36, 0.33, 0.33]
 BRASS = [0.88, 0.78, 0.5]
 STEEL = [0.65, 0.67, 0.72]
 
-
 def check_almost_equal(name, actual, expected):
     diff = abs(actual - expected)
-    if diff < 0.001:
+    if diff < 0.01:
         return True
     print(f'** WARNING ** {name} has the wrong measure. Expected {expected:.2f}, got {actual:.2f} (diff={diff:.2f})')
     return False
@@ -227,50 +226,73 @@ class MyWorm(CustomObject):
 
 
 class WormShaft(CustomObject):
+    # total length of the Shaft, "bearing to bearing" (including the washers)
+    LENGTH = 66
+    color = 'LawnGreen'
 
-    _total_length = 63.48
+    WASHER_ID = 4.20
+    WASHER_OD = 8.88
+    WASHER_H = 0.84
 
     def init_custom(self, *, axis):
+        lwasher = self.washers(n=2) # left washers
+        rwasher = self.washers(n=1) # right washers
+        #
         h_spur = 4
         h_worm = 25
-        self.worm = worm = Cube(h_worm, 5, 5) # this is just a worm placeholder
+        # this is just a worm placeholder
+        self.worm = worm = Cube(h_worm, 5, 5).color(self.color)
         #
         # left trunk length, right truck length
-        ltl = self._total_length/2 - h_worm/2 - h_spur
-        rtl = self._total_length/2 - h_worm/2
-        l_trunk = Cylinder(d=8, h=ltl, axis=axis)
-        r_trunk = Cylinder(d=8, h=rtl, axis=axis)
+        ltl = self.LENGTH/2 - h_worm/2 - h_spur - lwasher.h
+        rtl = self.LENGTH/2 - h_worm/2 - rwasher.h
+        l_trunk = Cylinder(d=8, h=ltl, axis=axis).color(self.color)
+        r_trunk = Cylinder(d=8, h=rtl, axis=axis).color(self.color)
         self.l_trunk = l_trunk.move_to(right=worm.left)
         self.r_trunk = r_trunk.move_to(left=worm.right)
         #
         spur = SmallWormFactory.spur(teeth=20, h=h_spur, axis=axis, optimized=False,
                                      fast_rendering=FAST_RENDERING)
-        self.spur = spur = spur.move_to(center=worm.center, right=l_trunk.left)
+        spur = spur.move_to(center=worm.center, right=l_trunk.left)
+        self.spur = spur.color(self.color)
         #
         # central bore
         self -= self.central_shaft(d=4, h=100, clearance=0).move_to(center=worm.center)
+        #
+        # washers
+        lwasher.move_to(center=worm.center, right=spur.left)
+        rwasher.move_to(center=worm.center, left=r_trunk.right)
 
         self.anchors.set_bounding_box(spur.pmin, spur.pmax,
                                       worm.pmin, worm.pmax,
                                       r_trunk.pmin, r_trunk.pmax)
         self.anchors.worm_center = worm.center
         self.anchors.worm_back = worm.back
-        check_almost_equal('WormShaft.length', self.length, self._total_length)
+        #
+        # sanity check
+        actual_length = rwasher.right.x - lwasher.left.x
+        check_almost_equal('WormShaft.LENGTH', self.LENGTH, actual_length)
 
-    @property
-    def length(self):
-        return self.r_trunk.right.x - self.spur.left.x
+        if VITAMINS:
+            self.lwasher = lwasher
+            self.rwasher = rwasher
 
     def central_shaft(self, *, d, h, clearance):
         # square inscribed in circle: l = d/2*sqrt(2)
         l = d/2 * math.sqrt(2) - clearance
         return Cube(h, l, l)
 
+    def washers(self, *, n):
+        # we simulate n washers by creating a single thicker washer
+        return Washer(d1=self.WASHER_ID, d2=self.WASHER_OD,
+                      h=self.WASHER_H*n, axis='x', color='white')
+
+
 
 class StepperSpur(CustomObject):
 
     color = 'pink'
-    SHAFT_H = 5.84
+    SHAFT_H = 5.68
 
     def init_custom(self, myworm):
         spur = SmallWormFactory.spur(teeth=10, h=3, axis='x',
@@ -291,10 +313,6 @@ class MotorBracket(CustomObject):
     NOTE: this MUST be printed together with the baseplate
     """
 
-    WASHER_ID = 4.20
-    WASHER_OD = 8.88
-    WASHER_H = 0.84
-
     def init_custom(self, baseplate, worm_shaft, stepper_spur):
         lb = Bearing('604', axis='x')    # left bearing
         rb = Bearing('604', axis='x')    # right bearing
@@ -305,14 +323,11 @@ class MotorBracket(CustomObject):
         lb.move_to(center=worm_shaft.center, left=lpil.socket_left)
         rb.move_to(center=worm_shaft.center, right=rpil.socket_right)
         #
-        lwasher = self.washers(n=5)
-        rwasher = self.washers(n=1)
-        lwasher.move_to(center=worm_shaft.center, left=lb.right)
-        rwasher.move_to(center=worm_shaft.center, right=rb.left)
         #
-        # sanity check. See also WormShaft._total_length
-        expected_shaft_l = rwasher.left.x - lwasher.right.x
-        check_almost_equal('worm_shaft.length', worm_shaft.length, expected_shaft_l)
+        # sanity check: check that the worm_shaft (including the washers) fit
+        # exactly the bearing-to-bearing distance
+        expected_length = rb.left.x - lb.right.x
+        check_almost_equal('worm_shaft.LENGTH', worm_shaft.LENGTH, expected_length)
 
         motor_mount = Cube(lpil.size.x, 30, lpil.size.z).color('cyan')
         motor_mount.move_to(top=lpil.top, back=lpil.front+EPS, left=lpil.left)
@@ -348,14 +363,7 @@ class MotorBracket(CustomObject):
         if VITAMINS:
             self.lb = lb
             self.rb = rb
-            self.lwasher = lwasher
-            self.rwasher = rwasher
             self.stepper = stepper
-
-    def washers(self, *, n):
-        # we simulate n washers by creating a single thicker washer
-        return Washer(d1=self.WASHER_ID, d2=self.WASHER_OD,
-                      h=self.WASHER_H*n, axis='x', color='white')
 
     def pillar(self, bearing, which, *, sy=None):
         assert which in ('left', 'right')
@@ -404,7 +412,7 @@ def build():
     obj.myworm = myworm
 
     worm_shaft = WormShaft(axis='x').move_to(worm_center=myworm.center)
-    obj.worm_shaft = worm_shaft.color('LawnGreen')
+    obj.worm_shaft = worm_shaft
 
     stepper_spur = StepperSpur(worm_shaft) # note: this is moved inside make_bracket
     baseplate.make_bracket(bearing, photo_plate, worm_shaft, stepper_spur)
