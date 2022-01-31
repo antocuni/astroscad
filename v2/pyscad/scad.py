@@ -270,6 +270,10 @@ class Cylinder(PySCADObject):
 
     You can specify only r or d. If you want a truncated cone, you
     TruncatedCone().
+
+    If you specify 'segments' it generates a polygon instead. In that case,
+    the radius/diameter measures the distance between two opposing VERTEXES,
+    not sides.
     """
 
     def init_solid(self, *, h, axis='z', r=None, d=None, segments=None):

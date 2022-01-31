@@ -1,3 +1,4 @@
+import math
 import solid
 from .scad import PySCADObject, _get_r_d, Cylinder
 from .geometry import Point, Vector, AnchorPoints
@@ -25,3 +26,20 @@ class DonutSlice(PySCADObject):
         self.anchors.center = Point.O
         self.anchors.set_bounding_box(cyl.pmin, cyl.pmax)
         self.solid = donut3d
+
+def CirumscribedHexagon(*, h, axis='z', r=None, d=None):
+    """
+    Generates a 3d hexagon which circumscribes the cylinder with the given
+    radius/diameter.
+    In other words, the d is the distance between two SIDES.
+    """
+    r, d = _get_r_d(r, d)
+    ri = r / math.cos(math.radians(30))
+    return Cylinder(r=ri, h=h, axis=axis, segments=6)
+
+
+def HexKey(*, size, h, axis='z'):
+    """
+    Hex/allen key of the given size (i.e., the side-to-side diameter).
+    """
+    return CirumscribedHexagon(d=size, h=h, axis=axis)
