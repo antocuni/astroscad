@@ -217,6 +217,14 @@ class RotatingPlate(CustomObject):
 class SmallWormFactory(WormFactory):
     module = 1
 
+class MyWorm(CustomObject):
+
+    def init_custom(self, *, h, axis):
+        self.h = h
+        self.worm = worm = WormFactory.worm(h=h, bore_d=0, axis=axis,
+                                            fast_rendering=FAST_RENDERING)
+        self.anchors.set_bounding_box(worm.pmin, worm.pmax)
+
 
 class WormShaft(CustomObject):
 
@@ -392,8 +400,11 @@ def build():
     rplate = RotatingPlate(bolt)
     obj.rplate = rplate.move_to(bottom=baseplate.body.top) #+25)
 
-    worm_shaft = WormShaft(axis='x').move_to(worm_center=rplate.spur.center,
-                                             worm_back=rplate.spur.front)
+    myworm = MyWorm(h=25, axis='x')
+    myworm.move_to(center=rplate.spur.center, back=rplate.spur.front)
+    obj.myworm = myworm
+
+    worm_shaft = WormShaft(axis='x').move_to(worm_center=myworm.center)
     obj.worm_shaft = worm_shaft.color('LawnGreen')
 
     stepper_spur = StepperSpur(worm_shaft) # note: this is moved inside make_bracket
