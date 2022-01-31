@@ -228,7 +228,7 @@ class MyWorm(CustomObject):
 
 class WormShaft(CustomObject):
 
-    _total_length = 62.32 # this must match the 'expected_worm_l' in MotorBracket
+    _total_length = 63.48
 
     def init_custom(self, *, axis):
         h_spur = 4
@@ -294,23 +294,21 @@ class MotorBracket(CustomObject):
     WASHER_ID = 4.20
     WASHER_OD = 8.88
     WASHER_H = 0.84
-    #WASHER_H = 0.1
 
     def init_custom(self, baseplate, worm_shaft, stepper_spur):
-        lwasher = self.washer()
-        rwasher = self.washer()
-        lwasher.move_to(center=worm_shaft.center, right=worm_shaft.left)
-        rwasher.move_to(center=worm_shaft.center, left=worm_shaft.right)
-        #
         lb = Bearing('604', axis='x')    # left bearing
         rb = Bearing('604', axis='x')    # right bearing
-        lb.move_to(center=worm_shaft.center, right=lwasher.left)
-        rb.move_to(center=worm_shaft.center, left=rwasher.right)
-        #
         lpil = self.pillar(lb, 'left')   # left pillar
         rpil = self.pillar(rb, 'right')  # right pillar
-        self.lpil = lpil.move_to(socket_center=lb.center, right=lwasher.left)
-        self.rpil = rpil.move_to(socket_center=rb.center, left=rwasher.right)
+        self.lpil = lpil.move_to(socket_center=worm_shaft.center, left=baseplate.left)
+        self.rpil = rpil.move_to(socket_center=worm_shaft.center, right=baseplate.right)
+        lb.move_to(center=worm_shaft.center, left=lpil.socket_left)
+        rb.move_to(center=worm_shaft.center, right=rpil.socket_right)
+        #
+        lwasher = self.washers(n=5)
+        rwasher = self.washers(n=1)
+        lwasher.move_to(center=worm_shaft.center, left=lb.right)
+        rwasher.move_to(center=worm_shaft.center, right=rb.left)
         #
         # sanity check. See also WormShaft._total_length
         expected_shaft_l = rwasher.left.x - lwasher.right.x
@@ -354,9 +352,10 @@ class MotorBracket(CustomObject):
             self.rwasher = rwasher
             self.stepper = stepper
 
-    def washer(self):
+    def washers(self, *, n):
+        # we simulate n washers by creating a single thicker washer
         return Washer(d1=self.WASHER_ID, d2=self.WASHER_OD,
-                      h=self.WASHER_H, axis='x', color='white')
+                      h=self.WASHER_H*n, axis='x', color='white')
 
     def pillar(self, bearing, which, *, sy=None):
         assert which in ('left', 'right')
