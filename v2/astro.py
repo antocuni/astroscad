@@ -212,7 +212,7 @@ class RotatingPlate(CustomObject):
 
 
 class SmallWormFactory(WormFactory):
-    module = 0.5
+    module = 1
 
 
 class MyWorm(CustomObject):
@@ -233,7 +233,7 @@ class MyWorm(CustomObject):
         self.l_trunk = l_trunk.move_to(right=worm.left)
         self.r_trunk = r_trunk.move_to(left=worm.right)
         #
-        spur = SmallWormFactory.spur(teeth=40, h=h_spur, axis=axis, optimized=False,
+        spur = SmallWormFactory.spur(teeth=20, h=h_spur, axis=axis, optimized=False,
                                      fast_rendering=FAST_RENDERING)
         self.spur = spur = spur.move_to(center=worm.center, right=l_trunk.left)
         #
@@ -262,7 +262,7 @@ class StepperSpur(CustomObject):
     SHAFT_H = 7.84
 
     def init_custom(self, myworm):
-        spur = SmallWormFactory.spur(teeth=20, h=3, axis='x',
+        spur = SmallWormFactory.spur(teeth=10, h=3, axis='x',
                                      fast_rendering=FAST_RENDERING)
         d = Stepper_28BYJ48._SBD - 2
         shaft = Cylinder(d=d, h=self.SHAFT_H, axis='x').move_to(right=spur.left)
