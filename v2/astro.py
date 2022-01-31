@@ -220,9 +220,28 @@ class MyWorm(CustomObject):
 
     def init_custom(self, *, h, axis):
         self.h = h
+        self.axis = axis
         self.worm = worm = WormFactory.worm(h=h, bore_d=0, axis=axis,
                                             fast_rendering=FAST_RENDERING)
         self.anchors.set_bounding_box(worm.pmin, worm.pmax)
+
+    def for_print(self, worm_shaft):
+        return MyWormForPrint(h=self.h, axis=self.axis, worm_shaft=worm_shaft)
+
+
+class MyWormForPrint(CustomObject):
+
+    def init_custom(self, *, h, axis, worm_shaft):
+        worm1 = WormFactory.worm(h=h, bore_d=0, axis=axis)
+        worm2 = WormFactory.worm(h=h, bore_d=0, axis=axis)
+        self.worm1 = worm1
+        self.worm2 = worm2.tr(x=h+2)
+        # remove the lower half of the worms
+        self -= Cube(100, worm1.d+5, worm1.d+5).move_to(top=worm1.center)
+
+        # cut a squared section to attach the worm on the worm shaft
+        side = worm_shaft.PLACEHOLDER_SIDE + 1
+        self -= Cube(100, side, side).mod()
 
 
 class WormShaft(CustomObject):
@@ -234,14 +253,17 @@ class WormShaft(CustomObject):
     WASHER_OD = 8.88
     WASHER_H = 0.84
 
+    PLACEHOLDER_SIDE = 5 # section of the square placeholder
+
     def init_custom(self, *, axis):
         lwasher = self.washers(n=2) # left washers
         rwasher = self.washers(n=1) # right washers
         #
         h_spur = 4
-        h_worm = 25
+        h_worm = 25 + 0.2
         # this is just a worm placeholder
-        self.worm = worm = Cube(h_worm, 5, 5).color(self.color)
+        side = self.PLACEHOLDER_SIDE
+        self.worm = worm = Cube(h_worm, side, side).color(self.color)
         #
         # left trunk length, right truck length
         ltl = self.LENGTH/2 - h_worm/2 - h_spur - lwasher.h
@@ -413,6 +435,8 @@ def build():
 
     worm_shaft = WormShaft(axis='x').move_to(worm_center=myworm.center)
     obj.worm_shaft = worm_shaft
+
+    #obj.myworm_for_print = myworm.for_print(worm_shaft)
 
     stepper_spur = StepperSpur(worm_shaft) # note: this is moved inside make_bracket
     baseplate.make_bracket(bearing, photo_plate, worm_shaft, stepper_spur)
