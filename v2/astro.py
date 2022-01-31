@@ -241,7 +241,7 @@ class MyWormForPrint(CustomObject):
         self -= Cube(100, worm1.d+5, worm1.d+5).move_to(top=worm1.center)
 
         # cut a squared section to attach the worm on the worm shaft
-        side = worm_shaft.PLACEHOLDER_SIDE + 1
+        side = worm_shaft.PLACEHOLDER_SIDE + 1.5
         self -= Cube(100, side, side)
 
 
@@ -280,7 +280,7 @@ class WormShaft(CustomObject):
         self.spur = spur.color(self.color)
         #
         # central bore
-        self -= Cylinder(d=4.15, h=100, axis=axis).move_to(center=worm.center)
+        self -= Cylinder(d=4.2, h=100, axis=axis).move_to(center=worm.center)
         #
         # washers
         lwasher.move_to(center=worm.center, right=spur.left)
