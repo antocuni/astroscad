@@ -279,7 +279,7 @@ class WormShaft(CustomObject):
         self.spur = spur.color(self.color)
         #
         # central bore
-        self -= self.central_shaft(d=4, h=100, clearance=0).move_to(center=worm.center)
+        self -= Cylinder(d=4.15, h=100, axis=axis).move_to(center=worm.center)
         #
         # washers
         lwasher.move_to(center=worm.center, right=spur.left)
@@ -299,10 +299,6 @@ class WormShaft(CustomObject):
             self.lwasher = lwasher
             self.rwasher = rwasher
 
-    def central_shaft(self, *, d, h, clearance):
-        # square inscribed in circle: l = d/2*sqrt(2)
-        l = d/2 * math.sqrt(2) - clearance
-        return Cube(h, l, l)
 
     def washers(self, *, n):
         # we simulate n washers by creating a single thicker washer
