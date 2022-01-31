@@ -22,9 +22,12 @@ BRASS = [0.88, 0.78, 0.5]
 STEEL = [0.65, 0.67, 0.72]
 
 
-def almost_equal(x, y):
-    return abs(x-y) < 0.0001
-
+def check_almost_equal(name, actual, expected):
+    diff = abs(actual - expected)
+    if diff < 0.001:
+        return True
+    print(f'** WARNING ** {name} has the wrong measure. Expected {expected:.2f}, got {actual:.2f} (diff={diff:.2f})')
+    return False
 
 class BallHead(CustomObject):
 
@@ -215,19 +218,18 @@ class SmallWormFactory(WormFactory):
     module = 1
 
 
-class MyWorm(CustomObject):
+class WormShaft(CustomObject):
 
     _total_length = 62.32 # this must match the 'expected_worm_l' in MotorBracket
 
     def init_custom(self, *, axis):
         h_spur = 4
-        h_bulge = 2
-        self.worm = worm = WormFactory.worm(h=25, bore_d=0, axis=axis,
-                                            fast_rendering=FAST_RENDERING)
+        h_worm = 25
+        self.worm = worm = Cube(h_worm, 5, 5) # this is just a worm placeholder
         #
         # left trunk length, right truck length
-        ltl = self._total_length/2 - worm.h/2 - h_spur - h_bulge
-        rtl = self._total_length/2 - worm.h/2
+        ltl = self._total_length/2 - h_worm/2 - h_spur
+        rtl = self._total_length/2 - h_worm/2
         l_trunk = Cylinder(d=8, h=ltl, axis=axis)
         r_trunk = Cylinder(d=8, h=rtl, axis=axis)
         self.l_trunk = l_trunk.move_to(right=worm.left)
@@ -237,23 +239,24 @@ class MyWorm(CustomObject):
                                      fast_rendering=FAST_RENDERING)
         self.spur = spur = spur.move_to(center=worm.center, right=l_trunk.left)
         #
-        l_bulge = Cylinder(d=8, h=h_bulge, axis=axis)
-        self.l_bulge = l_bulge.move_to(right=spur.left)
-        #
         # central bore
-        self -= Cylinder(d=4.1, h=100, axis=axis).move_to(center=worm.center)
-        #
+        self -= self.central_shaft(d=4, h=100, clearance=0).move_to(center=worm.center)
+
         self.anchors.set_bounding_box(spur.pmin, spur.pmax,
                                       worm.pmin, worm.pmax,
-                                      l_bulge.pmin, l_bulge.pmax,
                                       r_trunk.pmin, r_trunk.pmax)
         self.anchors.worm_center = worm.center
         self.anchors.worm_back = worm.back
-        assert almost_equal(self.length, self._total_length)
+        check_almost_equal('WormShaft.length', self.length, self._total_length)
 
     @property
     def length(self):
-        return self.r_trunk.right.x - self.l_bulge.left.x
+        return self.r_trunk.right.x - self.spur.left.x
+
+    def central_shaft(self, *, d, h, clearance):
+        # square inscribed in circle: l = d/2*sqrt(2)
+        l = d/2 * math.sqrt(2) - clearance
+        return Cube(h, l, l)
 
 
 class StepperSpur(CustomObject):
@@ -283,26 +286,27 @@ class MotorBracket(CustomObject):
     WASHER_ID = 4.20
     WASHER_OD = 8.88
     WASHER_H = 0.84
+    #WASHER_H = 0.1
 
-    def init_custom(self, baseplate, myworm, stepper_spur):
+    def init_custom(self, baseplate, worm_shaft, stepper_spur):
         lwasher = self.washer()
         rwasher = self.washer()
-        lwasher.move_to(center=myworm.center, right=myworm.left)
-        rwasher.move_to(center=myworm.center, left=myworm.right)
+        lwasher.move_to(center=worm_shaft.center, right=worm_shaft.left)
+        rwasher.move_to(center=worm_shaft.center, left=worm_shaft.right)
         #
         lb = Bearing('604', axis='x')    # left bearing
         rb = Bearing('604', axis='x')    # right bearing
-        lb.move_to(center=myworm.center, right=lwasher.left)
-        rb.move_to(center=myworm.center, left=rwasher.right)
+        lb.move_to(center=worm_shaft.center, right=lwasher.left)
+        rb.move_to(center=worm_shaft.center, left=rwasher.right)
         #
         lpil = self.pillar(lb, 'left')   # left pillar
         rpil = self.pillar(rb, 'right')  # right pillar
         self.lpil = lpil.move_to(socket_center=lb.center, right=lwasher.left)
         self.rpil = rpil.move_to(socket_center=rb.center, left=rwasher.right)
         #
-        # sanity check. See also MyWorm._total_length
-        expected_worm_l = rwasher.left.x - lwasher.right.x
-        assert myworm.length == expected_worm_l
+        # sanity check. See also WormShaft._total_length
+        expected_shaft_l = rwasher.left.x - lwasher.right.x
+        check_almost_equal('worm_shaft.length', worm_shaft.length, expected_shaft_l)
 
         motor_mount = Cube(lpil.size.x, 30, lpil.size.z).color('cyan')
         motor_mount.move_to(top=lpil.top, back=lpil.front+EPS, left=lpil.left)
@@ -310,7 +314,7 @@ class MotorBracket(CustomObject):
 
         floor_sx = rpil.right.x - lpil.left.x
         floor_sy = abs(rpil.front.y)
-        assert floor_sx == baseplate.d
+        check_almost_equal('floor_sx', floor_sx, baseplate.d)
         lfloor = Cube(floor_sx, floor_sy, 5).color('cyan')
         self.lfloor = lfloor.move_to(left=lpil.left,
                                      bottom=baseplate.bottom+EPS,
@@ -319,10 +323,10 @@ class MotorBracket(CustomObject):
         # we want to place the stepper-spur so that meshes with the worm-spur,
         # but we need to be careful else the stepper mounting holes touch the
         # bearing
-        dist = (stepper_spur.spur.r + myworm.spur.r)
+        dist = (stepper_spur.spur.r + worm_shaft.spur.r)
         a = math.radians(260)
         v = Vector(0, dist*math.sin(a), dist*math.cos(a))
-        stepper_spur.move_to(center=myworm.spur.center + v, right=myworm.spur.right)
+        stepper_spur.move_to(center=worm_shaft.spur.center + v, right=worm_shaft.spur.right)
         #
         stepper = Stepper_28BYJ48()
         stepper.move_to(
@@ -331,7 +335,9 @@ class MotorBracket(CustomObject):
         self -= stepper.make_mounting_holes(h=50, d=2.9)
 
         expected_stepper_spur_shaft_h = stepper_spur.spur.left.x - stepper.right.x - 4
-        assert almost_equal(expected_stepper_spur_shaft_h, stepper_spur.SHAFT_H)
+        check_almost_equal('stepper spur shaft',
+                           stepper_spur.SHAFT_H,
+                           expected_stepper_spur_shaft_h)
 
         if VITAMINS:
             self.lb = lb
@@ -386,15 +392,16 @@ def build():
     rplate = RotatingPlate(bolt)
     obj.rplate = rplate.move_to(bottom=baseplate.body.top) #+25)
 
-    myworm = MyWorm(axis='x').move_to(worm_center=rplate.spur.center,
-                                      worm_back=rplate.spur.front).color('LawnGreen')
-    obj.myworm = myworm
-    stepper_spur = StepperSpur(myworm) # note: this is moved inside make_bracket
-    baseplate.make_bracket(bearing, photo_plate, myworm, stepper_spur)
+    worm_shaft = WormShaft(axis='x').move_to(worm_center=rplate.spur.center,
+                                             worm_back=rplate.spur.front)
+    obj.worm_shaft = worm_shaft.color('LawnGreen')
+
+    stepper_spur = StepperSpur(worm_shaft) # note: this is moved inside make_bracket
+    baseplate.make_bracket(bearing, photo_plate, worm_shaft, stepper_spur)
     obj.baseplate = baseplate
     obj.stepper_spur = stepper_spur
 
-    compute_ratio(obj)
+    #compute_ratio(obj)
 
     if VITAMINS:
         obj.bolt = bolt
