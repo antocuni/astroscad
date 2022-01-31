@@ -221,8 +221,9 @@ class MyWorm(CustomObject):
     def init_custom(self, *, h, axis):
         self.h = h
         self.axis = axis
-        self.worm = worm = WormFactory.worm(h=h, bore_d=0, axis=axis,
-                                            fast_rendering=FAST_RENDERING)
+        worm = WormFactory.worm(h=h, bore_d=0, axis=axis,
+                                fast_rendering=FAST_RENDERING)
+        self.worm = worm.mod('%')
         self.anchors.set_bounding_box(worm.pmin, worm.pmax)
 
     def for_print(self, worm_shaft):
@@ -241,7 +242,7 @@ class MyWormForPrint(CustomObject):
 
         # cut a squared section to attach the worm on the worm shaft
         side = worm_shaft.PLACEHOLDER_SIDE + 1
-        self -= Cube(100, side, side).mod()
+        self -= Cube(100, side, side)
 
 
 class WormShaft(CustomObject):
@@ -432,8 +433,6 @@ def build():
     worm_shaft = WormShaft(axis='x').move_to(worm_center=myworm.center)
     obj.worm_shaft = worm_shaft
 
-    #obj.myworm_for_print = myworm.for_print(worm_shaft)
-
     stepper_spur = StepperSpur(worm_shaft) # note: this is moved inside make_bracket
     baseplate.make_bracket(bearing, photo_plate, worm_shaft, stepper_spur)
     obj.baseplate = baseplate
@@ -509,8 +508,12 @@ def main():
         # show only the parts which are given
         new_obj = CustomObject()
         for part_name in parts:
-            part_obj = getattr(obj, part_name)
-            setattr(new_obj, part_name, part_obj)
+            if part_name == 'myworm':
+                # special case
+                new_obj.myworm = obj.myworm.for_print(obj.worm_shaft)
+            else:
+                part_obj = getattr(obj, part_name)
+                setattr(new_obj, part_name, part_obj)
         obj = new_obj
 
     # fn=100 is needed to make sure that cura makes fully circular top/bottom patterns
