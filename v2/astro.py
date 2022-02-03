@@ -458,7 +458,7 @@ def build():
     obj.baseplate = baseplate
     obj.stepper_spur = stepper_spur
 
-    #compute_ratio(obj)
+    compute_ratio(obj)
 
     if VITAMINS:
         obj.bolt = bolt
@@ -485,14 +485,15 @@ def compute_ratio(obj):
     ratio1 = main_spur.teeth / main_worm.thread_starts
     #
     motor_spur = obj.stepper_spur.spur
-    myworm_spur = obj.myworm.spur
-    ratio2 = myworm_spur.teeth / motor_spur.teeth
+    shaft_spur = obj.worm_shaft.spur
+    ratio2 = shaft_spur.teeth / motor_spur.teeth
     #
     total_ratio = ratio1 * ratio2
     steps_per_360 = 512*8 * total_ratio
     steps_per_sec = steps_per_360 / (24*60*60)
     sec_per_steps = 1 / steps_per_sec
-    print(f'Total ratio: 1:{total_ratio} -- 1 step every {sec_per_steps:.4f}s')
+    #
+    print(f'Total ratio: 1:{total_ratio} -- 1 step every {sec_per_steps:.4f}s -- STEPS_FOR_360_DEGREES = {steps_per_360}')
 
 
 def main():
