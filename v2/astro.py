@@ -329,8 +329,22 @@ class StepperSpur(CustomObject):
 
         hole = Stepper_28BYJ48.make_shaft_hole(h=self.SHAFT_H)
         self -= hole.move_to(left=shaft.left-EPS).mod()
+        self.anchors.set_bounding_box(spur.pmin, spur.pmax)
 
-        self.anchors.set_bounding_box(self.spur.pmin, self.spur.pmax)
+    def for_print(self):
+        """
+        hack hack hack. I keep it around only in case I need it again in the
+        future, it's a way to print a slightly smaller spur, useful to add
+        some play between two gears. It needs to comment out the
+        "invalidate_anchors()" inside PySCADObject.scale
+        """
+        #pmin = spur.pmin
+        #pmax = spur.pmax
+        s = 0.9
+        spur.scale(1, s, s)
+        #spur.anchors.set_bounding_box(pmin, pmax)
+        self.spur = spur.color(self.color)
+        self.anchors.set_bounding_box(spur.pmin, spur.pmax)
 
 
 class MotorBracket(CustomObject):
