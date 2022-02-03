@@ -231,6 +231,11 @@ class MyWorm(CustomObject):
 
 
 class MyWormForPrint(CustomObject):
+    """
+    This was at attempt to print the worm and the shaft separately, but I
+    discovered that I can just print the shaft+worm vertically and it works
+    well.
+    """
 
     def init_custom(self, *, h, axis, worm_shaft):
         worm1 = WormFactory.worm(h=h, bore_d=0, axis=axis)
@@ -529,9 +534,9 @@ def main():
         # show only the parts which are given
         new_obj = CustomObject()
         for part_name in parts:
-            if part_name == 'myworm':
+            if part_name == 'myworm_for_print':
                 # special case
-                new_obj.myworm = obj.myworm.for_print(obj.worm_shaft)
+                new_obj.myworm_for_print = obj.myworm.for_print(obj.worm_shaft)
             else:
                 part_obj = getattr(obj, part_name)
                 setattr(new_obj, part_name, part_obj)
