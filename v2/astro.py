@@ -296,6 +296,12 @@ class WormShaft(CustomObject):
         actual_length = rwasher.right.x - lwasher.left.x
         check_almost_equal('WormShaft.LENGTH', self.LENGTH, actual_length)
 
+        # this hole is needed in conjunction with a 3d-printed cylindric axis:
+        # if we drill a hole inside the inner axis and fix it with a stick, we
+        # can attach the axis to a drill and rotate the worm very fast, useful
+        # for running in the system.
+        self -= Cylinder(d=2, h=10, axis='y').tr(25, 0, 0) #.mod()
+
         if VITAMINS:
             self.lwasher = lwasher
             self.rwasher = rwasher
