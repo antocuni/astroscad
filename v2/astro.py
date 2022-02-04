@@ -501,7 +501,7 @@ def compute_ratio(obj):
     print(f'Total ratio: 1:{total_ratio} -- 1 step every {sec_per_steps:.4f}s -- STEPS_FOR_360_DEGREES = {steps_per_360}')
 
 
-def main():
+def main(build_fn):
     global FAST_RENDERING
     global VITAMINS
     parts = None
@@ -517,7 +517,7 @@ def main():
         if '--no-vitamins' in parts:
             parts.remove('--no-vitamins')
     #
-    obj = build()
+    obj = build_fn()
     #obj = build_worm_bracket()
     if parts and parts[0].startswith('-'):
         # show everything APART the parts which are given
@@ -546,4 +546,4 @@ def main():
     obj.autorender(fn=100)
 
 if __name__ == '__main__':
-    main()
+    main(build)
