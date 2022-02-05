@@ -106,18 +106,15 @@ class BottomPlate(CustomObject):
 
         self.sub(holes = FourHoles(turntable.ohd, d=M5))
 
-        # motor bracket plate
-        mb_sx = 95
-        mb_sy = 17
+        # motor bracket plate, which is an inset inside the body
+        mb_sx = 70
+        mb_sy = 40
         mb_sz = 2
-        # cut a part of the body so that we can attach the mb_plate
-        cut = Cube(self.d, 35, self.BODY_H+1)
-        self -= cut.move_to(front=body.front-EPS)
-
         mb_plate = Cube(mb_sx, mb_sy, mb_sz).color('PaleGreen')
-        self.mb_plate = mb_plate.move_to(center=body.center,
-                                         back=cut.back,
-                                         bottom=body.bottom)
+        mb_plate.move_to(center=body.center,
+                         front=body.front-EPS,
+                         top=body.top+EPS)
+        self.sub(mb_plate=mb_plate)
 
         self.anchors.set_bounding_box(body.pmin, body.pmax,
                                       pillars[0].pmin, pillars[0].pmax,
@@ -245,7 +242,7 @@ class MotorBracket(CustomObject):
         bz = 1.5 # extra space above the bearing
         by = 3   # extra space around the bearing
         # compute the h so that the walls touch the mb_plate
-        h = lb.top.z + bz - mb_plate.top.z
+        h = lb.top.z + bz - mb_plate.bottom.z
 
         lwall = Cube(5, 50, h).color('cyan')
         lwall.move_to(left=lb.left, back=lb.back+by, top=lb.top+bz)
@@ -255,11 +252,17 @@ class MotorBracket(CustomObject):
         rwall.move_to(right=rb.right, back=rb.back+by, top=rb.top+bz)
         self.make_bearing_socket(rwall, rb, 'right')
 
-        floor_sx = rwall.right.x - lwall.left.x + 30
+        floor_sx = mb_plate.size.x - 1
         floor_sy = mb_plate.back.y - rwall.front.y
         floor = Cube(floor_sx, floor_sy, 2)
-        floor.move_to(back=mb_plate.back, bottom=mb_plate.top)
+        floor.move_to(back=mb_plate.back, bottom=mb_plate.bottom)
         self.floor = floor.color('cyan')
+
+        # sanity check: the floor must be wide enough to contains the two walls
+        wall_dist = rwall.right.x - lwall.left.x
+        if  floor_sx < wall_dist:
+            print('WARNING! The mb_plate is too narrow')
+
 
         # sanity check: check that the worm_shaft (including the washers) fit
         # exactly the bearing-to-bearing distance. This should be correct by
