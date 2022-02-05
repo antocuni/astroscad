@@ -50,7 +50,7 @@ class Turntable(CustomObject):
         self.sub(outer_holes = FourHoles(self.ohd, d=5))
         self.anchors.set_bounding_box(self.outer.pmin, self.outer.pmax)
 
-class UpperPlate(CustomObject):
+class TopPlate(CustomObject):
 
     def init_custom(self, turntable):
         self.body = Cylinder(d=turntable.d2-1, h=5).mod('%')
@@ -71,15 +71,15 @@ class SpurPlate(CustomObject):
         self.anchors.set_bounding_box(self.body.pmin, self.body.pmax)
 
 
-class BottomBase(CustomObject):
+class BottomPlate(CustomObject):
 
     PILLAR_H = 30
-    BASE_H = 4
+    BODY_H = 4
 
     def init_custom(self, turntable):
         self.d = turntable.d4+2
-        base = Cylinder(d=self.d, h=self.BASE_H).color('PaleGreen')
-        self.base = base
+        body = Cylinder(d=self.d, h=self.BODY_H).color('PaleGreen')
+        self.body = body
 
         pillars = []
         for i in range(3):
@@ -87,18 +87,20 @@ class BottomBase(CustomObject):
             pil = DonutSlice(d1=turntable.d3+2, d2=turntable.d4,
                              h=self.PILLAR_H,
                              start_angle=a-7.5, end_angle=a+7.5)
-            pil.move_to(bottom=base.top).color('PaleGreen')
+            pil.move_to(bottom=body.top).color('PaleGreen')
             pillars.append(pil)
         self.pillars = pillars
 
         self.sub(holes = FourHoles(turntable.ohd, d=M5))
 
-        base2 = Cube(80, 80, self.BASE_H).color('PaleGreen')
-        self.base2 = base2.move_to(center=base.center,
-                                   back=base.front + 40)
+        # motor bracket plate
+        mb_plate = Cube(80, 80, self.BODY_H).color('PaleGreen')
+        self.mb_plate = mb_plate.move_to(center=body.center,
+                                         back=body.front + 40)
 
-        self.anchors.set_bounding_box(base.pmin, base.pmax,
-                                      pillars[0].pmin, pillars[0].pmax)
+        self.anchors.set_bounding_box(body.pmin, body.pmax,
+                                      pillars[0].pmin, pillars[0].pmax,
+                                      mb_plate.pmin, mb_plate.pmax)
 
 
 
@@ -110,14 +112,14 @@ def build():
     obj = CustomObject()
 
     turntable = Turntable()
-    upper_plate = UpperPlate(turntable)
+    top_plate = TopPlate(turntable)
     spur_plate = SpurPlate(turntable)
-    bottom_base = BottomBase(turntable)
+    bottom_plate = BottomPlate(turntable)
 
     obj.turntable = turntable
-    obj.upper_plate = upper_plate.move_to(bottom=turntable.top)
+    obj.top_plate = top_plate.move_to(bottom=turntable.top)
     obj.spur_plate = spur_plate.move_to(top=turntable.bottom)
-    obj.bottom_base = bottom_base.move_to(top=turntable.bottom)
+    obj.bottom_plate = bottom_plate.move_to(top=turntable.bottom)
 
     worm = WormFactory.worm(h=20, bore_d=0, axis='x', fast_rendering=FAST_RENDERING)
     worm.mod('%')
