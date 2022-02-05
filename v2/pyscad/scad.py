@@ -140,6 +140,9 @@ class PySCADObject:
         self.solid.set_modifier(mod)
         return self
 
+    def hide(self):
+        return self.mod('*')
+
     def __neg__(self):
         return Neg(self)
 
