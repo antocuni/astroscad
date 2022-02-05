@@ -63,7 +63,7 @@ class SpurPlate(CustomObject):
 
     def init_custom(self, turntable):
         self.body = Cylinder(d=turntable.d2-1, h=2).color('pink')
-        spur = WormFactory.spur(teeth=70, h=17, optimized=False,
+        spur = WormFactory.spur(teeth=70, h=18, optimized=False,
                                 fast_rendering=FAST_RENDERING)
         self.spur = spur.move_to(top=self.body.bottom).color('pink')
         self.sub(holes = FourHoles(turntable.ihd, d=M5))
@@ -117,7 +117,7 @@ class BottomPlate(CustomObject):
 
 class WormShaft(CustomObject):
     # total length of the Shaft, "bearing to bearing" (including the washers)
-    LENGTH = 66
+    LENGTH = 55
     color = 'LawnGreen'
 
     WASHER_ID = 4.20
@@ -125,10 +125,10 @@ class WormShaft(CustomObject):
     WASHER_H = 0.84
 
     PLACEHOLDER_SIDE = 5 # section of the square placeholder
-    SPUR_TEETH = 18
+    SPUR_TEETH = 21
 
     def init_custom(self, *, axis):
-        lwasher = self.washers(n=2) # left washers
+        lwasher = self.washers(n=3) # left washers
         rwasher = self.washers(n=1) # right washers
         #
         h_spur = 4
@@ -158,11 +158,6 @@ class WormShaft(CustomObject):
         lwasher.move_to(center=worm.center, right=spur.left)
         rwasher.move_to(center=worm.center, left=r_trunk.right)
 
-        self.anchors.set_bounding_box(spur.pmin, spur.pmax,
-                                      worm.pmin, worm.pmax,
-                                      r_trunk.pmin, r_trunk.pmax)
-        self.anchors.worm_center = worm.center
-        self.anchors.worm_back = worm.back
         #
         # sanity check
         actual_length = rwasher.right.x - lwasher.left.x
@@ -174,15 +169,124 @@ class WormShaft(CustomObject):
         # for running in the system.
         self -= Cylinder(d=2, h=10, axis='y').tr(25, 0, 0) #.mod()
 
+        # NOTE: the bounding box of the shaft also includes the washers!
+        self.anchors.set_bounding_box(spur.pmin, spur.pmax,
+                                      worm.pmin, worm.pmax,
+                                      r_trunk.pmin, r_trunk.pmax,
+                                      lwasher.pmin, lwasher.pmax,
+                                      rwasher.pmin, rwasher.pmax)
+        self.anchors.worm_center = worm.center
+        self.anchors.worm_back = worm.back
+
         if VITAMINS:
             self.lwasher = lwasher
             self.rwasher = rwasher
+
+
 
 
     def washers(self, *, n):
         # we simulate n washers by creating a single thicker washer
         return Washer(d1=self.WASHER_ID, d2=self.WASHER_OD,
                       h=self.WASHER_H*n, axis='x', color='white')
+
+class StepperSpur(CustomObject):
+
+    color = 'pink'
+    SHAFT_H = 5.68
+    TEETH = 7
+
+    def init_custom(self, myworm):
+        spur = WormFactory.spur(teeth=self.TEETH, h=3, axis='x',
+                                fast_rendering=FAST_RENDERING)
+        d = Stepper_28BYJ48._SBD - 2
+        shaft = Cylinder(d=d, h=self.SHAFT_H, axis='x').move_to(right=spur.left)
+        self.spur = spur.color(self.color)
+        self.shaft = shaft.color(self.color)
+
+        hole = Stepper_28BYJ48.make_shaft_hole(h=self.SHAFT_H)
+        self -= hole.move_to(left=shaft.left-EPS).mod()
+        self.anchors.set_bounding_box(spur.pmin, spur.pmax)
+
+    def for_print(self):
+        """
+        hack hack hack. I keep it around only in case I need it again in the
+        future, it's a way to print a slightly smaller spur, useful to add
+        some play between two gears. It needs to comment out the
+        "invalidate_anchors()" inside PySCADObject.scale
+        """
+        #pmin = spur.pmin
+        #pmax = spur.pmax
+        s = 0.9
+        spur.scale(1, s, s)
+        #spur.anchors.set_bounding_box(pmin, pmax)
+        self.spur = spur.color(self.color)
+        self.anchors.set_bounding_box(spur.pmin, spur.pmax)
+
+        
+
+class MotorBracket(CustomObject):
+
+    def init_custom(self, mb_plate, worm_shaft, stepper_spur):
+        lb = Bearing('604', axis='x')    # left bearing
+        lb2 = Bearing('604', axis='x')    # left bearing 2
+        rb = Bearing('604', axis='x')    # right bearing
+
+        lb.move_to(center=worm_shaft.center, right=worm_shaft.left)
+        rb.move_to(center=worm_shaft.center, left=worm_shaft.right)
+
+        h = 30
+        bz = 1.5 # extra space above the bearing
+        by = 3   # extra space around the bearing
+        lwall = Cube(5, 50, h).color('cyan')
+        lwall.move_to(left=lb.left, back=lb.back+by, top=lb.top+bz)
+        self.make_bearing_socket(lwall, lb, 'left')
+
+        ## # sanity check: check that the worm_shaft (including the washers) fit
+        ## # exactly the bearing-to-bearing distance
+        ## expected_length = rb.left.x - lb.right.x
+        ## check_almost_equal('worm_shaft.LENGTH', worm_shaft.LENGTH, expected_length)
+
+        ## motor_mount = Cube(lpil.size.x, 30, lpil.size.z).color('cyan')
+        ## motor_mount.move_to(top=lpil.top, back=lpil.front+EPS, left=lpil.left)
+        ## self.motor_mount = motor_mount
+
+        # we want to place the stepper-spur so that meshes with the worm-spur,
+        # but we need to be careful else the stepper mounting holes touch the
+        # bearing
+        # the "+1" is to allow a bit of play between the spurs, else they get stuck
+        dist = (stepper_spur.spur.r + worm_shaft.spur.r) + 1
+        a = math.radians(260)
+        v = Vector(0, dist*math.sin(a), dist*math.cos(a))
+        stepper_spur.move_to(center=worm_shaft.spur.center + v, right=worm_shaft.spur.right)
+        ## #
+        stepper = Stepper_28BYJ48()
+        stepper.move_to(
+            shaft=stepper_spur.spur.center,
+            right=lwall.left)
+
+        ## expected_stepper_spur_shaft_h = stepper_spur.spur.left.x - stepper.right.x - 4
+        ## check_almost_equal('stepper spur shaft',
+        ##                    stepper_spur.SHAFT_H,
+        ##                    expected_stepper_spur_shaft_h)
+
+        self.lwall = lwall
+        self -= stepper.make_mounting_holes(h=50, d=2.9)
+
+        if VITAMINS:
+            self.lb = lb
+            self.rb = rb
+            self.stepper = stepper
+
+    def make_bearing_socket(self, wall, bearing, where):
+        socket = bearing.hole(bearing.h + 1)
+        if where == 'left':
+            socket.move_to(center=bearing.center, left=bearing.left-EPS)
+        else:
+            socket.move_to(center=bearing.center, right=bearing.right)
+        wall -= socket
+        wall -= RoundHole(d=10.5, h=100, axis='x').move_to(center=socket.center)
+
 
 
 
@@ -216,6 +320,10 @@ def build():
     if worm_shaft.spur.top.z >= spur_plate.body.bottom.z:
         print('WARNING, the worm_shaft.spur touches the spur plate')
 
+
+    stepper_spur = StepperSpur(worm_shaft) # note: this is placed by MotorBracket
+    obj.motor_bracket = MotorBracket(bottom_plate.mb_plate, worm_shaft, stepper_spur)
+    obj.stepper_spur = stepper_spur
 
     return obj
 
