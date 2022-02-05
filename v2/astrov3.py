@@ -62,12 +62,24 @@ class TopPlate(CustomObject):
 class SpurPlate(CustomObject):
 
     def init_custom(self, turntable):
-        self.body = Cylinder(d=turntable.d2-1, h=5).color('pink')
-        spur = WormFactory.spur(teeth=90, h=13, optimized=True,
+        self.body = Cylinder(d=turntable.d2-1, h=2).color('pink')
+        spur = WormFactory.spur(teeth=70, h=17, optimized=False,
                                 fast_rendering=FAST_RENDERING)
         self.spur = spur.move_to(top=self.body.bottom).color('pink')
         self.sub(holes = FourHoles(turntable.ihd, d=M5))
-        self -= Cylinder(d=18, h=100)
+
+        # make a big hole to optimize the material
+        self -= Cylinder(d=60, h=100)
+
+        # insert some spokes
+        spokes = []
+        n = 3
+        for i in range(n):
+            angle = i * (180/n)
+            spoke = Cube(2, spur.teeth, 4).rot(z=angle).color('pink')
+            spokes.append(spoke)
+        self.spokes = spokes
+
         self.anchors.set_bounding_box(self.body.pmin, self.body.pmax)
 
 
@@ -113,6 +125,7 @@ class WormShaft(CustomObject):
     WASHER_H = 0.84
 
     PLACEHOLDER_SIDE = 5 # section of the square placeholder
+    SPUR_TEETH = 18
 
     def init_custom(self, *, axis):
         lwasher = self.washers(n=2) # left washers
@@ -132,7 +145,8 @@ class WormShaft(CustomObject):
         self.l_trunk = l_trunk.move_to(right=worm.left)
         self.r_trunk = r_trunk.move_to(left=worm.right)
         #
-        spur = WormFactory.spur(teeth=20, h=h_spur, axis=axis, optimized=False,
+        spur = WormFactory.spur(teeth=self.SPUR_TEETH, h=h_spur, axis=axis,
+                                optimized=False,
                                 fast_rendering=FAST_RENDERING)
         spur = spur.move_to(center=worm.center, right=l_trunk.left)
         self.spur = spur.color(self.color)
@@ -199,9 +213,8 @@ def build():
 
     worm_shaft = WormShaft(axis='x').move_to(worm_center=worm.center)
     obj.worm_shaft = worm_shaft
-    if worm_shaft.spur.top.z >= turntable.bottom.z:
+    if worm_shaft.spur.top.z >= spur_plate.body.bottom.z:
         print('WARNING, the worm_shaft.spur touches the spur plate')
-
 
 
     return obj
