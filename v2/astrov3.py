@@ -194,7 +194,7 @@ class WormShaft(CustomObject):
 class StepperSpur(CustomObject):
 
     color = 'pink'
-    SHAFT_H = 5.68
+    SHAFT_H = 3.52
     TEETH = 7
 
     def init_custom(self, myworm):
@@ -230,9 +230,7 @@ class MotorBracket(CustomObject):
 
     def init_custom(self, mb_plate, worm_shaft, stepper_spur):
         lb = Bearing('604', axis='x')    # left bearing
-        lb2 = Bearing('604', axis='x')    # left bearing 2
         rb = Bearing('604', axis='x')    # right bearing
-
         lb.move_to(center=worm_shaft.center, right=worm_shaft.left)
         rb.move_to(center=worm_shaft.center, left=worm_shaft.right)
 
@@ -243,14 +241,15 @@ class MotorBracket(CustomObject):
         lwall.move_to(left=lb.left, back=lb.back+by, top=lb.top+bz)
         self.make_bearing_socket(lwall, lb, 'left')
 
-        ## # sanity check: check that the worm_shaft (including the washers) fit
-        ## # exactly the bearing-to-bearing distance
-        ## expected_length = rb.left.x - lb.right.x
-        ## check_almost_equal('worm_shaft.LENGTH', worm_shaft.LENGTH, expected_length)
+        rwall = Cube(5, 17, h).color('cyan')
+        rwall.move_to(right=rb.right, back=rb.back+by, top=rb.top+bz)
+        self.make_bearing_socket(rwall, rb, 'right')
 
-        ## motor_mount = Cube(lpil.size.x, 30, lpil.size.z).color('cyan')
-        ## motor_mount.move_to(top=lpil.top, back=lpil.front+EPS, left=lpil.left)
-        ## self.motor_mount = motor_mount
+        # sanity check: check that the worm_shaft (including the washers) fit
+        # exactly the bearing-to-bearing distance. This should be correct by
+        # construction.
+        expected_length = rb.left.x - lb.right.x
+        check_almost_equal('worm_shaft.LENGTH', worm_shaft.LENGTH, expected_length)
 
         # we want to place the stepper-spur so that meshes with the worm-spur,
         # but we need to be careful else the stepper mounting holes touch the
@@ -259,19 +258,20 @@ class MotorBracket(CustomObject):
         dist = (stepper_spur.spur.r + worm_shaft.spur.r) + 1
         a = math.radians(260)
         v = Vector(0, dist*math.sin(a), dist*math.cos(a))
-        stepper_spur.move_to(center=worm_shaft.spur.center + v, right=worm_shaft.spur.right)
-        ## #
+        stepper_spur.move_to(center=worm_shaft.spur.center + v,
+                             right=worm_shaft.spur.right)
+
         stepper = Stepper_28BYJ48()
         stepper.move_to(
             shaft=stepper_spur.spur.center,
             right=lwall.left)
-
-        ## expected_stepper_spur_shaft_h = stepper_spur.spur.left.x - stepper.right.x - 4
-        ## check_almost_equal('stepper spur shaft',
-        ##                    stepper_spur.SHAFT_H,
-        ##                    expected_stepper_spur_shaft_h)
+        expected_stepper_spur_shaft_h = stepper_spur.spur.left.x - stepper.right.x - 4
+        check_almost_equal('stepper spur shaft',
+                           stepper_spur.SHAFT_H,
+                           expected_stepper_spur_shaft_h)
 
         self.lwall = lwall
+        self.rwall = rwall
         self -= stepper.make_mounting_holes(h=50, d=2.9)
 
         if VITAMINS:
@@ -284,7 +284,7 @@ class MotorBracket(CustomObject):
         if where == 'left':
             socket.move_to(center=bearing.center, left=bearing.left-EPS)
         else:
-            socket.move_to(center=bearing.center, right=bearing.right)
+            socket.move_to(center=bearing.center, right=bearing.right+EPS)
         wall -= socket
         wall -= RoundHole(d=10.5, h=100, axis='x').move_to(center=socket.center)
 
@@ -311,14 +311,15 @@ def build():
     worm = WormFactory.worm(h=25, bore_d=0, axis='x', fast_rendering=FAST_RENDERING)
     worm.mod('%')
     obj.worm = worm.move_to(bottom=spur_plate.spur.bottom, back=spur_plate.spur.front)
-    if worm.top.z >= turntable.bottom.z:
+    if worm.top.z+1 >= turntable.bottom.z:
+        # the +1 is to count the addendum circle
         print('WARNING, the worm touches the turntable!')
-    if worm.top.z >= spur_plate.body.bottom.z:
+    if worm.top.z+1 >= spur_plate.body.bottom.z:
         print('WARNING, the worm touches the spur plate')
 
     worm_shaft = WormShaft(axis='x').move_to(worm_center=worm.center)
     obj.worm_shaft = worm_shaft
-    if worm_shaft.spur.top.z >= spur_plate.body.bottom.z:
+    if worm_shaft.spur.top.z+1 >= spur_plate.body.bottom.z:
         print('WARNING, the worm_shaft.spur touches the spur plate')
 
 
