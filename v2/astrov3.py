@@ -107,7 +107,7 @@ class BottomPlate(CustomObject):
         self.sub(holes = FourHoles(turntable.ohd, d=M5))
 
         # motor bracket plate
-        mb_plate = Cube(80, 80, self.BODY_H).color('PaleGreen')
+        mb_plate = Cube(80, 50, self.BODY_H).color('PaleGreen')
         self.mb_plate = mb_plate.move_to(center=body.center,
                                          back=body.front + 40)
 
@@ -234,9 +234,11 @@ class MotorBracket(CustomObject):
         lb.move_to(center=worm_shaft.center, right=worm_shaft.left)
         rb.move_to(center=worm_shaft.center, left=worm_shaft.right)
 
-        h = 30
         bz = 1.5 # extra space above the bearing
         by = 3   # extra space around the bearing
+        # compute the h so that the walls touch the mb_plate
+        h = lb.top.z + bz - mb_plate.top.z
+
         lwall = Cube(5, 50, h).color('cyan')
         lwall.move_to(left=lb.left, back=lb.back+by, top=lb.top+bz)
         self.make_bearing_socket(lwall, lb, 'left')
@@ -244,6 +246,11 @@ class MotorBracket(CustomObject):
         rwall = Cube(5, 17, h).color('cyan')
         rwall.move_to(right=rb.right, back=rb.back+by, top=rb.top+bz)
         self.make_bearing_socket(rwall, rb, 'right')
+
+        floor_sx = rwall.right.x - lwall.left.x + 30
+        floor = Cube(floor_sx, 17, 2)
+        floor.move_to(back=lwall.back, bottom=mb_plate.top)
+        self.floor = floor.color('cyan')
 
         # sanity check: check that the worm_shaft (including the washers) fit
         # exactly the bearing-to-bearing distance. This should be correct by
