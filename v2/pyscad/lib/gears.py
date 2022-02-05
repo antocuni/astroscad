@@ -60,6 +60,13 @@ class SpurGear(PySCADObject):
         self.h = h
         self.d = module * teeth
         self.r = r = self.d / 2
+
+        # the addendum circle is the circle which circumscribes the tip of the
+        # teeth
+        addendum = 1 * module
+        self.ar = self.r + addendum
+        self.ad = self.d + addendum
+        #
         #
         # to compute the anchors, we create a thrown-away Cylinder which is
         # "equivalent" to the spur

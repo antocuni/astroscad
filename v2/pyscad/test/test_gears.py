@@ -10,6 +10,7 @@ class TestGear(OpenSCADTest):
         spur = WormFactory.spur(teeth=24, h=2, bore_d=3.2)
         obj += spur
         obj += Cylinder(r=spur.r, h=1).color('red', 0.3).move_to(bottom=spur.top)
+        obj += Cylinder(r=spur.ar, h=1).color('green', 0.3).move_to(top=spur.bottom)
         self.check(obj)
 
     def test_spur_other_axes(self):
