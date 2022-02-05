@@ -62,8 +62,8 @@ class TopPlate(CustomObject):
 class SpurPlate(CustomObject):
 
     def init_custom(self, turntable):
-        self.body = Cylinder(d=turntable.d2-1, h=2).color('pink')
-        spur = WormFactory.spur(teeth=70, h=13, optimized=True,
+        self.body = Cylinder(d=turntable.d2-1, h=5).color('pink')
+        spur = WormFactory.spur(teeth=90, h=13, optimized=True,
                                 fast_rendering=FAST_RENDERING)
         self.spur = spur.move_to(top=self.body.bottom).color('pink')
         self.sub(holes = FourHoles(turntable.ihd, d=M5))
@@ -103,6 +103,74 @@ class BottomPlate(CustomObject):
                                       mb_plate.pmin, mb_plate.pmax)
 
 
+class WormShaft(CustomObject):
+    # total length of the Shaft, "bearing to bearing" (including the washers)
+    LENGTH = 66
+    color = 'LawnGreen'
+
+    WASHER_ID = 4.20
+    WASHER_OD = 8.88
+    WASHER_H = 0.84
+
+    PLACEHOLDER_SIDE = 5 # section of the square placeholder
+
+    def init_custom(self, *, axis):
+        lwasher = self.washers(n=2) # left washers
+        rwasher = self.washers(n=1) # right washers
+        #
+        h_spur = 4
+        h_worm = 25 + 0.2
+        # this is just a worm placeholder
+        side = self.PLACEHOLDER_SIDE
+        self.worm = worm = Cube(h_worm, side, side).color(self.color)
+        #
+        # left trunk length, right truck length
+        ltl = self.LENGTH/2 - h_worm/2 - h_spur - lwasher.h
+        rtl = self.LENGTH/2 - h_worm/2 - rwasher.h
+        l_trunk = Cylinder(d=8, h=ltl, axis=axis).color(self.color)
+        r_trunk = Cylinder(d=8, h=rtl, axis=axis).color(self.color)
+        self.l_trunk = l_trunk.move_to(right=worm.left)
+        self.r_trunk = r_trunk.move_to(left=worm.right)
+        #
+        spur = WormFactory.spur(teeth=20, h=h_spur, axis=axis, optimized=False,
+                                fast_rendering=FAST_RENDERING)
+        spur = spur.move_to(center=worm.center, right=l_trunk.left)
+        self.spur = spur.color(self.color)
+        #
+        # central bore
+        self -= Cylinder(d=4.2, h=100, axis=axis).move_to(center=worm.center)
+        #
+        # washers
+        lwasher.move_to(center=worm.center, right=spur.left)
+        rwasher.move_to(center=worm.center, left=r_trunk.right)
+
+        self.anchors.set_bounding_box(spur.pmin, spur.pmax,
+                                      worm.pmin, worm.pmax,
+                                      r_trunk.pmin, r_trunk.pmax)
+        self.anchors.worm_center = worm.center
+        self.anchors.worm_back = worm.back
+        #
+        # sanity check
+        actual_length = rwasher.right.x - lwasher.left.x
+        check_almost_equal('WormShaft.LENGTH', self.LENGTH, actual_length)
+
+        # this hole is needed in conjunction with a 3d-printed cylindric axis:
+        # if we drill a hole inside the inner axis and fix it with a stick, we
+        # can attach the axis to a drill and rotate the worm very fast, useful
+        # for running in the system.
+        self -= Cylinder(d=2, h=10, axis='y').tr(25, 0, 0) #.mod()
+
+        if VITAMINS:
+            self.lwasher = lwasher
+            self.rwasher = rwasher
+
+
+    def washers(self, *, n):
+        # we simulate n washers by creating a single thicker washer
+        return Washer(d1=self.WASHER_ID, d2=self.WASHER_OD,
+                      h=self.WASHER_H*n, axis='x', color='white')
+
+
 
 
 def build():
@@ -121,13 +189,20 @@ def build():
     obj.spur_plate = spur_plate.move_to(top=turntable.bottom)
     obj.bottom_plate = bottom_plate.move_to(top=turntable.bottom)
 
-    worm = WormFactory.worm(h=20, bore_d=0, axis='x', fast_rendering=FAST_RENDERING)
+    worm = WormFactory.worm(h=25, bore_d=0, axis='x', fast_rendering=FAST_RENDERING)
     worm.mod('%')
     obj.worm = worm.move_to(bottom=spur_plate.spur.bottom, back=spur_plate.spur.front)
     if worm.top.z >= turntable.bottom.z:
         print('WARNING, the worm touches the turntable!')
     if worm.top.z >= spur_plate.body.bottom.z:
         print('WARNING, the worm touches the spur plate')
+
+    worm_shaft = WormShaft(axis='x').move_to(worm_center=worm.center)
+    obj.worm_shaft = worm_shaft
+    if worm_shaft.spur.top.z >= turntable.bottom.z:
+        print('WARNING, the worm_shaft.spur touches the spur plate')
+
+
 
     return obj
 
