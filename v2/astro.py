@@ -526,7 +526,6 @@ def main(build_fn):
         for part_name, part_obj in obj.__dict__.items():
             if isinstance(part_obj, PySCADObject):
                 if part_name not in hidden_parts:
-                    print(part_name)
                     setattr(new_obj, part_name, part_obj)
         obj = new_obj
 
