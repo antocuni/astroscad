@@ -76,7 +76,8 @@ class SpurPlate(CustomObject):
         n = 3
         for i in range(n):
             angle = i * (180/n)
-            spoke = Cube(2, spur.teeth, 4).rot(z=angle).color('pink')
+            spoke = Cube(2, spur.teeth, 2).color('pink')
+            spoke.move_to(top=self.body.top).rot(z=angle)
             spokes.append(spoke)
         self.spokes = spokes
 
