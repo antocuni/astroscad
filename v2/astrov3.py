@@ -107,9 +107,17 @@ class BottomPlate(CustomObject):
         self.sub(holes = FourHoles(turntable.ohd, d=M5))
 
         # motor bracket plate
-        mb_plate = Cube(80, 50, self.BODY_H).color('PaleGreen')
+        mb_sx = 95
+        mb_sy = 17
+        mb_sz = 2
+        # cut a part of the body so that we can attach the mb_plate
+        cut = Cube(self.d, 35, self.BODY_H+1)
+        self -= cut.move_to(front=body.front-EPS)
+
+        mb_plate = Cube(mb_sx, mb_sy, mb_sz).color('PaleGreen')
         self.mb_plate = mb_plate.move_to(center=body.center,
-                                         back=body.front + 40)
+                                         back=cut.back,
+                                         bottom=body.bottom)
 
         self.anchors.set_bounding_box(body.pmin, body.pmax,
                                       pillars[0].pmin, pillars[0].pmax,
@@ -248,8 +256,9 @@ class MotorBracket(CustomObject):
         self.make_bearing_socket(rwall, rb, 'right')
 
         floor_sx = rwall.right.x - lwall.left.x + 30
-        floor = Cube(floor_sx, 17, 2)
-        floor.move_to(back=lwall.back, bottom=mb_plate.top)
+        floor_sy = mb_plate.back.y - rwall.front.y
+        floor = Cube(floor_sx, floor_sy, 2)
+        floor.move_to(back=mb_plate.back, bottom=mb_plate.top)
         self.floor = floor.color('cyan')
 
         # sanity check: check that the worm_shaft (including the washers) fit
@@ -313,7 +322,7 @@ def build():
     obj.turntable = turntable
     obj.top_plate = top_plate.move_to(bottom=turntable.top)
     obj.spur_plate = spur_plate.move_to(top=turntable.bottom)
-    obj.bottom_plate = bottom_plate.move_to(top=turntable.bottom)
+    bottom_plate = bottom_plate.move_to(top=turntable.bottom)
 
     worm = WormFactory.worm(h=25, bore_d=0, axis='x', fast_rendering=FAST_RENDERING)
     worm.mod('%')
@@ -333,6 +342,7 @@ def build():
     stepper_spur = StepperSpur(worm_shaft) # note: this is placed by MotorBracket
     obj.motor_bracket = MotorBracket(bottom_plate.mb_plate, worm_shaft, stepper_spur)
     obj.stepper_spur = stepper_spur
+    obj.bottom_plate = bottom_plate
 
     return obj
 
