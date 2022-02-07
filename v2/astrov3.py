@@ -324,6 +324,11 @@ class MotorBracket(CustomObject):
         self.rwall = rwall
         self -= stepper.make_mounting_holes(h=50, d=2.9)
 
+        # make a dent in the bottom_plate and the motor_bracket to make sure
+        # that the stepper can fit
+        self -= self.make_space_for_stepper(stepper)
+        bottom_plate -= self.make_space_for_stepper(stepper, h_clearance=4)
+
         if VITAMINS:
             self.lb = lb
             self.rb = rb
@@ -338,8 +343,11 @@ class MotorBracket(CustomObject):
         wall -= socket
         wall -= RoundHole(d=10.5, h=100, axis='x').move_to(center=socket.center)
 
-
-
+    def make_space_for_stepper(self, stepper, h_clearance=0):
+        clearance = 3
+        body = Cylinder(d=stepper._MBD+2, h=stepper._MBH+h_clearance, axis='x')
+        body.move_to(center=stepper.center)
+        return body
 
 
 def build():
