@@ -13,6 +13,7 @@ from pyscad.util import in2mm
 import astro
 from astro import main, check_almost_equal
 
+M3 = 3.4
 M5 = 5.5 # diameter of holes for M5 screws
 PH_38 = in2mm(3/8) + 0.5  # diameter for holes of 3/8" screws
 
@@ -114,6 +115,7 @@ class BottomPlate(CustomObject):
 
     def init_custom(self, turntable):
         self.d = turntable.d4+2
+        self._ohd = turntable.ohd
         body = Cylinder(d=self.d, h=self.BODY_H).color('PaleGreen')
         self.body = body
 
@@ -130,18 +132,34 @@ class BottomPlate(CustomObject):
         self.sub(holes = FourHoles(turntable.ohd, d=M5))
 
         # motor bracket plate, which is an inset inside the body
-        mb_sx = 70
-        mb_sy = 40
-        mb_sz = 2
-        mb_plate = Cube(mb_sx, mb_sy, mb_sz).color('PaleGreen')
-        mb_plate.move_to(center=body.center,
-                         front=body.front-EPS,
-                         top=body.top+EPS)
-        self.sub(mb_plate=mb_plate)
+        mb_floor = self.make_motor_bracket_floor()
+        mb_floor.move_to(center=self.body.center, top=self.body.top+EPS)
+        mb_holes = self.make_motor_bracket_holes()
+        self.sub(mb_floor=mb_floor)
+        self.sub(mb_holes=mb_holes)
 
         self.anchors.set_bounding_box(body.pmin, body.pmax,
-                                      pillars[0].pmin, pillars[0].pmax,
-                                      mb_plate.pmin, mb_plate.pmax)
+                                      pillars[0].pmin, pillars[0].pmax)
+
+    def make_motor_bracket_floor(self):
+        d = self.body.d + EPS*2
+        h = 2
+        mb_floor = Cylinder(d=d, h=h)
+        mb_floor -= Cube(d, d, h+1).tr(y=40)
+        return mb_floor
+
+    def make_motor_bracket_holes(self, h=10):
+        def hole(d, ang):
+            dist = self._ohd
+            x = dist * math.cos(math.radians(ang))
+            y = dist * math.sin(math.radians(ang))
+            cyl = Cylinder(d=d, h=h).move_to(center=self.body.center)
+            return cyl.tr(x=x, y=y)
+        holes = CustomObject()
+        holes.h1 = hole(M3, -30)
+        holes.h2 = hole(M3, -150)
+        holes.h5 = hole(M5, -90)
+        return holes
 
 
 class WormShaft(CustomObject):
@@ -211,9 +229,6 @@ class WormShaft(CustomObject):
             self.lwasher = lwasher
             self.rwasher = rwasher
 
-
-
-
     def washers(self, *, n):
         # we simulate n washers by creating a single thicker washer
         return Washer(d1=self.WASHER_ID, d2=self.WASHER_OD,
@@ -256,7 +271,7 @@ class StepperSpur(CustomObject):
 
 class MotorBracket(CustomObject):
 
-    def init_custom(self, mb_plate, worm_shaft, stepper_spur):
+    def init_custom(self, bottom_plate, worm_shaft, stepper_spur):
         lb = Bearing('604', axis='x')    # left bearing
         rb = Bearing('604', axis='x')    # right bearing
         lb.move_to(center=worm_shaft.center, right=worm_shaft.left)
@@ -264,8 +279,8 @@ class MotorBracket(CustomObject):
 
         bz = 1.5 # extra space above the bearing
         by = 3   # extra space around the bearing
-        # compute the h so that the walls touch the mb_plate
-        h = lb.top.z + bz - mb_plate.bottom.z
+        # compute the h so that the walls touch the mb_floor
+        h = lb.top.z + bz - bottom_plate.mb_floor.bottom.z
 
         lwall = Cube(5, 50, h).color('cyan')
         lwall.move_to(left=lb.left, back=lb.back+by, top=lb.top+bz)
@@ -275,17 +290,10 @@ class MotorBracket(CustomObject):
         rwall.move_to(right=rb.right, back=rb.back+by, top=rb.top+bz)
         self.make_bearing_socket(rwall, rb, 'right')
 
-        floor_sx = mb_plate.size.x - 1
-        floor_sy = mb_plate.back.y - rwall.front.y
-        floor = Cube(floor_sx, floor_sy, 2)
-        floor.move_to(back=mb_plate.back, bottom=mb_plate.bottom)
+        floor = bottom_plate.make_motor_bracket_floor()
+        floor.move_to(center=bottom_plate.center, bottom=bottom_plate.mb_floor.bottom)
+        floor -= bottom_plate.make_motor_bracket_holes()
         self.floor = floor.color('cyan')
-
-        # sanity check: the floor must be wide enough to contains the two walls
-        wall_dist = rwall.right.x - lwall.left.x
-        if  floor_sx < wall_dist:
-            print('WARNING! The mb_plate is too narrow')
-
 
         # sanity check: check that the worm_shaft (including the washers) fit
         # exactly the bearing-to-bearing distance. This should be correct by
@@ -366,7 +374,7 @@ def build():
 
 
     stepper_spur = StepperSpur(worm_shaft) # note: this is placed by MotorBracket
-    obj.motor_bracket = MotorBracket(bottom_plate.mb_plate, worm_shaft, stepper_spur)
+    obj.motor_bracket = MotorBracket(bottom_plate, worm_shaft, stepper_spur)
     obj.stepper_spur = stepper_spur
     obj.bottom_plate = bottom_plate
 
