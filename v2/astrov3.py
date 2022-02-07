@@ -16,21 +16,42 @@ from astro import main, check_almost_equal
 M5 = 5.5 # diameter of holes for M5 screws
 PH_38 = in2mm(3/8) + 0.5  # diameter for holes of 3/8" screws
 
+def M5_countersink_hole(h=20):
+    dk = 9.3 + 0.5 # nominal d of the head + clearance
+    k = 2.7 + 0.7  # nominal h of the head + clearance
+    obj = CustomObject()
+    obj.head = TCone(d1=M5, d2=dk, h=k)
+    obj.thread = Cylinder(d=M5, h=h-k).move_to(top=obj.head.bottom+EPS)
+    obj.anchors.set_bounding_box(obj.head.pmin, obj.head.pmax,
+                                 obj.thread.pmin, obj.thread.pmax)
+    return obj
+
+
+class MyWormFactory(WormFactory):
+    thread_starts = 1
+
 class FourHoles(CustomObject):
 
-    def init_custom(self, dist, *, d, h=100, angle=0):
+    def init_custom(self, dist, *, d, h=100, angle=0, countersink=False):
         holes = []
         points = []
+        bbox = []
         for i in range(4):
             a = math.radians(angle + i*90)
             x = dist * math.cos(a)
             y = dist * math.sin(a)
             p = Point(x, y, 0)
-            hole = Cylinder(d=d, h=h).move_to(center=p)
+            if countersink:
+                assert d == M5, 'countersink holes supported only for M5'
+                hole = M5_countersink_hole(h=h).move_to(center=p)
+            else:
+                hole = Cylinder(d=d, h=h).move_to(center=p)
             holes.append(hole)
             points.append(p)
+            bbox += [hole.pmin, hole.pmax]
         self.holes = holes
         self.points = points
+        self.anchors.set_bounding_box(*bbox)
 
 
 class Turntable(CustomObject):
@@ -54,7 +75,9 @@ class TopPlate(CustomObject):
 
     def init_custom(self, turntable):
         self.body = Cylinder(d=turntable.d2-1, h=5).mod('%')
-        self.sub(holes = FourHoles(turntable.ihd, d=M5))
+        holes = FourHoles(turntable.ihd, d=M5, countersink=True)
+        holes.move_to(top=self.body.top+EPS)
+        self.sub(holes=holes)
         self -= Cylinder(d=PH_38, h=6)
         self.anchors.set_bounding_box(self.body.pmin, self.body.pmax)
 
@@ -352,3 +375,4 @@ def build():
 
 if __name__ == '__main__':
     main(build)
+
