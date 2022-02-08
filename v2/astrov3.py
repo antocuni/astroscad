@@ -248,7 +248,7 @@ class WormShaft(CustomObject):
         if VITAMINS:
             self.lwasher = lwasher
             self.rwasher = rwasher
-            shaft = Cylinder(d=4, h=55, axis='x').color(IRON)
+            shaft = Cylinder(d=4, h=92, axis='x').color(IRON)
             self.shaft = shaft.move_to(center=worm.center)
 
     def washers(self, *, n):
