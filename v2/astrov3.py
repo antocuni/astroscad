@@ -13,6 +13,10 @@ from pyscad.util import in2mm
 import astro
 from astro import main, check_almost_equal
 
+IRON = [0.36, 0.33, 0.33]
+BRASS = [0.88, 0.78, 0.5]
+STEEL = [0.65, 0.67, 0.72]
+
 M3 = 3.4
 M5 = 5.5 # diameter of holes for M5 screws
 PH_38 = in2mm(3/8) + 0.5  # diameter for holes of 3/8" screws
@@ -137,6 +141,17 @@ class BottomPlate(CustomObject):
         mb_holes = self.make_motor_bracket_holes()
         self.sub(mb_floor=mb_floor)
         self.sub(mb_holes=mb_holes)
+
+        pp = Manfrotto_200PL(with_holes=True)
+        pp.move_to(top=body.bottom-EPS)
+        # screw holes to attach the photo plate
+        for p in (pp.hole3, pp.hole6, pp.hole9, pp.hole12):
+            screw_hole = RoundHole(d=3, h=18, extra_walls=1)
+            self -= screw_hole.move_to(center=p, bottom=self.body.bottom-EPS)
+
+
+        if VITAMINS:
+            self.photo_plate = pp.color(IRON, 0.7)
 
         self.anchors.set_bounding_box(body.pmin, body.pmax,
                                       pillars[0].pmin, pillars[0].pmax)
