@@ -164,8 +164,7 @@ class BottomPlate(CustomObject):
         return mb_floor
 
     def make_motor_bracket_holes(self, h=10):
-        def hole(d, ang):
-            dist = self._ohd
+        def hole(d, ang, dist=self._ohd):
             x = dist * math.cos(math.radians(ang))
             y = dist * math.sin(math.radians(ang))
             cyl = Cylinder(d=d, h=h).move_to(center=self.body.center)
@@ -173,6 +172,7 @@ class BottomPlate(CustomObject):
         holes = CustomObject()
         holes.h1 = hole(M3, -30)
         holes.h2 = hole(M3, -150)
+        holes.h3 = hole(M3, -90, dist=self._ohd * math.sin(math.radians(30)))
         holes.h5 = hole(M5, -90)
         return holes
 
