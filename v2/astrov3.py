@@ -179,7 +179,7 @@ class BottomPlate(CustomObject):
 
 class WormShaft(CustomObject):
     # total length of the Shaft, "bearing to bearing" (including the washers)
-    LENGTH = 55
+    LENGTH = 66
     color = 'LawnGreen'
 
     WASHER_ID = 4.20
@@ -200,8 +200,13 @@ class WormShaft(CustomObject):
         self.worm = worm = Cube(h_worm, side, side).color(self.color)
         #
         # left trunk length, right truck length
-        ltl = self.LENGTH/2 - h_worm/2 - h_spur - lwasher.h
-        rtl = self.LENGTH/2 - h_worm/2 - rwasher.h
+        ## automatic compute the ltl, rtl
+        ## ltl = self.LENGTH/2 - h_worm/2 - h_spur - lwasher.h
+        ## rtl = self.LENGTH/2 - h_worm/2 - rwasher.h
+        # or manually override the settings
+        ltl = 14.72 - 0.84
+        rtl = 19.56
+
         l_trunk = Cylinder(d=8, h=ltl, axis=axis).color(self.color)
         r_trunk = Cylinder(d=8, h=rtl, axis=axis).color(self.color)
         self.l_trunk = l_trunk.move_to(right=worm.left)
@@ -243,6 +248,8 @@ class WormShaft(CustomObject):
         if VITAMINS:
             self.lwasher = lwasher
             self.rwasher = rwasher
+            shaft = Cylinder(d=4, h=55, axis='x').color(IRON)
+            self.shaft = shaft.move_to(center=worm.center)
 
     def washers(self, *, n):
         # we simulate n washers by creating a single thicker washer
