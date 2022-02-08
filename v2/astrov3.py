@@ -190,7 +190,7 @@ class WormShaft(CustomObject):
     SPUR_TEETH = 21
 
     def init_custom(self, *, axis):
-        lwasher = self.washers(n=3) # left washers
+        lwasher = self.washers(n=2) # left washers
         rwasher = self.washers(n=1) # right washers
         #
         h_spur = 4
@@ -204,7 +204,7 @@ class WormShaft(CustomObject):
         ## ltl = self.LENGTH/2 - h_worm/2 - h_spur - lwasher.h
         ## rtl = self.LENGTH/2 - h_worm/2 - rwasher.h
         # or manually override the settings
-        ltl = 14.72 - 0.84
+        ltl = 14.72
         rtl = 19.56
 
         l_trunk = Cylinder(d=8, h=ltl, axis=axis).color(self.color)
@@ -259,7 +259,7 @@ class WormShaft(CustomObject):
 class StepperSpur(CustomObject):
 
     color = 'pink'
-    SHAFT_H = 3.52
+    SHAFT_H = 5.68
     TEETH = 7
 
     def init_custom(self, myworm):
@@ -299,18 +299,19 @@ class MotorBracket(CustomObject):
         lb.move_to(center=worm_shaft.center, right=worm_shaft.left)
         rb.move_to(center=worm_shaft.center, left=worm_shaft.right)
 
+        bx = 3   # extra space for the bearing rim
         bz = 1.5 # extra space above the bearing
         by = 3   # extra space around the bearing
         # compute the h so that the walls touch the mb_floor
         h = lb.top.z + bz - bottom_plate.mb_floor.bottom.z
 
-        lwall = Cube(5, 50, h).color('cyan')
-        lwall.move_to(left=lb.left, back=lb.back+by, top=lb.top+bz)
-        self.make_bearing_socket(lwall, lb, 'left')
+        lwall = Cube(lb.h+bx, 50, h).color('cyan')
+        lwall.move_to(right=lb.right, back=lb.back+by, top=lb.top+bz)
+        self.make_bearing_socket(lwall, lb, 'right')
 
         rwall = Cube(5, 17, h).color('cyan')
-        rwall.move_to(right=rb.right, back=rb.back+by, top=rb.top+bz)
-        self.make_bearing_socket(rwall, rb, 'right')
+        rwall.move_to(left=rb.left, back=rb.back+by, top=rb.top+bz)
+        self.make_bearing_socket(rwall, rb, 'left')
 
         floor = bottom_plate.make_motor_bracket_floor()
         floor.move_to(center=bottom_plate.center, bottom=bottom_plate.mb_floor.bottom)
@@ -357,13 +358,13 @@ class MotorBracket(CustomObject):
             self.stepper = stepper
 
     def make_bearing_socket(self, wall, bearing, where):
-        socket = bearing.hole(bearing.h + 1)
+        socket = bearing.hole(bearing.h)
         if where == 'left':
-            socket.move_to(center=bearing.center, left=bearing.left-EPS)
+            socket.move_to(center=bearing.center, left=wall.left-EPS)
         else:
-            socket.move_to(center=bearing.center, right=bearing.right+EPS)
+            socket.move_to(center=bearing.center, right=wall.right+EPS)
         wall -= socket
-        wall -= RoundHole(d=10.5, h=100, axis='x').move_to(center=socket.center)
+        wall -= RoundHole(d=10, h=100, axis='x').move_to(center=socket.center)
 
     def make_space_for_stepper(self, stepper, h_clearance=0):
         clearance = 3
