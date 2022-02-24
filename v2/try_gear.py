@@ -2,7 +2,7 @@
 
 import os
 from pyscad import autorender, Cube, Cylinder, ImportScad, bolt_hole, Union, Point
-from pyscad.gears import WormFactory, _gears
+from pyscad.lib.gears import WormFactory, _gears
 
 os.environ['OPENSCADPATH'] = ':'.join([
     '/usr/share/openscad/libraries/',
@@ -49,7 +49,7 @@ def main():
     root += bracket()
 
     spur = WormFactory.spur(teeth=24, h=2, bore_d=3.2)
-    worm = WormFactory.worm(length=15, bore_d=0)
+    worm = WormFactory.worm(h=15, bore_d=0, axis='y')
 
     root += spur
     #root += worm.translate(x=spur.r+worm.r)
