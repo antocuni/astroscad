@@ -129,3 +129,63 @@ class WormGear(PySCADObject):
 
         # _worm is a GenericSCADWrapper, manually unwrap it
         self.solid = _worm.solid
+
+
+class HerringboneGear(PySCADObject):
+
+    def init_solid(self, *, module, teeth, h, bore_d, pressure_angle, helix_angle,
+                   optimized, axis='z', fast_rendering=False):
+
+        self.d = module * teeth
+        self.r = r = self.d / 2
+
+        # to compute the anchors, we create a thrown-away Cylinder which is
+        # "equivalent" to the gear
+        cyl = Cylinder(d=self.d, h=h, axis=axis)
+        self.anchors.center = Point.O
+        self.anchors.set_bounding_box(cyl.pmin, cyl.pmax)
+        if fast_rendering:
+            self.solid = cyl.solid
+            return
+
+        # create the gear and center on the Z axis
+        _gear = _gears.spur_gear(module, teeth, h, bore_d, pressure_angle,
+                                        helix_angle, optimized)
+        _gear.translate(0, 0, -h/2)
+
+        # rotate as needed by the 'axis', by re-using the rot_vector provided
+        # by the equivalent cylinder
+        _gear.rotate(*cyl.rot_vector)
+        #
+        # _gear is a GenericSCADWrapper, manually unwrap it
+        self.solid = _gear.solid
+
+
+
+class HerringboneRingGear(PySCADObject):
+
+    def init_solid(self, *, module, teeth, h, rim_width, pressure_angle, helix_angle,
+                   axis='z', fast_rendering=False):
+        self.d = module * teeth  # XXX + rim_width?
+        self.r = r = self.d / 2
+
+        # to compute the anchors, we create a thrown-away Cylinder which is
+        # "equivalent" to the gear
+        cyl = Cylinder(d=self.d, h=h, axis=axis)
+        self.anchors.center = Point.O
+        self.anchors.set_bounding_box(cyl.pmin, cyl.pmax)
+        if fast_rendering:
+            self.solid = cyl.solid
+            return
+
+        # create the gear and center on the Z axis
+        _ring = _gears.ring_gear(module, teeth, h, rim_width,
+                                             pressure_angle, helix_angle)
+        _ring.translate(0, 0, -h/2)
+
+        # rotate as needed by the 'axis', by re-using the rot_vector provided
+        # by the equivalent cylinder
+        _ring.rotate(*cyl.rot_vector)
+        #
+        # _gear is a GenericSCADWrapper, manually unwrap it
+        self.solid = _ring.solid
