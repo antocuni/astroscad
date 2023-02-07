@@ -133,6 +133,10 @@ class PySCADObject:
         self.solid = solid.color(*args, **kwargs)(self.solid)
         return self
 
+    def projection(self, cut=False):
+        self.solid = solid.projection(cut=cut)(self.solid)
+        return self
+
     def mod(self, mod='#'):
         """
         Shorthand for set_modifier
