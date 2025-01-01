@@ -66,10 +66,20 @@ def board():
     screw_hole2 = RoundHole(d=3.75, h=25)
     res -= screw_hole2.move_to(back=base.back-31, right=base.right-12.5)
 
-    dsub = dsub_connector()
-    dsub.move_to(flange_right=base.left, flange_front=base.front, flange_bottom=base.bottom)
-    dsub.tr(x=-13.5, z=5)
+    usb_pcb = Cube(18, 30, 2)
+    usb_pcb.move_to(right=base.left - 3, back=base.back - 5)
+    usb_pcb.move_to(bottom=base.top + 3)
+    res.usb_pcb = usb_pcb
 
+    usb = Cube(16, 12, 12)
+    usb.move_to(center=usb_pcb.center)
+    usb.move_to(right=usb_pcb.right -6)
+    usb.move_to(bottom=usb_pcb.top)
+    res.usb = usb
+
+    dsub = dsub_connector()
+    dsub.move_to(flange_left=usb_pcb.left, flange_front=base.front, flange_bottom=base.bottom)
+    dsub.tr(z=5)
     res.dsub = dsub
 
     return res
