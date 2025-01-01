@@ -205,6 +205,7 @@ class Difference(PySCADObject):
     def init_solid(self, *objs):
         self.solid = solid.difference()
         for obj in objs:
+            self.children.append(obj)
             self.solid.add(obj.solid)
 
 
