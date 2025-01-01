@@ -16,7 +16,7 @@ class OpenSCADTest:
         self.request = request
         self.tmpdir = tmpdir
 
-    def check(self, obj, distance=None):
+    def check(self, obj, distance=None, *, THRESHOLD=1e-4):
         name = f'{self.__class__.__name__}.{self.request.node.name}'
         ref = REFDIR.join(f'{name}.png')
         actual = self.tmpdir.join(f'{name}.png')
@@ -37,9 +37,9 @@ class OpenSCADTest:
         if ref.check(exists=False):
             raise Exception(f'Reference does not exist: {ref.relto(ROOT)}')
         res = image_diff._diff(str(ref), str(actual), str(diff))
-        ## if res != 0:
-        ##     os.system(f'eog "{diff}" &')
-        assert res == 0
+        if res >= THRESHOLD and self.request.config.option.show_diff:
+            os.system(f'eog "{ref}" "{actual}"  "{diff}" &')
+        assert res < THRESHOLD
 
 class TestBasic(OpenSCADTest):
 
