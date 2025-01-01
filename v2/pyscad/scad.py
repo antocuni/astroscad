@@ -444,3 +444,8 @@ class GenericSCADWrapper(PySCADObject):
 
     def init_solid(self, obj):
         self.solid = obj
+
+
+class ImportSTL(PySCADObject):
+    def init_solid(self, path):
+        self.solid = solid.import_stl(path)
